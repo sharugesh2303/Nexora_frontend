@@ -33,7 +33,9 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 // --- API URL (Unchanged) ---
-const API_URL = 'http://localhost:5000/api/content'; 
+// --- API URL (UPDATED: Reads from Vercel Environment Variable) ---
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_URL = `${API_BASE_URL}/api/content`;
 
 // CRITICAL HIERARCHY DATA: Hardcoded structure matching AdminPage.js logic
 const FIXED_ROLES_HIERARCHY = [

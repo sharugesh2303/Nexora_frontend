@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'; // FIX: Removed useState
-import styled, { createGlobalStyle, keyframes } from 'styled-components'; // FIX: Removed css
+import React, { useEffect, useRef } from 'react'; 
+import styled, { createGlobalStyle, keyframes } from 'styled-components'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faUsers, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
@@ -199,7 +199,8 @@ const Footer = styled.footer`
 /* -------------------------
     HOME PAGE COMPONENT
     ------------------------- */
-const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
+// FIX: Added 'homeData' to the destructured props for consistency with App.js
+const HomePage = ({ onNavigate = () => {}, generalData = {}, homeData = {} }) => {
     const canvasRef = useRef(null);
     const rafRef = useRef(null);
 
