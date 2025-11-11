@@ -4,13 +4,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faPhone, faMapMarkerAlt, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
-// --- API URL (Kept for completeness, though functional API call is mocked) ---
-const API_URL = 'http://localhost:5000/api/messages';
+// =========================================================
+// 🚀 CRITICAL FIX: DYNAMIC API URL
+// This line ensures the API call uses the deployed Koyeb URL (set in Vercel environment vars) 
+// or falls back to localhost for development.
+// =========================================================
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api'; 
+const API_URL = `${BASE_URL}/messages`;
+// NOTE: You must set an environment variable named REACT_APP_API_BASE_URL 
+// on Vercel to your deployed Koyeb URL (e.g., https://evil-gypsy-nexora-backend-XXXXX.koyeb.app).
 
 // --- THEME TOKENS (Navy + Neon to match Home) ---
 const NEON_COLOR = '#00e0b3';
 const NAVY_BG = '#071025';
-// FIX: Removed unused constant MID_NAVY and CARD_BG
 const LIGHT_TEXT = '#D6E2F0';
 const MUTED_TEXT = '#9AA6B3';
 const ACCENT_LIGHT = '#1ddc9f';
@@ -354,14 +360,28 @@ const ContactPage = ({ onNavigate, generalData }) => {
         setFormMessage({ type: 'info', text: 'Sending...' });
 
         try {
-            // Replace mock network delay with actual API call
+            // This API_URL now correctly points to the Koyeb backend
             await axios.post(API_URL, formData); 
             
             setFormMessage({ type: 'success', text: 'Success! Your message has been sent. We will get back to you shortly.' });
             setFormData({ name: '', email: '', mobile: '', message: '' });
         } catch (err) {
-            console.error('Form submit error:', err);
-            setFormMessage({ type: 'error', text: 'An error occurred. Please verify all fields and check your API server.' });
+            console.error('Form submit error:', err.response ? err.response.data : err.message);
+            
+            // Extract the user-friendly error message from the backend validation response
+            let errorMessage = 'An error occurred. Please verify all fields and check your API server.';
+            if (err.response && err.response.data && err.response.data.errors) {
+                // If backend validation (express-validator) returned errors
+                errorMessage = err.response.data.errors[0].msg || 'Please check your form inputs.';
+            } else if (err.response && err.response.data && err.response.data.message) {
+                 // For generic backend errors (e.g., login failure)
+                errorMessage = err.response.data.message;
+            } else if (err.response && err.response.status === 400) {
+                 // General bad request fallback
+                errorMessage = 'Bad request: Ensure all required fields are filled correctly.';
+            }
+                
+            setFormMessage({ type: 'error', text: errorMessage });
         }
     };
 
@@ -452,7 +472,7 @@ const ContactPage = ({ onNavigate, generalData }) => {
                                     placeholder="Mobile Number"
                                     value={formData.mobile}
                                     onChange={handleChange}
-                                    required
+                                    required // Set to required based on previous context, but may be optional in schema
                                 />
                                 <FormTextArea
                                     name="message"
