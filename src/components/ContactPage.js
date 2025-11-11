@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
+import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPhone,
@@ -177,6 +178,7 @@ const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    mobile: "",
     message: "",
   });
   const [statusMessage, setStatusMessage] = useState("");
@@ -225,27 +227,36 @@ const ContactPage = () => {
     animate();
   }, []);
 
-  // --- Handle Form Inputs ---
+  // --- Handle Input Change ---
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- Handle Form Submit (Frontend only) ---
-  const handleSubmit = (e) => {
+  // --- Handle Submit (Connected to Backend) ---
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.email || !formData.message) {
+    if (!formData.name || !formData.email || !formData.mobile || !formData.message) {
       setStatusMessage("⚠️ Please fill all fields.");
       setSuccess(false);
       return;
     }
 
-    // Simulate message sending
-    setTimeout(() => {
-      setStatusMessage("✅ Message sent successfully (demo mode).");
-      setSuccess(true);
-      setFormData({ name: "", email: "", message: "" });
-    }, 700);
+    try {
+      const res = await axios.post("/api/messages", formData);
+      if (res.status === 201) {
+        setStatusMessage("✅ Message sent successfully!");
+        setSuccess(true);
+        setFormData({ name: "", email: "", mobile: "", message: "" });
+      } else {
+        setStatusMessage("⚠️ Something went wrong. Try again.");
+        setSuccess(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setStatusMessage("❌ Failed to send message. Server error.");
+      setSuccess(false);
+    }
   };
 
   return (
@@ -254,7 +265,9 @@ const ContactPage = () => {
       <ContactCard>
         <Title>Contact Us</Title>
         <Subtitle>We’d love to hear your thoughts and feedback!</Subtitle>
+
         <ContactGrid>
+          {/* --- LEFT SIDE INFO --- */}
           <InfoSection>
             <InfoBox>
               <FontAwesomeIcon icon={faPhone} color="#00ffff" /> +91 98765 43210
@@ -267,6 +280,7 @@ const ContactPage = () => {
             </InfoBox>
           </InfoSection>
 
+          {/* --- RIGHT SIDE FORM --- */}
           <Form onSubmit={handleSubmit}>
             <Input
               type="text"
@@ -280,6 +294,13 @@ const ContactPage = () => {
               name="email"
               placeholder="Your Email"
               value={formData.email}
+              onChange={handleChange}
+            />
+            <Input
+              type="text"
+              name="mobile"
+              placeholder="Your Mobile Number"
+              value={formData.mobile}
               onChange={handleChange}
             />
             <TextArea
