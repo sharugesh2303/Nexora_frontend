@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from 'axios'; // Correctly used for frontend API calls
 import { createGlobalStyle } from 'styled-components';
 
 // --- Import All Public Pages (Assuming correct file paths) ---
@@ -32,8 +32,8 @@ const GlobalStyle = createGlobalStyle`
     }
 `;
 
-// --- API URL (Unchanged) ---
-// --- API URL (UPDATED: Reads from Vercel Environment Variable) ---
+// --- API URL (Reads from Vercel Environment Variable) ---
+// This is correct for linking frontend (Vercel) to backend (Koyeb)
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 const API_URL = `${API_BASE_URL}/api/content`;
 
