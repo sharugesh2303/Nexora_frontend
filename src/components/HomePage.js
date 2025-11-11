@@ -1,4 +1,3 @@
-// HomePage.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -136,7 +135,7 @@ const Letter = styled.span`
     /* apply flag wave animation with stagger via inline style delay */
     animation: ${flagWave} 2.2s ease-in-out infinite;
     /* scale slightly on browser zoom using CSS var set by JS */
-    transform: translateY(0) rotate(0deg) scale(calc(1 * var(--dpr-scale, 1)));
+    transform: translateY(0) rotate(0deg) scale(var(--dpr-scale, 1));
     /* subtle neon color for specific words */
     &.neon {
         color: ${NEON_COLOR};
@@ -162,7 +161,8 @@ const ButtonGroup = styled.div`
     justify-content: center;
 `;
 
-const PrimaryBtn = styled.a`
+// FIX: Changed from styled.a (anchor) to styled.button for proper semantics/A11Y
+const PrimaryBtn = styled.button`
     background: ${NEON_COLOR};
     color: ${DARK_BG};
     padding: 12px 26px;
@@ -174,13 +174,18 @@ const PrimaryBtn = styled.a`
     align-items: center;
     gap: 10px;
     transition: transform .18s ease, box-shadow .18s ease;
+    border: none; /* Ensure it looks like a button */
+    cursor: pointer;
     &:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,224,179,0.35); }
 `;
 
+// FIX: Inherits button style
 const SecondaryBtn = styled(PrimaryBtn)`
     background: transparent;
     color: ${LIGHT_TEXT};
     border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: none;
+    &:hover { box-shadow: 0 0 10px rgba(255,255,255,0.1); }
 `;
 
 /* Footer */
@@ -198,12 +203,11 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     const canvasRef = useRef(null);
     const rafRef = useRef(null);
 
-    // keep last DPR to set CSS variable
-    const [dpr, setDpr] = useState(typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1);
+    // FIX: Removed unused 'dpr' state to resolve unused variable warning
+    const dprReference = useRef(typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1); 
 
     // utility: split text into words then letters
     const renderAnimatedTitle = (text, neonWord = 'NEXORA') => {
-        // ensure we keep words intact (we mark neon word)
         const words = text.split(' ');
         return words.map((w, wi) => (
             <span className="word" key={`w-${wi}`}>
@@ -231,7 +235,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
         if (!canvas) return;
         const ctx = canvas.getContext('2d', { alpha: true });
 
-        // make canvas size match devicepixels for crispness (handles zoom/dpr)
+        // Function to set canvas size based on DPR/Zoom
         const setSize = () => {
             const dprLocal = Math.max(1, window.devicePixelRatio || 1);
             canvas.style.width = `${window.innerWidth}px`;
@@ -402,20 +406,21 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
             // clamp scale to reasonable range so letters don't explode
             const scale = Math.min(1.25, 1 + (d - 1) * 0.18);
             document.documentElement.style.setProperty('--dpr-scale', String(scale));
-            setDpr(d);
+            // FIX: Use the ref for dpr value tracking instead of state
+            dprReference.current = d; 
         };
         setVar();
         window.addEventListener('resize', setVar);
         // sometimes dpr changes without resize in some browsers — poll as fallback
         let poll = setInterval(() => {
             const now = Math.max(1, window.devicePixelRatio || 1);
-            if (now !== dpr) setVar();
+            if (now !== dprReference.current) setVar(); // Compare against the current ref value
         }, 600);
         return () => {
             window.removeEventListener('resize', setVar);
             clearInterval(poll);
         };
-    }, [dpr]);
+    }, []); // Empty dependency array, but relies on dprReference being stable
 
     const safeGeneralData = {
         email: generalData?.email || 'info@nexora.com',
@@ -441,10 +446,11 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                             </Subtitle>
 
                             <ButtonGroup>
-                                {/* UPDATED: Text is now "Explore More" and navigates to 'about' */}
+                                {/* FIX: Button component now uses onClick, navigating to /about */}
                                 <PrimaryBtn onClick={() => onNavigate('about')}>
                                     Explore More <FontAwesomeIcon icon={faChevronRight} />
                                 </PrimaryBtn>
+                                {/* FIX: Button component now uses onClick, navigating to /contact */}
                                 <SecondaryBtn onClick={() => onNavigate('contact')}>
                                     Join Our Community <FontAwesomeIcon icon={faUsers} />
                                 </SecondaryBtn>

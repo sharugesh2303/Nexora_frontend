@@ -140,7 +140,6 @@ const TeamContainer = styled.div`
 `;
 
 // Define size constants for easier modification
-// ALL MEMBERS WILL NOW USE THIS SIZE
 const MEMBER_CIRCLE_SIZE = '280px'; 
 
 
@@ -336,10 +335,16 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
     ];
     const mvjSections = initialSections.filter(s => s.body && s.title);
     const customBlocks = Array.isArray(safeAboutData.sections) ? safeAboutData.sections.filter(s => s.type === 'Custom' || s.type === 'Text') : [];
-    const safeTeamData = Array.isArray(teamData) ? teamData : [];
-    const safeFixedRoles = fixedRoles || [];
+    
+    // Original arrays passed as dependencies
+    const teamDataProp = teamData;
+    const fixedRolesProp = fixedRoles;
 
     const groupedAndSortedTeam = useMemo(() => {
+        // Fix: Initialization is moved inside useMemo for stable dependencies
+        const safeTeamData = Array.isArray(teamDataProp) ? teamDataProp : [];
+        const safeFixedRoles = fixedRolesProp || [];
+        
         const rolesMap = safeFixedRoles.reduce((map, role) => {
             map[role.name] = { group: role.group, subGroup: role.subGroup, name: role.name }; return map;
         }, {});
@@ -355,25 +360,21 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
         });
         groupsArray.sort(customRoleSorter);
         return groupsArray;
-    }, [safeTeamData, safeFixedRoles]);
+    }, [teamDataProp, fixedRolesProp]); // Depend only on props
 
     /* render team group */
     const renderTeamGroup = (group, groupIndex) => {
         if (!group.members || group.members.length === 0) return null;
-        // No longer distinguishing based on isSingle, all cards will be the same size
-        // const isSingle = group.members.length === 1; 
 
         return (
             <div key={group.roleName} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }} className="animate-in" >
                 <h3 style={{ color: NEON_COLOR, margin: '8px 0' }}>{group.roleName}</h3>
 
-                {/* Now all members render within the SmallGrid */}
                 <SmallGrid>
                     {group.members.map((member, idx) => (
                         <TeamMemberCard key={member._id || idx} className="animate-in">
                             <div className="image-wrapper">
                                 <img
-                                    // Use MEMBER_CIRCLE_SIZE for the placeholder image as well
                                     src={member.img || `https://via.placeholder.com/${parseInt(MEMBER_CIRCLE_SIZE)}x${parseInt(MEMBER_CIRCLE_SIZE)}/0f172a/00e0b3?text=Member`}
                                     alt={member.name || 'Member'}
                                     style={{
@@ -415,12 +416,13 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
                 <Header>
                     <Logo onClick={() => onNavigate('home')} className="neon-text-shadow">NEXORA</Logo>
                     <NavGroup>
-                        <NavItem onClick={() => onNavigate('home')}>Home</NavItem>
-                        <NavItem onClick={() => onNavigate('about')} style={{ color: NEON_COLOR, fontWeight:700 }}>About</NavItem>
-                        <NavItem onClick={() => onNavigate('services')}>Services</NavItem>
-                        <NavItem onClick={() => onNavigate('projects')}>Projects</NavItem>
-                        <NavItem onClick={() => onNavigate('blog')}>Blog</NavItem>
-                        <NavItem onClick={() => onNavigate('contact')}>Contact</NavItem>
+                        {/* FIX: Changed <a> to <span> for click handler without href */}
+                        <span onClick={() => onNavigate('home')}>Home</span>
+                        <span onClick={() => onNavigate('about')} style={{ color: NEON_COLOR, fontWeight:700 }}>About</span>
+                        <span onClick={() => onNavigate('services')}>Services</span>
+                        <span onClick={() => onNavigate('projects')}>Projects</span>
+                        <span onClick={() => onNavigate('blog')}>Blog</span>
+                        <span onClick={() => onNavigate('contact')}>Contact</span>
                     </NavGroup>
                 </Header>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import axios from 'axios';
-import styled, { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 
 // --- Import All Public Pages (Assuming correct file paths) ---
 import HomePage from './components/HomePage';
@@ -69,8 +69,9 @@ function App() {
             
             setContent({
                 ...res.data,
-                home: { sections: res.data.home.sections || [] },
-                about: { sections: res.data.about.sections || [] },
+                // Ensure section arrays exist, falling back to empty array if null/undefined in API response
+                home: { ...res.data.home, sections: res.data.home.sections || [] }, 
+                about: { ...res.data.about, sections: res.data.about.sections || [] },
             });
             setLoading(false);
         } catch (err) {
@@ -85,7 +86,7 @@ function App() {
         fetchAllContent();
     }, [fetchAllContent]);
 
-    // 2. Auto-Refresh Logic
+    // 2. Auto-Refresh Logic (Re-fetches when tab is focused)
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible' && !loading) {

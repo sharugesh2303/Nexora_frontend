@@ -42,7 +42,8 @@ const Logo = styled.h1`
     margin: 0;
     cursor: pointer;
 `;
-const NavItem = styled.a`
+// FIX: Changed from styled.a to styled.span to resolve A11Y errors
+const NavItem = styled.span`
     color: white;
     text-decoration: none;
     margin-left: 30px;
@@ -118,12 +119,14 @@ const PostPage = ({ onNavigate, posts }) => {
     const safePosts = posts || [];
     const post = safePosts.find(p => p._id === id);
 
+    // Initial check while content data is fetching
     if (!posts || posts.length === 0) {
-        return (
+         return (
              <h1 style={{color: 'white', textAlign: 'center', paddingTop: '100px'}}>Loading Post...</h1>
-        );
+         );
     }
     
+    // Redirect if post ID is not found
     if (!post) {
         return <Navigate to="/blog" replace />;
     }
