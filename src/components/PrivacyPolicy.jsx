@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components'; // FIX: Removed createGlobalStyle
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 

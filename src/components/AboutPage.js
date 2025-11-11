@@ -18,7 +18,7 @@ const BORDER_LIGHT = 'rgba(255,255,255,0.04)';
 /* ---------------- KEYFRAMES ---------------- */
 const slideInUp = keyframes`
     from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
 `;
 const softGlow = keyframes`
     0% { box-shadow: 0 0 0 rgba(0,224,179,0); }
@@ -79,10 +79,18 @@ const Logo = styled.h1`
     color: ${NEON_COLOR}; font-size: 1.6rem; margin:0; cursor:pointer;
     ${css`text-shadow: 0 0 8px ${NEON_COLOR}, 0 0 18px rgba(0,224,179,0.1);`}
 `;
-const NavGroup = styled.div` display:flex; gap:18px; align-items:center; `;
-const NavItem = styled.span` /* FIX: Changed to span */
-    color: ${TEXT_MUTED}; text-decoration:none; cursor:pointer;
-    &:hover { color: ${NEON_COLOR}; }
+const NavGroup = styled.div` 
+    display:flex; 
+    gap:18px; 
+    align-items:center; 
+
+    /* Apply styles directly to the span children */
+    span { 
+        color: ${TEXT_MUTED}; 
+        text-decoration:none; 
+        cursor:pointer;
+        &:hover { color: ${NEON_COLOR}; }
+    }
 `;
 
 /* Hero */
@@ -411,7 +419,6 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
                 <Header>
                     <Logo onClick={() => onNavigate('home')} className="neon-text-shadow">NEXORA</Logo>
                     <NavGroup>
-                        {/* FIX: Changed <a> to <span> for click handler without href */}
                         <span onClick={() => onNavigate('home')}>Home</span>
                         <span onClick={() => onNavigate('about')} style={{ color: NEON_COLOR, fontWeight:700 }}>About</span>
                         <span onClick={() => onNavigate('services')}>Services</span>

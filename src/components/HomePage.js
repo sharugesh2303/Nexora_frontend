@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
+import React, { useEffect, useRef } from 'react'; // FIX: Removed useState
+import styled, { createGlobalStyle, keyframes } from 'styled-components'; // FIX: Removed css
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faUsers, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
@@ -203,7 +203,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     const canvasRef = useRef(null);
     const rafRef = useRef(null);
 
-    // FIX: Removed unused 'dpr' state to resolve unused variable warning
+    // FIX: Removed unused 'dpr' state and simplified variable tracking to just the ref
     const dprReference = useRef(typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1); 
 
     // utility: split text into words then letters

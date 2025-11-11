@@ -1,7 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styled, { createGlobalStyle, css, keyframes } from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLink } from '@fortawesome/free-solid-svg-icons';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- THEME TOKENS (navy + neon) ---
@@ -428,7 +426,7 @@ const ProjectsPage = ({ onNavigate, projects }) => {
                     animate="visible"
                 >
                     <AnimatePresence>
-                        {filteredProjects.map((project, idx) => (
+                        {filteredProjects.map((project) => (
                             <ProjectCard
                                 key={project._id}
                                 onClick={() => onNavigate(`projects/${project._id}`)}
@@ -438,8 +436,6 @@ const ProjectsPage = ({ onNavigate, projects }) => {
                                 animate="visible"
                                 exit="hidden"
                                 transition={{ duration: 0.36 }}
-                                // FIX: Removed style={{ animationDelay: ...}} as framer-motion handles stagger
-                                // and the fixed CSS animation "animate-in" is not used here.
                             >
                                 <CardImage>
                                     <img src={project.imageUrl || 'https://via.placeholder.com/800x450/1ddc9f/081026?text=Project+Image'} alt={project.title} />
