@@ -80,7 +80,7 @@ const Logo = styled.h1`
     ${css`text-shadow: 0 0 8px ${NEON_COLOR}, 0 0 18px rgba(0,224,179,0.1);`}
 `;
 const NavGroup = styled.div` display:flex; gap:18px; align-items:center; `;
-const NavItem = styled.a`
+const NavItem = styled.span` /* FIX: Changed to span */
     color: ${TEXT_MUTED}; text-decoration:none; cursor:pointer;
     &:hover { color: ${NEON_COLOR}; }
 `;
@@ -139,9 +139,7 @@ const TeamContainer = styled.div`
     display:flex; flex-direction:column; gap: 22px;
 `;
 
-// Define size constants for easier modification
 const MEMBER_CIRCLE_SIZE = '280px'; 
-
 
 /* ------------------ UPDATED TeamMemberCard STYLES ------------------ */
 const TeamMemberCard = styled.div`
@@ -156,11 +154,10 @@ const TeamMemberCard = styled.div`
     text-align: center;
     position: relative;
 
-    // Adjust top padding based on the single, larger circle size
     padding-top: calc(${MEMBER_CIRCLE_SIZE} / 2 + 10px);
     margin-top: calc(${MEMBER_CIRCLE_SIZE} / 2);
     
-    max-width: 420px; // A suitable max-width for individual cards
+    max-width: 420px;
     margin-left: auto;
     margin-right: auto;
 
@@ -172,7 +169,6 @@ const TeamMemberCard = styled.div`
         left: 50%;
         transform: translate(-50%, -50%);
 
-        // Apply the single, larger size to all circles
         width: ${MEMBER_CIRCLE_SIZE};
         height: ${MEMBER_CIRCLE_SIZE};
         border-radius: 50%;
@@ -214,7 +210,6 @@ const TeamMemberCard = styled.div`
 /* small grid for non-leader members - narrower cards */
 const SmallGrid = styled.div`
     display:grid;
-    // Adjusted minmax to accommodate larger cards
     grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); 
     gap: 16px;
 `;
