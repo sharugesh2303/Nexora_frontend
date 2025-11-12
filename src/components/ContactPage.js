@@ -1,451 +1,590 @@
-import React, { useState, useEffect, useRef } from 'react';
-// FIX APPLIED HERE: Removed 'css' to resolve the Vercel build error (no-unused-vars)
-import styled, { createGlobalStyle, keyframes } from 'styled-components'; 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faPhone, faMapMarkerAlt, faPaperPlane, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
+import React, { useEffect, useRef, useState } from "react";
+import styled, { createGlobalStyle, keyframes } from "styled-components";
+import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faPhone,
+  faMapMarkerAlt,
+  faPaperPlane,
+  faBars,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 
-// =========================================================
-// API CONFIGURATION FIX (SOLUTION APPLIED HERE)
-// The endpoint is changed from /messages to /api/messages
-// to match the backend router configuration in server.js.
-// =========================================================
+/* =======================
+   API CONFIG
+======================= */
 const DEPLOYED_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
 const API_URL = DEPLOYED_BASE_URL
-  ? `${DEPLOYED_BASE_URL}/api/messages` // <--- FIX APPLIED
-  : 'http://localhost:5000/api/messages'; // <--- FIX APPLIED
+  ? `${DEPLOYED_BASE_URL}/api/messages`
+  : "http://localhost:5000/api/messages";
 
+/* =======================
+   THEME
+======================= */
+const NEON = "#00ffc6";
+const NAVY_BG = "#040b1a";
+const LIGHT = "#e8f1ff";
+const MUTED = "#9aa8b8";
+const GLASS = "rgba(12, 20, 35, 0.55)";
+const BORDER = "rgba(255,255,255,0.08)";
+const ACCENT = "#12f3d4";
 
-// --- THEME COLORS ---
-const NEON = '#00ffc6';
-const NAVY_BG = '#040b1a';
-const LIGHT = '#e8f1ff';
-const MUTED = '#9aa8b8';
-const CARD_BG = 'rgba(10, 20, 40, 0.8)';
-const BORDER = 'rgba(255, 255, 255, 0.08)';
-const ACCENT = '#12f3d4';
-
-// --- KEYFRAMES ---
-const fadeUp = keyframes`
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
-const glowPulse = keyframes`
-  0%, 100% { text-shadow: 0 0 8px ${NEON}, 0 0 18px rgba(0,255,198,0.25); }
-  50% { text-shadow: 0 0 18px ${NEON}, 0 0 32px rgba(0,255,198,0.35); }
-`;
-
-// --- GLOBAL STYLE (Ensuring root elements are transparent for fixed background) ---
+/* =======================
+   GLOBAL
+======================= */
 const GlobalStyle = createGlobalStyle`
-  * { box-sizing: border-box; }
-  body, html, #root {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: transparent !important; 
-    color: ${LIGHT};
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-    height: 100%;
-  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    color: ${LIGHT};
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+    background: ${NAVY_BG};
+  }
 `;
 
-// --- STAR BACKGROUND (Fixed position) ---
-const StarCanvas = styled.canvas`
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
+/* =======================
+   LAYOUT
+======================= */
+const Page = styled.div`
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 `;
 
-// --- PAGE WRAPPER (Scrolling content container with semi-transparent background) ---
-const PageWrapper = styled.div`
-  position: relative;
-  z-index: 2;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: rgba(4, 11, 26, 0.92); /* Semi-transparent overlay to reveal stars behind */
-`;
-
-// --- HEADER (Fixed and Translucent) ---
 const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 40px;
-  background: rgba(4, 11, 26, 0.7);
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  position: fixed;
-  width: 100%;
-  z-index: 6;
-
-  @media (max-width: 768px) {
-    padding: 16px 22px;
-  }
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  background: rgba(4, 11, 26, 0.7);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid ${BORDER};
 `;
 
-const Logo = styled.h1`
-  color: ${NEON};
-  font-weight: 800;
-  font-size: 1.3rem;
-  cursor: pointer;
-  animation: ${glowPulse} 3s infinite ease-in-out;
+const Brand = styled.div`
+  font-weight: 800;
+  color: ${NEON};
+  letter-spacing: 0.5px;
 `;
 
-// --- NAVIGATION ---
-const NavLinks = styled.div`
-  display: flex;
-  align-items: center;
+const Nav = styled.nav`
+  display: flex;
+  gap: 18px;
 
-  @media (max-width: 768px) {
-    position: fixed;
-    inset: 0;
-    background: rgba(4, 11, 26, 0.96);
-    flex-direction: column;
-    justify-content: center;
-    transform: ${({ open }) => (open ? 'translateX(0)' : 'translateX(100%)')};
-    transition: transform 0.4s ease;
-    z-index: 5;
-  }
+  @media (max-width: 768px) {
+    position: fixed;
+    inset: 0 0 auto auto;
+    top: 56px;
+    right: 0;
+    width: 100%;
+    max-width: 320px;
+    background: rgba(4,11,26,0.96);
+    backdrop-filter: blur(6px);
+    border-left: 1px solid ${BORDER};
+    border-bottom: 1px solid ${BORDER};
+    transform: ${({ open }) => (open ? "translateX(0)" : "translateX(100%)")};
+    transition: transform .3s ease;
+    padding: 18px;
+    flex-direction: column;
+    z-index: 25;
+  }
 `;
 
-const NavItem = styled.span`
-  color: ${MUTED};
-  font-weight: 600;
-  margin-left: 22px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  &:hover { color: ${NEON}; transform: scale(1.05); }
-  &.active { color: ${NEON}; text-shadow: 0 0 8px ${NEON}; }
+const NavItem = styled.button`
+  background: transparent;
+  border: 0;
+  color: ${MUTED};
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: color .2s ease, transform .2s ease, background .2s ease;
 
-  @media (max-width: 768px) {
-    margin: 20px 0;
-    font-size: 1.5rem;
-  }
+  &:hover { color: ${NEON}; transform: translateY(-1px); background: rgba(255,255,255,0.03); }
+  &.active { color: ${NEON}; text-shadow: 0 0 10px rgba(0,255,198,.25); }
 `;
 
-const MobileMenuIcon = styled.div`
-  display: none;
-  font-size: 1.6rem;
-  color: ${NEON};
-  cursor: pointer;
-  @media (max-width: 768px) { display: block; }
+const MobileToggle = styled.button`
+  display: none;
+  @media (max-width: 768px){ display: inline-flex; }
+  border: 0;
+  background: transparent;
+  color: ${NEON};
+  font-size: 1.25rem;
+  cursor: pointer;
 `;
 
-// --- MAIN SECTION ---
+/* =======================
+   STARFIELD (scoped)
+======================= */
+const floatUp = keyframes`
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
 const Section = styled.section`
-  padding: 140px 24px 60px;
-  max-width: 1100px;
-  margin: 0 auto;
+  position: relative;
+  padding: clamp(56px, 6vw, 80px) 20px;
+  display: grid;
+  place-items: center;
+`;
+
+const SectionInner = styled.div`
+  position: relative;
+  width: min(1100px, 100%);
+  z-index: 2;
+`;
+
+const StarLayer = styled.canvas`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 20px;
+  overflow: hidden;
+`;
+
+const StarGlow = styled.div`
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(60% 40% at 50% 0%, rgba(0,255,198,0.10), transparent 55%),
+              radial-gradient(30% 30% at 85% 40%, rgba(0,255,198,0.06), transparent 60%);
+  filter: blur(30px);
+  pointer-events: none;
+  z-index: 1;
+`;
+
+/* =======================
+   TITLES
+======================= */
+const TitleWrap = styled.div`
+  text-align: center;
+  margin-bottom: 28px;
+  animation: ${floatUp} 0.6s ease both;
 `;
 
 const Title = styled.h1`
-  font-size: 2.8rem;
-  margin-bottom: 12px;
-  text-align: center;
-  span { color: ${NEON}; }
-  animation: ${fadeUp} 1s ease forwards;
+  margin: 0 0 8px 0;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+
+  span { color: ${NEON}; }
 `;
 
 const Subtitle = styled.p`
-  text-align: center;
-  color: ${MUTED};
-  margin-bottom: 36px;
-  animation: ${fadeUp} 1s ease forwards;
-  animation-delay: 0.15s;
+  margin: 0;
+  color: ${MUTED};
 `;
 
-// --- GRID ---
+/* =======================
+   GRID
+======================= */
 const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 36px;
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 26px;
+
+  @media (max-width: 980px){
+    grid-template-columns: 1fr;
+  }
 `;
 
-// --- INFO CARD ---
-const InfoCard = styled.div`
-  background: ${CARD_BG};
-  border: 1px solid ${BORDER};
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,255,198,0.05);
-  transition: all 0.3s ease;
-  &:hover { border-color: ${NEON}; box-shadow: 0 16px 40px rgba(0,255,198,0.15); }
+/* =======================
+   CARDS
+======================= */
+const Card = styled.div`
+  position: relative;
+  background: ${GLASS};
+  border: 1px solid ${BORDER};
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  animation: ${floatUp} .6s ease both;
 `;
 
-const InfoTitle = styled.h3`
-  color: ${NEON};
-  margin-bottom: 10px;
+const CardTitle = styled.h3`
+  margin: 0 0 14px 0;
+  color: ${NEON};
 `;
 
-const InfoItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin: 14px 0;
-  color: ${LIGHT};
-  .icon {
-    color: ${NEON};
-    font-size: 1.2rem;
-    min-width: 30px;
-  }
-  div span {
-    font-weight: 700;
-  }
-  div small {
-    display: block;
-    color: ${MUTED};
-    font-size: 0.95rem;
-  }
+const InfoRow = styled.div`
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 0;
+  color: ${LIGHT};
+
+  small { color: ${MUTED}; display: block; }
+  .icon { color: ${NEON}; font-size: 1.1rem; line-height: 1; margin-top: 2px; }
 `;
 
-// --- FORM CARD ---
-const FormCard = styled.div`
-  background: ${CARD_BG};
-  border: 1px solid ${BORDER};
-  border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 10px 30px rgba(0,255,198,0.05);
-  transition: all 0.3s ease;
-  &:hover { border-color: ${NEON}; box-shadow: 0 16px 40px rgba(0,255,198,0.15); }
-`;
-
+/* =======================
+   FORM
+======================= */
 const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  gap: 14px;
+`;
+
+const Label = styled.label`
+  font-size: 0.92rem;
+  color: ${MUTED};
+  margin-bottom: 6px;
+  display: inline-block;
 `;
 
 const Input = styled.input`
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: ${LIGHT};
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  &::placeholder { color: rgba(255,255,255,0.3); }
-  &:focus { border-color: ${NEON}; box-shadow: 0 0 12px rgba(0,255,198,0.2); }
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: ${LIGHT};
+  padding: 12px 14px;
+  border-radius: 12px;
+  outline: none;
+  transition: border .2s ease, box-shadow .2s ease, background .2s ease;
+
+  &::placeholder { color: rgba(232,241,255,.5); }
+  &:focus { border-color: ${NEON}; box-shadow: 0 0 0 4px rgba(0,255,198,0.12); background: rgba(255,255,255,0.06); }
 `;
 
+/* ✅ Upgraded message box (textarea) */
 const TextArea = styled.textarea`
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: ${LIGHT};
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  resize: vertical;
-  min-height: 140px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  &::placeholder { color: rgba(255,255,255,0.3); }
-  &:focus { border-color: ${NEON}; box-shadow: 0 0 12px rgba(0,255,198,0.2); }
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: ${LIGHT};
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+  outline: none;
+  resize: none;
+  min-height: 160px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.25),
+              0 0 0 rgba(0, 255, 198, 0.0);
+
+  &::placeholder {
+    color: rgba(232, 241, 255, 0.45);
+    font-style: italic;
+  }
+
+  &:hover {
+    border-color: rgba(0, 255, 198, 0.28);
+  }
+
+  &:focus {
+    border-color: ${NEON};
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 0 14px rgba(0, 255, 198, 0.25),
+                inset 0 0 8px rgba(0, 255, 198, 0.12);
+  }
 `;
 
 const Button = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: linear-gradient(90deg, ${NEON}, ${ACCENT});
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 18px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  &:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,255,198,0.3); }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(90deg, ${NEON}, ${ACCENT});
+  color: #00130e;
+  border: none;
+  font-weight: 800;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+
+  &:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,255,198,.28); }
+  &:disabled { opacity: .6; cursor: not-allowed; transform: none; box-shadow: none; }
 `;
 
-const StatusMessage = styled.p`
-  margin-top: 8px;
-  font-weight: 600;
-  color: ${({ type }) => (type === 'error' ? '#ff6b6b' : NEON)};
+const Status = styled.p`
+  margin: 8px 0 0 0;
+  font-weight: 600;
+  color: ${({ type }) => (type === "error" ? "#ff6b6b" : NEON)};
 `;
 
-// --- FOOTER ---
+/* =======================
+   FOOTER
+======================= */
 const Footer = styled.footer`
-  text-align: center;
-  padding: 24px;
-  color: ${MUTED};
-  font-size: 0.95rem;
-  margin-top: auto;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: auto;
+  padding: 22px;
+  text-align: center;
+  color: ${MUTED};
+  border-top: 1px solid ${BORDER};
 `;
 
-// =========================================================
-// MAIN COMPONENT
-// =========================================================
-const ContactPage = ({ onNavigate, generalData }) => {
-  const canvasRef = useRef(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', mobile: '', message: '' });
-  const [formMessage, setFormMessage] = useState({ type: '', text: '' });
+/* =======================
+   STARFIELD HOOK (scoped to a node)
+======================= */
+function useStarfield(containerRef, density = 120) {
+  const canvasRef = useRef(null);
 
-  // --- STAR BACKGROUND EFFECT ---
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let w = (canvas.width = window.innerWidth);
-    let h = (canvas.height = window.innerHeight);
-    
-    const stars = Array.from({ length: 120 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: Math.random() * 1.5 + 0.5,
-      dx: (Math.random() - 0.5) * 0.4,
-      dy: 0.3 + Math.random() * 0.4,
-      alpha: 0.3 + Math.random() * 0.7
-    }));
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = NAVY_BG;
-      ctx.fillRect(0, 0, w, h);
-      stars.forEach(s => {
-        s.x += s.dx;
-        s.y += s.dy;
-        if (s.y > h) s.y = 0;
-        if (s.x > w) s.x = 0;
-        if (s.x < 0) s.x = w;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,255,198,${s.alpha})`;
-        ctx.fill();
-      });
-      requestAnimationFrame(draw);
-    };
-    draw();
-    
-    const handleResize = () => {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
 
-  // --- FORM HANDLERS ---
-  const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
-  
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setFormMessage({ type: '', text: 'Sending...' });
-    
-    try {
-      // API_URL now points correctly to /api/messages
-      await axios.post(API_URL, formData);
-      
-      setFormMessage({ type: 'success', text: '✅ Message sent successfully!' });
-      setFormData({ name: '', email: '', mobile: '', message: '' });
-      
-    } catch (err) {
-      // 💡 Enhanced error handling to display more helpful messages
-      let errorMessage = '❌ Failed to send. Please check network connection.';
+    let width = container.clientWidth;
+    let height = container.clientHeight;
+    let raf;
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
-      if (err.response) {
-          if (err.response.status === 400 && err.response.data.errors) {
-              // Express-validator error from backend
-              errorMessage = `❌ Validation Error: ${err.response.data.errors[0].msg}`;
-          } else if (err.response.status === 500) {
-              errorMessage = '❌ Server Error (500). Database save failed.';
-          } else if (err.response.status === 404 || err.response.status === 405) {
-              errorMessage = '❌ Routing Error. Backend endpoint not found/allowed. (Check for /api prefix)';
-          }
-      }
-      console.error('Form Submission Error:', err);
-      setFormMessage({ type: 'error', text: errorMessage });
-    }
-  };
+    function sizeCanvas() {
+      width = container.clientWidth;
+      height = container.clientHeight;
+      canvas.width = Math.max(1, Math.floor(width * DPR));
+      canvas.height = Math.max(1, Math.floor(height * DPR));
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
 
-  const safeGeneralData = generalData || {};
+    sizeCanvas();
 
-  return (
-    <>
-      <GlobalStyle />
-      <StarCanvas ref={canvasRef} />
-      <PageWrapper>
-        <Header>
-          <Logo onClick={() => onNavigate('home')}>NEXORA</Logo>
-          <NavLinks open={isMenuOpen}>
-            <NavItem onClick={() => onNavigate('home')}>Home</NavItem>
-            <NavItem onClick={() => onNavigate('about')}>About</NavItem>
-            <NavItem onClick={() => onNavigate('services')}>Services</NavItem>
-            <NavItem onClick={() => onNavigate('projects')}>Projects</NavItem>
-            <NavItem onClick={() => onNavigate('blog')}>Blog</NavItem>
-            <NavItem className="active" onClick={() => onNavigate('contact')}>Contact</NavItem>
-          </NavLinks>
-          <MobileMenuIcon onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
-          </MobileMenuIcon>
-        </Header>
+    const stars = Array.from({ length: density }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 1.6 + 0.5,
+      dx: (Math.random() - 0.5) * 0.35,
+      dy: 0.25 + Math.random() * 0.4,
+      a: 0.35 + Math.random() * 0.65,
+    }));
 
-        <Section>
-          <Title>Let's <span>Connect</span></Title>
-          <Subtitle>Have a project or idea? Reach out to collaborate!</Subtitle>
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
 
-          <Grid>
-            {/* LEFT INFO */}
-            <InfoCard>
-              <InfoTitle>Get In Touch</InfoTitle>
-              <InfoItem>
-                <FontAwesomeIcon icon={faEnvelope} className="icon" />
-                <div>
-                  <span>Email</span>
-                  <small>{safeGeneralData.email || 'nexora.crew@gmail.com'}</small>
-                </div>
-              </InfoItem>
-              <InfoItem>
-                <FontAwesomeIcon icon={faPhone} className="icon" />
-                <div>
-                  <span>Phone</span>
-                  <small>{safeGeneralData.phone || '+91 95976 46460'}</small>
-                </div>
-              </InfoItem>
-              <InfoItem>
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
-                <div>
-                  <span>Location</span>
-                  <small>Tiruchirappalli, Tamil Nadu</small>
-                </div>
-              </InfoItem>
-            </InfoCard>
+      // subtle vignette background so stars are "inside" the section
+      const g = ctx.createLinearGradient(0, 0, 0, height);
+      g.addColorStop(0, "rgba(4,11,26,0.85)");
+      g.addColorStop(1, "rgba(4,11,26,0.95)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, width, height);
 
-            {/* RIGHT FORM */}
-            <FormCard>
-              <Form onSubmit={handleSubmit}>
-                <Input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
-                <Input type="email" name="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
-                <Input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} required />
-                <TextArea name="message" placeholder="Your Message..." value={formData.message} onChange={handleChange} required />
-                <Button type="submit">
-                  <FontAwesomeIcon icon={faPaperPlane} /> Send Message
-                </Button>
-                {formMessage.text && (
-                  <StatusMessage type={formMessage.type}>{formMessage.text}</StatusMessage>
-                )}
-              </Form>
-            </FormCard>
-          </Grid>
-        </Section>
+      stars.forEach((s) => {
+        s.x += s.dx;
+        s.y += s.dy;
 
-        <Footer>
-          © 2025 NEXORA Crew — Crafted with passion ✨
-        </Footer>
-      </PageWrapper>
-    </>
-  );
-};
+        if (s.y > height) s.y = 0;
+        if (s.x > width) s.x = 0;
+        if (s.x < 0) s.x = width;
 
-export default ContactPage;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,255,198,${s.a})`;
+        ctx.fill();
+      });
+
+      raf = requestAnimationFrame(draw);
+    };
+
+    const ro = new ResizeObserver(sizeCanvas);
+    ro.observe(container);
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [containerRef, density]);
+
+  return canvasRef;
+}
+
+/* =======================
+   PAGE
+======================= */
+export default function ContactPage({ onNavigate, generalData }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState({ type: "", text: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    message: "",
+  });
+
+  const sectionRef = useRef(null);
+  const canvasRef = useStarfield(sectionRef, 130);
+
+  const safe = generalData || {};
+
+  const onChange = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    setStatus({ type: "", text: "Sending..." });
+
+    try {
+      await axios.post(API_URL, form);
+      setStatus({ type: "success", text: "✅ Message sent successfully!" });
+      setForm({ name: "", email: "", mobile: "", message: "" });
+    } catch (err) {
+      let msg = "❌ Failed to send. Please check network connection.";
+      if (err?.response) {
+        if (err.response.status === 400 && err.response.data?.errors) {
+          msg = `❌ Validation Error: ${err.response.data.errors[0].msg}`;
+        } else if (err.response.status === 500) {
+          msg = "❌ Server Error (500). Database save failed.";
+        } else if ([404, 405].includes(err.response.status)) {
+          msg = "❌ Routing Error. Backend endpoint not found/allowed. (Check /api prefix)";
+        }
+      }
+      setStatus({ type: "error", text: msg });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <>
+      <GlobalStyle />
+      <Page>
+        <Header>
+          <Brand onClick={() => onNavigate?.("home")}>NEXORA</Brand>
+          <Nav open={menuOpen}>
+            <NavItem onClick={() => onNavigate?.("home")}>Home</NavItem>
+            <NavItem onClick={() => onNavigate?.("about")}>About</NavItem>
+            <NavItem onClick={() => onNavigate?.("services")}>Services</NavItem>
+            <NavItem onClick={() => onNavigate?.("projects")}>Projects</NavItem>
+            <NavItem onClick={() => onNavigate?.("blog")}>Blog</NavItem>
+            <NavItem className="active" onClick={() => onNavigate?.("contact")}>
+              Contact
+            </NavItem>
+          </Nav>
+          <MobileToggle onClick={() => setMenuOpen((s) => !s)} aria-label="Toggle menu">
+            <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
+          </MobileToggle>
+        </Header>
+
+        {/* CONTACT SECTION (stars are scoped inside) */}
+        <Section ref={sectionRef}>
+          <StarLayer ref={canvasRef} aria-hidden />
+          <StarGlow />
+
+          <SectionInner>
+            <TitleWrap>
+              <Title>
+                Let’s <span>Connect</span>
+              </Title>
+              <Subtitle>Have a project or idea? Reach out to collaborate!</Subtitle>
+            </TitleWrap>
+
+            <Grid>
+              {/* LEFT: INFO */}
+              <Card>
+                <CardTitle>Get In Touch</CardTitle>
+
+                <InfoRow>
+                  <FontAwesomeIcon icon={faEnvelope} className="icon" />
+                  <div>
+                    <strong>Email</strong>
+                    <small>{safe.email || "nexora.crew@gmail.com"}</small>
+                  </div>
+                </InfoRow>
+
+                <InfoRow>
+                  <FontAwesomeIcon icon={faPhone} className="icon" />
+                  <div>
+                    <strong>Phone</strong>
+                    <small>{safe.phone || "+91 95976 46460"}</small>
+                  </div>
+                </InfoRow>
+
+                <InfoRow>
+                  <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
+                  <div>
+                    <strong>Location</strong>
+                    <small>Tiruchirappalli, Tamil Nadu</small>
+                  </div>
+                </InfoRow>
+              </Card>
+
+              {/* RIGHT: FORM */}
+              <Card>
+                <Form onSubmit={submit} noValidate>
+                  <div>
+                    <Label htmlFor="name">Your Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      placeholder="John Doe"
+                      value={form.name}
+                      onChange={onChange}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      name="email"
+                      placeholder="you@example.com"
+                      value={form.email}
+                      onChange={onChange}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="mobile">Mobile</Label>
+                    <Input
+                      id="mobile"
+                      name="mobile"
+                      placeholder="+91 9xxxx xxxxx"
+                      value={form.mobile}
+                      onChange={onChange}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="message">Message</Label>
+                    <TextArea
+                      id="message"
+                      name="message"
+                      placeholder="Tell us about your project…"
+                      value={form.message}
+                      onChange={onChange}
+                      required
+                    />
+                  </div>
+
+                  <Button type="submit" disabled={sending} aria-busy={sending}>
+                    <FontAwesomeIcon icon={faPaperPlane} />
+                    {sending ? "Sending..." : "Send Message"}
+                  </Button>
+
+                  {status.text && <Status type={status.type}>{status.text}</Status>}
+                </Form>
+              </Card>
+            </Grid>
+          </SectionInner>
+        </Section>
+
+        <Footer>© 2025 NEXORA Crew — Crafted with passion ✨</Footer>
+      </Page>
+    </>
+  );
+}
