@@ -427,7 +427,7 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
                     <PrimaryBtn onClick={() => onNavigate('contact')}>Let's Collaborate</PrimaryBtn>
                 </FinalCta>
 
-                <Footer>&copy; 2025 Crafted with care by NEXORA Team, JJ College.</Footer>
+                <Footer>&copy; NEXORACREW Team, Palakarai,Tiruchirappalli, Tamil Nadu</Footer>
             </Page>
         </>
     );

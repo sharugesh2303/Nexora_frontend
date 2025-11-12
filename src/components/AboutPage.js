@@ -486,7 +486,7 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
                     </button>
                 </Section>
 
-                <Footer>&copy; 2025 Crafted with care by NEXORA Team, JJ College.</Footer>
+                <Footer>&copy; NEXORACREW Team, Palakarai,Tiruchirappalli, Tamil Nadu</Footer>
             </PageWrapper>
         </>
     );

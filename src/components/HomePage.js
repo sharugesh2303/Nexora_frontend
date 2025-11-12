@@ -473,7 +473,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {}, homeData = {} }) =>
                         </a>
                     </div>
                     <div style={{ color: MUTED_TEXT }}>
-                        © 2025 NEXORA Team, JJ College — All Rights Reserved.
+                        © NEXORACREW Team, Palakarai,Tiruchirappalli, Tamil Nadu — All Rights Reserved.
                     </div>
                 </Footer>
             </PageLayer>

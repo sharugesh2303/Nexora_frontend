@@ -473,7 +473,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
                 </PostGrid>
 
                 <Footer>
-                    &copy; 2025 Crafted with care by NEXORA Team, JJ College.
+                    &copy; NEXORACREW Team, Palakarai,Tiruchirappalli, Tamil Nadu
                 </Footer>
             </Page>
         </>

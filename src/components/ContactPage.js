@@ -514,7 +514,7 @@ export default function ContactPage({ onNavigate, generalData }) {
                   <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
                   <div>
                     <strong>Location</strong>
-                    <small>Tiruchirappalli, Tamil Nadu</small>
+                    <small>Palakarai,Tiruchirappalli, Tamil Nadu</small>
                   </div>
                 </InfoRow>
               </Card>
@@ -583,7 +583,7 @@ export default function ContactPage({ onNavigate, generalData }) {
           </SectionInner>
         </Section>
 
-        <Footer>© 2025 NEXORA Crew — Crafted with passion ✨</Footer>
+        <Footer>© NEXORACREW-Crafted with passion ✨</Footer>
       </Page>
     </>
   );
