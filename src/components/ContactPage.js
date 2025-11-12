@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
+// FIX APPLIED HERE: Removed 'css' to resolve the Vercel build error (no-unused-vars)
+import styled, { createGlobalStyle, keyframes } from 'styled-components'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faPhone, faMapMarkerAlt, faPaperPlane, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
