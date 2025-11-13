@@ -541,7 +541,7 @@ const ProjectsPage = ({ onNavigate }) => {
                     </div>
                 )}
 
-                <Footer>&copy; NEXORACREW Team, Palakarai, Tiruchirappalli, Tamil Nadu.</Footer>
+                <Footer>© NEXORACREW Team, Palakarai, Tiruchirappalli, Tamil Nadu — All Rights Reserved.</Footer>
             </Page>
         </>
     );
