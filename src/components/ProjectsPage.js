@@ -1,5 +1,7 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+// src/pages/ProjectsPage.jsx
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import styled, { createGlobalStyle, css, keyframes } from 'styled-components';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- THEME TOKENS (navy + neon) ---
@@ -7,7 +9,6 @@ const NEON = '#00e0b3';
 const ACCENT = '#1ddc9f';
 const NAVY_BG = '#071025';
 const MID_NAVY = '#0B1724';
-// FIX: Removed CARD_BG as it was unused
 const LIGHT_TEXT = '#D6E2F0';
 const MUTED_TEXT = '#9AA6B3';
 const BORDER = 'rgba(255,255,255,0.06)';
@@ -85,7 +86,6 @@ const Logo = styled.h1`
 const Nav = styled.nav`
     display:flex;
     gap: 18px;
-    /* FIX: Changed <a> styles to <span> styles */
     span { color: ${MUTED_TEXT}; font-weight:600; cursor: pointer; text-decoration:none; }
     span.active { color: ${NEON}; text-shadow: 0 0 8px rgba(0,224,179,0.12); }
 `;
@@ -226,7 +226,7 @@ const Footer = styled.footer`
     border-top: 1px solid rgba(255,255,255,0.02);
 `;
 
-/* ---------- STAR CANVAS HOOK (same engine used across pages) ---------- */
+/* ---------- STAR CANVAS HOOK ---------- */
 const useStarCanvas = (canvasRef) => {
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -353,33 +353,98 @@ const useStarCanvas = (canvasRef) => {
     }, [canvasRef]);
 };
 
+/* ---------- HELPERS ---------- */
+// Normalize tags so UI gets an array of strings for each project
+// - project.tags might be: ['React','Node'] or [{_id:'...', name:'React'}] or ['615abc...'] (ObjectId strings)
+// - we fetch tagList to map id -> name when necessary
+const normalizeProjectTags = (rawTags, tagList) => {
+    if (!rawTags) return [];
+    // rawTags might be string (single) or array
+    const arr = Array.isArray(rawTags) ? rawTags : [rawTags];
+
+    return arr.map(item => {
+        if (!item && item !== 0) return ''; // skip falsy
+        if (typeof item === 'string') {
+            // if it's an id and exists in tagList, map to its name
+            const foundById = tagList.find(t => String(t._id) === String(item));
+            if (foundById) return foundById.name;
+            // maybe it's already a name
+            return item;
+        }
+        if (typeof item === 'object') {
+            // object might be { _id, name } or a mongoose object - prefer name
+            return item.name || item.title || String(item._id || '');
+        }
+        // fallback
+        return String(item);
+    }).filter(Boolean);
+};
+
 /* ---------- MAIN COMPONENT ---------- */
-const ProjectsPage = ({ onNavigate, projects }) => {
+const ProjectsPage = ({ onNavigate }) => {
+    const [projects, setProjects] = useState([]);
+    const [tags, setTags] = useState([]); // array of { _id, name, slug? }
     const [activeFilter, setActiveFilter] = useState('All');
+    const [loading, setLoading] = useState(true);
     const canvasRef = useRef(null);
-    // Use the custom hook
     useStarCanvas(canvasRef);
 
-    // FIX: Memoize safeProjects initialization to stabilize dependencies
-    const safeProjects = useMemo(() => {
-        return projects || [
-            { _id: '1', title: 'College Portal Redesign', description: 'A massive project involving complete overhaul of the college’s information and enrollment system using React and Node.js.', tags: ['Web App', 'UI/UX'], imageUrl: 'https://via.placeholder.com/800x450/1ddc9f/081026?text=College+Portal' },
-            { _id: '2', title: 'AI Recommendation Engine', description: 'Developed a custom machine learning model for personalized product recommendations based on user behavior data.', tags: ['AI', 'Python'], imageUrl: 'https://via.placeholder.com/800x450/3081ff/081026?text=AI+Engine' },
-            { _id: '3', title: 'NEXORA Brand Identity', description: 'Our comprehensive branding project, covering logo, style guide, and core messaging for the startup.', tags: ['Branding', 'Design'], imageUrl: 'https://via.placeholder.com/800x450/00e0b3/081026?text=NEXORA+Brand' },
-            { _id: '4', title: 'Mobile E-Commerce App', description: 'Cross-platform mobile application development using React Native for a local retail chain.', tags: ['Mobile', 'Web App'], imageUrl: 'https://via.placeholder.com/800x450/ff914d/081026?text=Mobile+App' },
-        ];
+    // API endpoints (adjust if different)
+    const PROJECT_API = 'http://localhost:5000/api/projects';
+    const TAG_API = 'http://localhost:5000/api/tags';
+
+    // fetch projects + tags
+    useEffect(() => {
+        let mounted = true;
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [pRes, tRes] = await Promise.all([axios.get(PROJECT_API), axios.get(TAG_API)]);
+                if (!mounted) return;
+
+                // tags list
+                const tagList = Array.isArray(tRes.data) ? tRes.data.map(t => ({ _id: t._id, name: t.name || t.slug || String(t._id) })) : [];
+
+                // projects: normalize tags to names
+                const normalizedProjects = (Array.isArray(pRes.data) ? pRes.data : []).map(proj => {
+                    const nTags = normalizeProjectTags(proj.tags, tagList); // array of strings
+                    return { ...proj, tags: nTags };
+                });
+
+                setTags(tagList);
+                setProjects(normalizedProjects);
+                setLoading(false);
+            } catch (err) {
+                console.error('Failed to load projects/tags', err);
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+        return () => { mounted = false; };
+    }, []);
+
+    // compute tag counts and filter list
+    const tagCounts = useMemo(() => {
+        const counts = {};
+        projects.forEach(p => {
+            (p.tags || []).forEach(t => {
+                counts[t] = (counts[t] || 0) + 1;
+            });
+        });
+        return counts;
     }, [projects]);
 
     const allTags = useMemo(() => {
-        const tags = new Set();
-        safeProjects.forEach(p => p.tags.forEach(tag => { if (tag.toLowerCase() !== 'all') tags.add(tag); }));
-        return ['All', ...Array.from(tags)];
-    }, [safeProjects]);
+        // Show All first, then tags sorted by name
+        const tagNames = Object.keys(tagCounts).sort((a,b) => a.localeCompare(b));
+        return ['All', ...tagNames];
+    }, [tagCounts]);
 
     const filteredProjects = useMemo(() => {
-        if (activeFilter === 'All') return safeProjects;
-        return safeProjects.filter(p => p.tags.includes(activeFilter));
-    }, [activeFilter, safeProjects]);
+        if (activeFilter === 'All') return projects;
+        return projects.filter(p => (p.tags || []).includes(activeFilter));
+    }, [activeFilter, projects]);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -394,15 +459,14 @@ const ProjectsPage = ({ onNavigate, projects }) => {
 
             <Page>
                 <Header>
-                    <Logo onClick={() => onNavigate('home')} className="neon-text-shadow">NEXORA</Logo>
+                    <Logo onClick={() => onNavigate?.('home')} className="neon-text-shadow">NEXORA</Logo>
                     <Nav>
-                        {/* FIX: Changed <a> tags to <span> for click handlers without href */}
-                        <span onClick={() => onNavigate('home')}>Home</span>
-                        <span onClick={() => onNavigate('about')}>About</span>
-                        <span onClick={() => onNavigate('services')}>Services</span>
-                        <span className="active" onClick={() => onNavigate('projects')}>Projects</span>
-                        <span onClick={() => onNavigate('blog')}>Blog</span>
-                        <span onClick={() => onNavigate('contact')}>Contact</span>
+                        <span onClick={() => onNavigate?.('home')}>Home</span>
+                        <span onClick={() => onNavigate?.('about')}>About</span>
+                        <span onClick={() => onNavigate?.('services')}>Services</span>
+                        <span className="active" onClick={() => onNavigate?.('projects')}>Projects</span>
+                        <span onClick={() => onNavigate?.('blog')}>Blog</span>
+                        <span onClick={() => onNavigate?.('contact')}>Contact</span>
                     </Nav>
                 </Header>
 
@@ -412,8 +476,13 @@ const ProjectsPage = ({ onNavigate, projects }) => {
 
                     <FilterBar>
                         {allTags.map(tag => (
-                            <FilterButton key={tag} $active={activeFilter === tag} onClick={() => setActiveFilter(tag)}>
+                            <FilterButton
+                                key={tag}
+                                $active={activeFilter === tag}
+                                onClick={() => setActiveFilter(tag)}
+                            >
                                 {tag}
+                                {tag !== 'All' && <span style={{ marginLeft: 8, color: MUTED_TEXT }}>({tagCounts[tag] || 0})</span>}
                             </FilterButton>
                         ))}
                     </FilterBar>
@@ -426,39 +495,53 @@ const ProjectsPage = ({ onNavigate, projects }) => {
                     animate="visible"
                 >
                     <AnimatePresence>
-                        {filteredProjects.map((project) => (
-                            <ProjectCard
-                                key={project._id}
-                                onClick={() => onNavigate(`projects/${project._id}`)}
-                                layout
-                                variants={itemVariants}
-                                initial="hidden"
-                                animate="visible"
-                                exit="hidden"
-                                transition={{ duration: 0.36 }}
-                            >
-                                <CardImage>
-                                    <img src={project.imageUrl || 'https://via.placeholder.com/800x450/1ddc9f/081026?text=Project+Image'} alt={project.title} />
-                                </CardImage>
-                                <CardContent>
-                                    <CardTitle>{project.title}</CardTitle>
-                                    <CardDescription>{project.description.length > 130 ? `${project.description.substring(0, 130)}...` : project.description}</CardDescription>
-                                    <TagContainer>
-                                        {project.tags.map(t => <Tag key={t}>{t}</Tag>)}
-                                    </TagContainer>
-                                </CardContent>
-                            </ProjectCard>
-                        ))}
+                        {loading ? (
+                            // show placeholders while loading
+                            new Array(3).fill(0).map((_, i) => (
+                                <ProjectCard key={`ph-${i}`} layout variants={itemVariants} initial="hidden" animate="visible" exit="hidden" transition={{ duration: 0.36 }}>
+                                    <CardImage style={{ background: '#081224' }} />
+                                    <CardContent>
+                                        <CardTitle style={{ background: '#0b1720', width: '60%', height: 18, borderRadius: 6 }} />
+                                        <CardDescription style={{ height: 44 }} />
+                                        <TagContainer />
+                                    </CardContent>
+                                </ProjectCard>
+                            ))
+                        ) : (
+                            filteredProjects.map((project) => (
+                                <ProjectCard
+                                    key={project._id}
+                                    onClick={() => onNavigate?.(`projects/${project._id}`)}
+                                    layout
+                                    variants={itemVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="hidden"
+                                    transition={{ duration: 0.36 }}
+                                >
+                                    <CardImage>
+                                        <img src={project.imageUrl || 'https://via.placeholder.com/800x450/1ddc9f/081026?text=Project+Image'} alt={project.title} />
+                                    </CardImage>
+                                    <CardContent>
+                                        <CardTitle>{project.title}</CardTitle>
+                                        <CardDescription>{project.description ? (project.description.length > 130 ? `${project.description.substring(0, 130)}...` : project.description) : '...'}</CardDescription>
+                                        <TagContainer>
+                                            {(project.tags || []).map(t => <Tag key={`${project._id}-${t}`}>{t}</Tag>)}
+                                        </TagContainer>
+                                    </CardContent>
+                                </ProjectCard>
+                            ))
+                        )}
                     </AnimatePresence>
                 </ProjectGrid>
 
-                {filteredProjects.length === 0 && (
+                {(!loading && filteredProjects.length === 0) && (
                     <div style={{ textAlign: 'center', color: MUTED_TEXT, marginTop: 20 }}>
                         No projects found for this filter.
                     </div>
                 )}
 
-                <Footer>&copy;  NEXORACREW Team, Palakarai,Tiruchirappalli, Tamil Nadu.</Footer>
+                <Footer>&copy; NEXORACREW Team, Palakarai, Tiruchirappalli, Tamil Nadu.</Footer>
             </Page>
         </>
     );
