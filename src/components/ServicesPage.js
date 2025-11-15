@@ -3,12 +3,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faDesktop, faRobot, faCommentDots,
-  faBullhorn, faCode, faShieldHalved, faQuestionCircle,
   faCalendarCheck, faChevronDown, faChevronUp
 } from '@fortawesome/free-solid-svg-icons';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+// =========================================================================
+// 🔑 CRITICAL FIX: API_BASE URL HANDLING
+// =========================================================================
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168.') || window.location.hostname.startsWith('10.');
+const API_BASE = isLocalhost
+  ? (process.env.REACT_APP_API_BASE || 'http://localhost:5000')
+  : (process.env.REACT_APP_API_BASE || '');
 
 // --- THEME TOKENS ---
 const NEON = '#00e0b3';
@@ -18,11 +22,9 @@ const MID_NAVY = '#0B1724';
 const LIGHT_TEXT = '#D6E2F0';
 const MUTED_TEXT = '#9AA6B3';
 const BORDER_DARK = '#0e2430';
-
-// Header height constant
 const HEADER_HEIGHT = '72px';
 
-// KEYFRAMES...
+/* ================= KEYFRAMES ================= */
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
@@ -67,7 +69,7 @@ const StarCanvas = styled.canvas`
   background: radial-gradient(circle at 18% 12%, #071122 0%, #081226 18%, #071020 45%, #02040a 100%);
 `;
 
-/* ------------------------------- PAGE LAYOUT ------------------------------- */
+/* ------------------------------- LAYOUT ----------------------------------- */
 const Page = styled.div`
   position: relative;
   z-index: 3;
@@ -77,7 +79,7 @@ const Page = styled.div`
   padding-top: ${HEADER_HEIGHT};
 `;
 
-/* ---------------------- HEADER / NAV ---------------------- */
+/* ------------------------------- HEADER ----------------------------------- */
 const Header = styled.header`
   display: flex;
   align-items: center;
@@ -112,7 +114,7 @@ const NavGroup = styled.div`
   .active { color: ${NEON}; text-shadow: 0 0 8px ${NEON}; }
 `;
 
-/* -------------------------------- INTRO SECTION ---------------------------- */
+/* ------------------------------- INTRO ------------------------------------ */
 const Intro = styled.section`
   padding: calc(${HEADER_HEIGHT} + 40px) 20px 40px;
   width: 100%;
@@ -134,61 +136,130 @@ const IntroSubtitle = styled.p`
   font-size: 1.05rem;
 `;
 
-/* ------------------------------ SERVICES GRID & CARDS (unchanged) ------------------------------ */
+/* ------------------------------ SERVICES GRID & CARDS ---------------------- */
 const ServiceGrid = styled.div`
   width: 100%;
   max-width: 1400px;
   margin: 40px auto 90px;
   padding: 0 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-  gap: 36px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
 `;
+
 const ServiceCard = styled.article`
   position: relative;
   background: ${MID_NAVY};
   border-radius: 18px;
-  padding: 50px 38px;
-  border: 2px solid rgba(29,220,159,0.35);
+  padding: 36px 28px;
+  border: 2px solid rgba(29,220,159,0.20);
   box-shadow: 0 20px 40px rgba(2,6,23,0.55);
-  transition: 0.32s ease;
+  transition: transform 0.32s ease, box-shadow 0.32s ease, border-color 0.32s ease;
   transform-style: preserve-3d;
   perspective: 900px;
-  overflow: visible;
+  overflow: visible; /* allow overlay to be positioned outside padding */
   animation: ${css`${fadeUp} 0.9s ease forwards`};
-  display:flex; align-items:center; justify-content:center; text-align:center; min-height: 230px;
-  &:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 30px 60px rgba(29,220,159,0.20); }
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 220px;
+  gap: 12px;
+
+  h3 {
+    margin: 4px 0 0;
+    font-size: 1.2rem;
+    color: ${LIGHT_TEXT};
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    z-index: 5;
+  }
+
+  /* Centered overlay: truly centered and constrained in size */
+  .desc-overlay {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.98);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.32s ease, transform 0.32s ease;
+    z-index: 8;
+    width: calc(100% - 56px);
+    max-width: 420px;
+    box-sizing: border-box;
+
+    /* Remove any scrollbars — keep overlay content visible and let it expand naturally
+       Use cross-browser rules to hide scrollbars if any appear. */
+    overflow: visible;
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .desc-overlay::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+  &:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 30px 60px rgba(29,220,159,0.15); }
+  &:focus { outline: none; box-shadow: 0 30px 60px rgba(29,220,159,0.15); }
+
   &::after {
     content: '';
     position: absolute;
     inset: -6px;
     border-radius: 22px;
     pointer-events: none;
-    box-shadow: 0 12px 32px rgba(29,220,159,0.15), 0 0 16px rgba(29,220,159,0.10);
-    animation: ${pulseOutline} 3.6s infinite;
+    box-shadow: 0 12px 32px rgba(29,220,159,0.10), 0 0 16px rgba(29,220,159,0.06);
+    animation: ${pulseOutline} 4.4s infinite;
+    z-index: 0;
   }
-  h3 { margin: 0; color: ${LIGHT_TEXT}; font-size: 1.5rem; font-weight: 700; z-index: 3; position: relative; }
-  .desc-overlay { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; padding: 30px; opacity: 0; transform: translateY(18px) scale(0.98); transition: 240ms ease; z-index: 2; }
-  &.active { background: linear-gradient(150deg, ${ACCENT} 0%, #19c38c 100%); border-color: transparent; transform: translateY(-8px) scale(1.03);
-    &::after { box-shadow: 0 30px 70px rgba(29,220,159,0.26), 0 0 50px rgba(29,220,159,0.20); animation: ${pulseActive} 2s infinite; }
-    .desc-overlay { pointer-events: auto; opacity: 1; transform: translateY(0) scale(1); }
-    h3 { opacity: 0; transform: translateY(-12px); }
+
+  &.active {
+    background: linear-gradient(150deg, ${ACCENT} 0%, #19c38c 100%);
+    border-color: transparent;
+    transform: translateY(-8px) scale(1.03);
+    &::after { box-shadow: 0 30px 70px rgba(29,220,159,0.26), 0 0 50px rgba(29,220,159,0.18); animation: ${pulseActive} 2.6s infinite; }
+    .desc-overlay { pointer-events: auto; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    /* keep the title visible on active */
+    h3 { opacity: 1; transform: translateY(0); z-index: 6; }
+  }
+
+  @media (max-width: 880px) {
+    padding: 22px 18px;
+    min-height: 200px;
+    .desc-overlay { width: calc(100% - 36px); max-width: 360px; }
   }
 `;
+
+/* Desc panel used inside overlay */
 const DescPanel = styled.div`
   width: 100%;
-  max-width: 100%;
-  background: rgba(2,8,18,0.96);
-  border-radius: 16px;
-  padding: 24px 26px;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(2,8,18,0.98);
+  border-radius: 12px;
+  padding: 18px 16px;
+  border: 1px solid rgba(255,255,255,0.06);
   color: ${LIGHT_TEXT};
-  backdrop-filter: blur(8px);
-  box-shadow: 0 18px 38px rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.6);
   text-align: center;
   animation: ${floatMicro} 7s ease-in-out infinite;
-  strong { font-size: 1.12rem; display:block; margin-bottom:10px; color: ${NEON}; }
-  p { color: ${MUTED_TEXT}; margin: 0; line-height: 1.6; }
+  box-sizing: border-box;
+
+  /* ensure no scrollbars inside the panel — hide any if they appear */
+  overflow: visible;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  strong { font-size: 1.05rem; display:block; margin-bottom:10px; color: ${NEON}; }
+  p { color: ${MUTED_TEXT}; margin: 0; line-height: 1.5; font-size: 0.96rem; }
+`;
+
+/* CTA button used in cards and bottom CTA */
+const PrimaryBtn = styled.button`
+  display:inline-flex; align-items:center; gap:8px; padding:10px 14px; background: linear-gradient(90deg, ${NEON}, ${ACCENT});
+  border: none; color: ${MID_NAVY}; font-weight: 700; border-radius: 10px; cursor: pointer; box-shadow: 0 12px 34px rgba(0,224,179,0.12);
+  transition: transform 0.18s ease;
+  font-size: 0.95rem;
+  &:hover { transform: translateY(-3px) scale(1.03); }
 `;
 
 /* ------------------------------ FAQ SECTION -------------------------------- */
@@ -210,12 +281,7 @@ const FAQSidebar = styled.div`
   .empty { color: ${MUTED_TEXT}; padding: 30px 10px; background:${MID_NAVY}; border-radius:8px; text-align:center; }
 `;
 const FAQMain = styled.div``;
-const FAQList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 10px;
-`;
+const FAQList = styled.div` display:flex; flex-direction:column; gap:15px; margin-top:10px; `;
 const FAQToggle = styled.button`
   display: flex; justify-content: space-between; align-items: center; width: 100%;
   padding: 18px 24px; background: ${MID_NAVY}; color: ${LIGHT_TEXT}; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
@@ -230,7 +296,7 @@ const FAQAnswer = styled.div`
   p { color: ${MUTED_TEXT}; margin: 0; padding-bottom: ${props => (props.$isOpen ? '10px' : '0')}; line-height: 1.6; }
 `;
 
-/* ------------------------------ CTA & Footer ------------------------------- */
+/* ------------------------------ FINAL CTA & FOOTER ------------------------- */
 const FinalCta = styled.section`
   width: 100%;
   max-width: 1100px;
@@ -244,12 +310,6 @@ const FinalCta = styled.section`
 `;
 const CtaTitle = styled.h3` color:${LIGHT_TEXT}; font-size:1.7rem; margin:0 0 10px; `;
 const CtaText = styled.p` color:${MUTED_TEXT}; margin:0 0 18px; `;
-const PrimaryBtn = styled.button`
-  display:inline-flex; align-items:center; gap:8px; padding:12px 20px; background: linear-gradient(90deg, ${NEON}, ${ACCENT});
-  border: none; color: ${MID_NAVY}; font-weight: 700; border-radius: 12px; cursor: pointer; box-shadow: 0 12px 34px rgba(0,224,179,0.15);
-  transition: 0.2s ease;
-  &:hover { transform: translateY(-3px) scale(1.03); }
-`;
 const Footer = styled.footer` padding: 40px 20px; text-align:center; color: ${MUTED_TEXT}; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); `;
 
 /* ----------------------------- STAR CANVAS HOOK --------------------------- */
@@ -371,18 +431,18 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
 
   const [activeId, setActiveId] = useState(null);
   const [openFAQId, setOpenFAQId] = useState(null);
-  const [faqs, setFaqs] = useState([]); // fetched from server
+  const [faqs, setFaqs] = useState([]);
 
   // services fallback if none passed
   const getServiceData = () => {
     if (servicesData && servicesData.length > 0) return servicesData;
     return [
-      { _id: '1', title: 'Web Development', desc: 'Creation of responsive, high-performance websites and web applications.', icon: 'faCode' },
-      { _id: '2', title: 'AI & Automation', desc: 'Implementing custom AI solutions and automated workflows for business efficiency.', icon: 'faRobot' },
-      { _id: '3', title: 'Content Strategy', desc: 'Crafting compelling, SEO-optimized content that drives engagement and conversions.', icon: 'faCommentDots' },
-      { _id: '4', title: 'UI/UX Design', desc: 'Designing intuitive, attractive user interfaces for optimal customer experiences.', icon: 'faDesktop' },
-      { _id: '5', title: 'Branding Strategy', desc: 'Developing a cohesive brand identity, voice, and visual system.', icon: 'faBullhorn' },
-      { _id: '6', title: 'Security Audits', desc: 'Professional security assessments to protect your digital assets.', icon: 'faShieldHalved' },
+      { _id: '1', title: 'Web Development', desc: 'Creation of responsive, high-performance websites and web applications.' },
+      { _id: '2', title: 'AI & Automation', desc: 'Implementing custom AI solutions and automated workflows for business efficiency.' },
+      { _id: '3', title: 'Content Strategy', desc: 'Crafting compelling, SEO-optimized content that drives engagement and conversions.' },
+      { _id: '4', title: 'UI/UX Design', desc: 'Designing intuitive, attractive user interfaces for optimal customer experiences.' },
+      { _id: '5', title: 'Branding Strategy', desc: 'Developing a cohesive brand identity, voice, and visual system.' },
+      { _id: '6', title: 'Security Audits', desc: 'Professional security assessments to protect your digital assets.' },
     ];
   };
 
@@ -393,37 +453,31 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
   const onToggleTouch = (id) => setActiveId(prev => (prev === id ? null : id));
   const toggleFAQ = (id) => setOpenFAQId(prevId => (prevId === id ? null : id));
 
-  // Fetch public FAQs. Attempts multiple public endpoints in order:
-  // 1) GET /api/faqs
-  // 2) GET /api/content/faqs
-  // 3) GET /api/content -> use content.faqs
+  // Fetch public FAQs from multiple possible endpoints
   const fetchPublicFaqs = async () => {
     try {
-      // try dedicated public route
-      const res1 = await fetch(`${API_BASE}/api/faqs`);
-      if (res1.ok) {
-        const json = await res1.json();
-        if (Array.isArray(json)) { setFaqs(json); return; }
-        if (Array.isArray(json.data)) { setFaqs(json.data); return; }
-      }
+      const tryFetch = async (path) => {
+        const res = await fetch(`${API_BASE}${path}`);
+        if (!res.ok) return null;
+        const json = await res.json();
+        return json;
+      };
 
-      // try content/faqs
-      const res2 = await fetch(`${API_BASE}/api/content/faqs`);
-      if (res2.ok) {
-        const json2 = await res2.json();
-        if (Array.isArray(json2)) { setFaqs(json2); return; }
-        if (Array.isArray(json2.data)) { setFaqs(json2.data); return; }
-      }
+      // 1) /api/content/faqs
+      const r1 = await tryFetch('/api/content/faqs');
+      if (Array.isArray(r1)) { setFaqs(r1); return; }
+      if (r1 && Array.isArray(r1.data)) { setFaqs(r1.data); return; }
 
-      // fallback: get content document and use content.faqs
-      const res3 = await fetch(`${API_BASE}/api/content`);
-      if (res3.ok) {
-        const json3 = await res3.json();
-        const candidate = json3?.faqs || json3?.data?.faqs;
-        if (Array.isArray(candidate)) { setFaqs(candidate); return; }
-      }
+      // 2) /api/faqs
+      const r2 = await tryFetch('/api/faqs');
+      if (Array.isArray(r2)) { setFaqs(r2); return; }
+      if (r2 && Array.isArray(r2.data)) { setFaqs(r2.data); return; }
 
-      // No faqs found -> empty array
+      // 3) /api/content -> content.faqs
+      const r3 = await tryFetch('/api/content');
+      const candidate = r3?.faqs || r3?.data?.faqs;
+      if (Array.isArray(candidate)) { setFaqs(candidate); return; }
+
       setFaqs([]);
     } catch (err) {
       console.error('Failed to fetch FAQs:', err);
@@ -434,12 +488,10 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
   useEffect(() => {
     fetchPublicFaqs();
 
-    // listen for AdminPage broadcasts to live-refresh faqs
     const handler = (e) => {
       if (e?.detail?.faqs && Array.isArray(e.detail.faqs)) {
         setFaqs(e.detail.faqs);
       } else {
-        // if event payload missing, refetch from server
         fetchPublicFaqs();
       }
     };
@@ -497,13 +549,20 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
                 tabIndex={0}
                 aria-expanded={isActive}
                 role="button"
+                aria-label={`Service: ${service.title}`}
               >
-                <h3 aria-hidden={isActive}>{service.title}</h3>
-                <div className="desc-overlay" aria-hidden={!isActive}>
+                <h3 aria-hidden={false}>{service.title}</h3>
+
+                {/* Centered description overlay that appears on hover/touch/active */}
+                <div
+                  className="desc-overlay"
+                  aria-hidden={!isActive}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <DescPanel>
                     <strong>{service.title}</strong>
                     <p>{service.desc}</p>
-                    <div style={{ marginTop: 14 }}>
+                    <div style={{ marginTop: 12 }}>
                       <PrimaryBtn onClick={() => onNavigate('contact')}>Get Quote</PrimaryBtn>
                     </div>
                   </DescPanel>
@@ -513,7 +572,7 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
           })}
         </ServiceGrid>
 
-        {/* FAQ Section always visible (even when empty) */}
+        {/* FAQ Section */}
         <FAQSection>
           <FAQSidebar>
             <h4>FAQ</h4>
@@ -542,11 +601,11 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
 
             {faqs.length > 0 && (
               <FAQList>
-                {faqs.map((item, i) => {
-                  const id = item.id ?? item._id ?? `faq-${i}`;
+                {faqs.map((item, idx) => {
+                  const id = item.id ?? item._id ?? `faq-${idx}`;
                   const isOpen = openFAQId === id;
                   return (
-                    <div key={id} className="animate-in" style={{ animationDelay: `${0.12 * i + 0.1}s` }}>
+                    <div key={id} className="animate-in" style={{ animationDelay: `${0.12 * idx + 0.1}s` }}>
                       <FAQToggle $isOpen={isOpen} onClick={() => toggleFAQ(id)} aria-expanded={isOpen} aria-controls={`faq-answer-${id}`}>
                         {item.question}
                         <FontAwesomeIcon icon={isOpen ? faChevronUp : faChevronDown} className="icon" />
