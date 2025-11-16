@@ -575,7 +575,7 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
         <FAQSection>
           <FAQSidebar>
             <h4>FAQ</h4>
-            <div className="count">FAQ Items ({faqs.length})</div>
+            
             {faqs.length === 0 ? (
               <div className="empty">
                 No FAQ items yet.
