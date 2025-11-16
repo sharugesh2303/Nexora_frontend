@@ -574,8 +574,6 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
 
         <FAQSection>
           <FAQSidebar>
-            <h4>FAQ</h4>
-            
             {faqs.length === 0 ? (
               <div className="empty">
                 No FAQ items yet.
