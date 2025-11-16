@@ -4,13 +4,29 @@ import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarCheck, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
-// Detect API base: local development or env var
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168.') || window.location.hostname.startsWith('10.');
-const API_BASE = isLocalhost
-  ? (process.env.REACT_APP_API_BASE || 'http://localhost:5000')
-  : (process.env.REACT_APP_API_BASE || '');
+/**
+ * API base detection:
+ * - uses REACT_APP_API_BASE (old name) OR REACT_APP_API_BASE_URL (your Vercel screenshot)
+ * - local dev => default to http://localhost:5000
+ * - production => prefer env var; fallback to DEFAULT_REMOTE_API (quick patch only)
+ */
+const ENV_API_A = process.env.REACT_APP_API_BASE || '';
+const ENV_API_B = process.env.REACT_APP_API_BASE_URL || '';
+const ENV_API = ENV_API_A || ENV_API_B || '';
+const isLocalhost =
+  window.location.hostname === 'localhost' ||
+  window.location.hostname.startsWith('192.168.') ||
+  window.location.hostname.startsWith('10.');
+// OPTIONAL: replace with your real API host if you want a fallback quick-patch
+const DEFAULT_REMOTE_API = 'https://evil-gypsy-sharugesh-06d0c56b.koyeb.app';
 
-// THEME
+const API_BASE = isLocalhost
+  ? (ENV_API || 'http://localhost:5000')
+  : (ENV_API || DEFAULT_REMOTE_API);
+
+console.info('[ServicesPage] API_BASE =', API_BASE);
+
+// THEME tokens (unchanged)
 const NEON = '#00e0b3';
 const ACCENT = '#1ddc9f';
 const NAVY_BG = '#071025';
@@ -19,36 +35,27 @@ const LIGHT_TEXT = '#D6E2F0';
 const MUTED_TEXT = '#9AA6B3';
 const HEADER_HEIGHT = '72px';
 
-/* KEYFRAMES */
+/* keyframes & styles (kept identical to your prior file) */
 const fadeUp = keyframes` from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } `;
 const floatMicro = keyframes` 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(0.8deg); } 100% { transform: translateY(0) rotate(0deg); } `;
 const pulseOutline = keyframes` 0% { box-shadow: 0 8px 26px rgba(29,220,159,0.06), 0 0 6px rgba(29,220,159,0.04); } 50% { box-shadow: 0 12px 42px rgba(29,220,159,0.10), 0 0 12px rgba(29,220,159,0.07); } 100% { box-shadow: 0 8px 26px rgba(29,220,159,0.06), 0 0 6px rgba(29,220,159,0.04); } `;
 const pulseActive = keyframes` 0% { box-shadow: 0 18px 44px rgba(29,220,159,0.18), 0 0 28px rgba(29,220,159,0.12); } 50% { box-shadow: 0 28px 64px rgba(29,220,159,0.26), 0 0 48px rgba(29,220,159,0.18); } 100% { box-shadow: 0 18px 44px rgba(29,220,159,0.18), 0 0 28px rgba(29,220,159,0.12); }`;
 
-/* GLOBAL STYLE */
 const GlobalStyle = createGlobalStyle`
   body { margin:0; font-family:'Poppins',sans-serif; background:${NAVY_BG}; color:${LIGHT_TEXT}; overflow-x:hidden; }
   .neon-text-shadow { text-shadow: 0 0 12px ${NEON}, 0 0 22px rgba(0,224,179,0.12); }
   .animate-in { opacity: 0; animation: ${css`${fadeUp} 0.85s ease forwards`}; }
 `;
 
-/* STAR CANVAS */
+/* (All styled components preserved) */
 const StarCanvas = styled.canvas` position: fixed; inset:0; width:100%; height:100%; z-index:0; display:block; background: radial-gradient(circle at 18% 12%, #071122 0%, #081226 18%, #071020 45%, #02040a 100%); `;
-
-/* PAGE LAYOUT */
 const Page = styled.div` position:relative; z-index:3; min-height:100vh; display:flex; flex-direction:column; padding-top:${HEADER_HEIGHT}; `;
-
-/* HEADER */
 const Header = styled.header` display:flex; align-items:center; gap:40px; padding:14px 48px; position:fixed; top:0; width:100%; height:${HEADER_HEIGHT}; background: rgba(7,16,38,0.65); backdrop-filter: blur(10px); border-bottom:1px solid rgba(255,255,255,0.04); z-index:10; `;
 const Logo = styled.h1` color:${NEON}; font-size:1.8rem; font-weight:800; margin:0; text-shadow:0 0 12px ${NEON}; cursor:pointer; `;
 const NavGroup = styled.div` display:flex; gap:22px; align-items:center; margin-right:auto; span { color:${MUTED_TEXT}; cursor:pointer; } span:hover { color:${NEON}; } .active { color:${NEON}; } `;
-
-/* INTRO */
 const Intro = styled.section` padding: calc(${HEADER_HEIGHT} + 40px) 20px 40px; width:100%; max-width:1200px; margin:0 auto; text-align:center; `;
 const IntroTitle = styled.h2` font-size:2.6rem; font-weight:800; margin:0 0 12px; color:${LIGHT_TEXT}; span{ color:${NEON}; } `;
 const IntroSubtitle = styled.p` color:${MUTED_TEXT}; max-width:850px; margin:0 auto; font-size:1.05rem; `;
-
-/* GRID & CARD */
 const ServiceGrid = styled.div` width:100%; max-width:1400px; margin:40px auto 90px; padding:0 20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:28px; `;
 const ServiceCard = styled.article`
   position: relative;
@@ -61,68 +68,25 @@ const ServiceCard = styled.article`
   overflow: visible;
   display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:220px; gap:12px;
   h3{ margin:4px 0 0; font-size:1.2rem; color:${LIGHT_TEXT}; z-index:5; }
-
-  /* Centered overlay */
   .desc-overlay{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%) scale(0.98);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.32s ease, transform 0.32s ease;
-    z-index:8;
-    width: calc(100% - 56px);
-    max-width: 420px;
-    box-sizing: border-box;
-    overflow: visible;
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.98);
+    opacity:0; pointer-events:none; transition:opacity 0.32s ease, transform 0.32s ease; z-index:8; width: calc(100% - 56px); max-width: 420px; box-sizing: border-box; overflow: visible;
   }
-
   &::after{ content:''; position:absolute; inset:-6px; border-radius:22px; pointer-events:none; box-shadow:0 12px 32px rgba(29,220,159,0.10), 0 0 16px rgba(29,220,159,0.06); animation:${pulseOutline} 4.4s infinite; z-index:0; }
-
-  &.active {
-    background: linear-gradient(150deg, ${ACCENT} 0%, #19c38c 100%);
-    border-color: transparent;
-    transform: translateY(-8px) scale(1.03);
-    &::after { box-shadow: 0 30px 70px rgba(29,220,159,0.26), 0 0 50px rgba(29,220,159,0.18); animation: ${pulseActive} 2.6s infinite; }
-    .desc-overlay { pointer-events: auto; opacity: 1; transform: translate(-50%,-50%) scale(1); }
-    h3 { opacity: 1; transform: translateY(0); z-index: 6; }
-  }
-
-  @media (max-width: 880px) {
-    padding: 22px 18px; min-height:200px; .desc-overlay { width: calc(100% - 36px); max-width: 360px; }
-  }
+  &.active { background: linear-gradient(150deg, ${ACCENT} 0%, #19c38c 100%); border-color: transparent; transform: translateY(-8px) scale(1.03); &::after { box-shadow: 0 30px 70px rgba(29,220,159,0.26), 0 0 50px rgba(29,220,159,0.18); animation: ${pulseActive} 2.6s infinite; } .desc-overlay { pointer-events: auto; opacity: 1; transform: translate(-50%,-50%) scale(1); } h3 { opacity: 1; transform: translateY(0); z-index: 6; } }
+  @media (max-width: 880px) { padding: 22px 18px; min-height:200px; .desc-overlay { width: calc(100% - 36px); max-width: 360px; } }
 `;
-
-/* Desc panel */
 const DescPanel = styled.div`
-  width:100%;
-  background: rgba(2,8,18,0.98);
-  border-radius:12px;
-  padding:18px 16px;
-  border:1px solid rgba(255,255,255,0.06);
-  color:${LIGHT_TEXT};
-  backdrop-filter: blur(6px);
-  box-shadow:0 14px 34px rgba(0,0,0,0.6);
-  text-align:center;
-  animation: ${floatMicro} 7s ease-in-out infinite;
-  box-sizing: border-box;
-  strong{ font-size:1.05rem; display:block; margin-bottom:10px; color:${NEON}; }
-  p{ color:${MUTED_TEXT}; margin:0; line-height:1.5; font-size:0.96rem; }
+  width:100%; background: rgba(2,8,18,0.98); border-radius:12px; padding:18px 16px; border:1px solid rgba(255,255,255,0.06); color:${LIGHT_TEXT}; backdrop-filter: blur(6px); box-shadow:0 14px 34px rgba(0,0,0,0.6); text-align:center; animation: ${floatMicro} 7s ease-in-out infinite; box-sizing: border-box;
+  strong{ font-size:1.05rem; display:block; margin-bottom:10px; color:${NEON}; } p{ color:${MUTED_TEXT}; margin:0; line-height:1.5; font-size:0.96rem; }
 `;
-
-/* CTA button */
 const PrimaryBtn = styled.button` display:inline-flex; align-items:center; gap:8px; padding:10px 14px; background: linear-gradient(90deg, ${NEON}, ${ACCENT}); border:none; color:${MID_NAVY}; font-weight:700; border-radius:10px; cursor:pointer; box-shadow:0 12px 34px rgba(0,224,179,0.12); &:hover{ transform:translateY(-3px) scale(1.03); } `;
-
-/* FAQ */
 const FAQSection = styled.section` width:100%; max-width:1000px; margin:50px auto 90px; padding:0 20px; display:grid; grid-template-columns:260px 1fr; gap:24px; @media (max-width:880px){ grid-template-columns:1fr; } `;
 const FAQSidebar = styled.div` padding:12px 6px; color:${LIGHT_TEXT}; h4{ margin:6px 0 14px 0; color:${NEON}; } .count{ font-size:1.05rem; color:${LIGHT_TEXT}; margin-bottom:16px; } .empty{ color:${MUTED_TEXT}; padding:30px 10px; background:${MID_NAVY}; border-radius:8px; text-align:center; } `;
 const FAQMain = styled.div``;
 const FAQList = styled.div` display:flex; flex-direction:column; gap:15px; margin-top:10px; `;
 const FAQToggle = styled.button` display:flex; justify-content:space-between; align-items:center; width:100%; padding:18px 24px; background:${MID_NAVY}; color:${LIGHT_TEXT}; border:1px solid rgba(255,255,255,0.08); border-radius:12px; font-size:1.05rem; font-weight:600; cursor:pointer; transition:0.3s; &:hover{ background:#111e2b; color:${NEON}; } .icon{ margin-left:15px; transition:transform 0.3s; transform: rotate(${props => (props.$isOpen ? '180deg' : '0deg')}); } `;
 const FAQAnswer = styled.div` overflow:hidden; max-height:${props => (props.$isOpen ? '500px' : '0')}; transition:max-height 0.4s ease-in-out; padding:${props => (props.$isOpen ? '15px 24px' : '0 24px')}; background: rgba(11, 23, 36, 0.5); border-bottom-left-radius:12px; border-bottom-right-radius:12px; p{ color:${MUTED_TEXT}; margin:0; padding-bottom:${props => (props.$isOpen ? '10px' : '0')}; line-height:1.6; } `;
-
-/* FINAL CTA */
 const FinalCta = styled.section` width:100%; max-width:1100px; margin:50px auto 90px; padding:32px; border-radius:16px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.05)); border:1px solid rgba(0,0,0,0.24); box-shadow:0 14px 40px rgba(2,6,23,0.45); text-align:center; `;
 const CtaTitle = styled.h3` color:${LIGHT_TEXT}; font-size:1.7rem; margin:0 0 10px; `;
 const CtaText = styled.p` color:${MUTED_TEXT}; margin:0 0 18px; `;
@@ -244,7 +208,6 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
   const [openFAQId, setOpenFAQId] = useState(null);
   const [faqs, setFaqs] = useState([]);
 
-  // fallback services if none passed
   const getServiceData = () => {
     if (servicesData && servicesData.length > 0) return servicesData;
     return [
@@ -263,7 +226,7 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
   const onToggleTouch = (id) => setActiveId(prev => (prev === id ? null : id));
   const toggleFAQ = (id) => setOpenFAQId(prevId => (prevId === id ? null : id));
 
-  // robust fetchPublicFaqs
+  // robust public FAQ fetcher with logging
   const fetchPublicFaqs = async () => {
     const log = (...args) => console.debug('[SERVICES:FAQ]', ...args);
 
@@ -282,7 +245,7 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
         try {
           return JSON.parse(text);
         } catch (parseErr) {
-          log('json parse error for', url, parseErr, 'raw:', text.slice(0, 400));
+          log('json parse error for', url, parseErr, 'raw snippet:', text.slice(0, 400));
           return null;
         }
       } catch (err) {
@@ -292,7 +255,6 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
     };
 
     try {
-      // try common endpoints in order
       const r1 = await tryFetch('/api/content/faqs');
       if (Array.isArray(r1)) { setFaqs(r1); return; }
       if (r1 && Array.isArray(r1.data)) { setFaqs(r1.data); return; }
