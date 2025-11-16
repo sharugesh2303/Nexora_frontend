@@ -584,7 +584,7 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
                 </div>
               </div>
             ) : (
-              <div style={{ color: MUTED_TEXT, fontSize: '0.95rem' }}>FAQs below are managed from the Admin panel.</div>
+              <div style={{ color: MUTED_TEXT, fontSize: '0.95rem' }}></div>
             )}
           </FAQSidebar>
 
