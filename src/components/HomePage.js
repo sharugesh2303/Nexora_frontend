@@ -4,14 +4,14 @@ import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faUsers,
-    faEnvelope,
     faClipboardList,
     faStar,
     faClock,
     faMapMarkerAlt,
     faPhone,
     faBars,
-    faTimes
+    faTimes,
+    faEnvelope
 } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
@@ -19,14 +19,11 @@ import axios from 'axios';
 // ====================================================================
 // ========== CONFIG & API ENDPOINTS ==========
 // ====================================================================
-/* 
-   Robust API Base URL detection. 
-   Matches AdminPage config to ensure consistency between Vercel/Localhost.
-*/
 const API_BASE = (process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_API_BASE || 'http://localhost:5000').replace(/\/$/, '');
 
 const MILESTONE_FETCH_URL = `${API_BASE}/api/milestones`;
 const STORY_FETCH_URL = `${API_BASE}/api/stories`;
+const PARTNER_FETCH_URL = `${API_BASE}/api/partners`;
 
 // ====================================================================
 // ========== DESIGN TOKENS ==========
@@ -85,6 +82,12 @@ const glowPulse = keyframes`
     100% { text-shadow: 0 0 8px ${NEON_COLOR}, 0 0 18px rgba(0,224,179,0.5); }
 `;
 
+// Infinite Scroll Keyframe: Moves -50% (covering 2 of the 4 sets)
+const scrollX = keyframes`
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+`;
+
 // ====================================================================
 // ========== STYLED COMPONENTS ==========
 // ====================================================================
@@ -135,15 +138,18 @@ const MobileMenuButton = styled.button`
     @media (max-width: 1024px) { display: block; }
 `;
 
-// --- ANIMATION UTILS ---
-const AnimatedSection = styled.div.attrs(props => ({
-    'data-visible': props.isVisible ? 'true' : 'false',
-}))`
-    opacity: 0; transform: translateY(30px) scale(0.95); will-change: opacity, transform;
-    ${props => props['data-visible'] === 'true' && css`
-        animation: ${rollIn} 0.8s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
-        animation-delay: ${props.delay || '0s'};
-    `}
+// --- ANIMATION UTILS (use transient props: $isVisible, $delay) ---
+const AnimatedSection = styled.div`
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    will-change: opacity, transform;
+
+    ${({ $isVisible, $delay }) =>
+        $isVisible &&
+        css`
+            animation: ${rollIn} 0.8s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+            animation-delay: ${$delay || '0s'};
+        `}
 `;
 
 // --- HERO ---
@@ -221,10 +227,22 @@ const MilestoneIcon = styled.div`
     width: 80px; height: 80px; background: ${NEON_COLOR}; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
     box-shadow: 0 0 20px rgba(0,224,179,0.4);
-    ${props => props.isExperience && css` background: #008060; box-shadow: 0 0 20px rgba(0,128,96,0.4); `}
+
+    ${({ $isExperience }) =>
+        $isExperience &&
+        css`
+            background: #008060;
+            box-shadow: 0 0 20px rgba(0,128,96,0.4);
+        `}
+
     .svg-inline--fa {
         color: ${DARK_BG}; font-size: 36px;
-        ${props => props.isExperience && css` color: ${LIGHT_TEXT}; `}
+
+        ${({ $isExperience }) =>
+            $isExperience &&
+            css`
+                color: ${LIGHT_TEXT};
+            `}
     }
 `;
 
@@ -240,27 +258,81 @@ const MilestoneDescription = styled.p`
     @media (max-width: 480px) { font-size: 0.85rem; }
 `;
 
-// --- PARTNERS ---
-const PartnersSection = styled.section` padding: 60px 20px; text-align: center; `;
+// --- PARTNERS (INFINITE SCROLL MARQUEE - 3 VISIBLE & SHADED SIDES) ---
+const PartnersSection = styled.section`
+    padding: 60px 0;
+    text-align: center;
+    background: transparent;
+    overflow: hidden;
+`;
+
 const PartnersHeader = styled.p`
-    font-size: 0.85rem; color: ${MUTED_TEXT}; text-transform: uppercase;
-    letter-spacing: 0.2em; margin-bottom: 40px; font-weight: 500;
+    font-size: 0.85rem; 
+    color: ${MUTED_TEXT}; 
+    text-transform: uppercase;
+    letter-spacing: 0.2em; 
+    margin-bottom: 50px; 
+    font-weight: 500;
+    padding: 0 20px;
 `;
-const PartnersGrid = styled.div`
-    max-width: 900px; margin: 0 auto; display: flex; justify-content: center;
-    flex-wrap: wrap; gap: 40px 60px;
-    @media (max-width: 480px) { gap: 30px 40px; }
+
+const MarqueeContainer = styled.div`
+    max-width: 800px; 
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 20%,
+        black 80%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 20%,
+        black 80%,
+        transparent 100%
+    );
 `;
-const PartnerLogo = styled.div`
-    display: flex; flex-direction: column; align-items: center; opacity: 0.65;
-    transition: opacity 0.3s; cursor: pointer; max-width: 150px;
-    &:hover { opacity: 1; }
-    .icon-box {
-        width: 45px; height: 45px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
-        display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
-        background: rgba(255,255,255,0.02);
+
+const MarqueeTrack = styled.div`
+    display: flex;
+    gap: 80px;
+    width: max-content;
+    animation: ${scrollX} 35s linear infinite; 
+    
+    &:hover {
+        animation-play-state: paused;
     }
-    p { margin: 0; font-size: 0.75rem; color: ${MUTED_TEXT}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
+
+    @media (max-width: 768px) {
+        gap: 50px;
+        animation-duration: 25s;
+    }
+`;
+
+const PartnerLogoImg = styled.img`
+    height: 70px;
+    width: auto;
+    max-width: 180px; 
+    object-fit: contain;
+    opacity: 1;
+    filter: none;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 8px ${NEON_COLOR});
+    }
+
+    @media (max-width: 768px) {
+        height: 50px;
+    }
 `;
 
 // --- STACK ---
@@ -372,10 +444,12 @@ const Copyright = styled.div`
     text-align: center; font-size: 0.8rem; padding-top: 30px;
     border-top: 1px solid rgba(255,255,255,0.02); margin-top: 50px;
 `;
+
+// NOTE: use transient prop $isOpen here
 const MobileNavMenu = styled.div`
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: ${DARK_BG}; z-index: 1100; display: flex; flex-direction: column; align-items: center;
-    padding-top: 80px; transform: translateX(${props => (props.isOpen ? '0' : '100%')});
+    padding-top: 80px; transform: translateX(${props => (props.$isOpen ? '0' : '100%')});
     transition: transform 0.3s ease-in-out;
     .close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: ${LIGHT_TEXT}; font-size: 2rem; cursor: pointer; }
     span { font-size: 1.5rem; margin: 15px 0; cursor: pointer; color: ${MUTED_TEXT}; &:hover { color: ${NEON_COLOR}; } }
@@ -445,6 +519,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
 
     const [milestones, setMilestones] = useState([]);
     const [clientStories, setClientStories] = useState([]);
+    const [partners, setPartners] = useState([]); 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     // Observers
@@ -453,12 +528,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     const [ctaRef, isCtaVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
 
     // Data for Static Sections
-    const partnerData = [
-        { name: 'SECURIX', role: 'CYBER SECURITY' },
-        { name: 'UMMATI', role: 'TECH & BRANDING' },
-        { name: '33 INCUBATION', role: 'INFRASTRUCTURE' },
-        { name: 'CYBER DEPT', role: 'ACADEMIC PARTNER' },
-    ];
     const stackData = [
         { title: 'Development', tech: 'React, Node.js, Firebase' },
         { title: 'Design', tech: 'Figma, Adobe, Spline' },
@@ -518,10 +587,30 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
             { _id: 'd3', quote: "Delivered a secure and user-friendly system ahead of time.", author: "HOD", role: "Cybersecurity Dept." },
         ];
 
+        // NEW: Fetch Partners
+        const fetchPartners = async () => {
+            try {
+                const res = await axios.get(PARTNER_FETCH_URL);
+                if (cancelled) return;
+                const data = Array.isArray(res.data) ? res.data : [];
+                setPartners(data);
+            } catch (err) {
+                console.error("Error fetching partners", err);
+            }
+        };
+
         // Polling
-        const poll = () => { if (!document.hidden) fetchMilestones(); };
+        const poll = () => { 
+            if (!document.hidden) {
+                fetchMilestones(); 
+                fetchPartners();
+            }
+        };
+
         fetchMilestones();
         fetchStories();
+        fetchPartners(); 
+        
         const intervalId = setInterval(poll, 5000);
         
         return () => { cancelled = true; clearInterval(intervalId); };
@@ -539,6 +628,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
             canvas.height = window.innerHeight * dpr;
             canvas.style.width = `${window.innerWidth}px`;
             canvas.style.height = `${window.innerHeight}px`;
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // reset before scaling
             ctx.scale(dpr, dpr);
         };
         resize();
@@ -556,17 +646,14 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
         }));
 
         const draw = () => {
-            // Update dims for draw loop
             width = window.innerWidth;
             height = window.innerHeight;
 
             ctx.clearRect(0, 0, width, height);
-            // Background Gradient
             const grad = ctx.createLinearGradient(0, 0, 0, height);
             grad.addColorStop(0, '#071025'); grad.addColorStop(1, '#02040a');
             ctx.fillStyle = grad; ctx.fillRect(0, 0, width, height);
 
-            // Stars
             stars.forEach(s => {
                 s.x += s.dx; s.y += s.dy; s.twinkle += 0.05;
                 if(s.y > height) s.y = -5; if(s.x > width) s.x = -5; if(s.x < -5) s.x = width;
@@ -585,15 +672,18 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     const neonWord = 'NEXORACREW';
     const [typedCount, setTypedCount] = useState(0);
     useEffect(() => {
-        const t = setTimeout(() => {
+        let intervalId;
+        const timeoutId = setTimeout(() => {
             let idx = 0;
-            const interval = setInterval(() => {
+            intervalId = setInterval(() => {
                 idx++; setTypedCount(idx);
-                if (idx >= neonWord.length) clearInterval(interval);
+                if (idx >= neonWord.length) clearInterval(intervalId);
             }, 120);
-            return () => clearInterval(interval);
         }, 300);
-        return () => clearTimeout(t);
+        return () => {
+            clearTimeout(timeoutId);
+            if (intervalId) clearInterval(intervalId);
+        };
     }, []);
 
     const handleNavigation = (route) => {
@@ -620,7 +710,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                 </Header>
 
                 {/* MOBILE MENU */}
-                <MobileNavMenu isOpen={isMobileMenuOpen}>
+                <MobileNavMenu $isOpen={isMobileMenuOpen}>
                     <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)}><FontAwesomeIcon icon={faTimes} /></button>
                     {navItems.map(item => (
                         <span key={item} onClick={() => handleNavigation(item)} style={item === 'home' ? {color: NEON_COLOR} : {}}>
@@ -659,9 +749,15 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                             <div style={{ color: MUTED_TEXT, gridColumn: '1/-1', padding: 20 }}>Loading Milestones...</div>
                         ) : (
                             milestones.map((ms, index) => (
-                                <AnimatedSection key={ms.key || index} isVisible={isMilestonesVisible} delay={ms.delay}>
+                                <AnimatedSection
+                                    key={ms.key || index}
+                                    $isVisible={isMilestonesVisible}
+                                    $delay={ms.delay}
+                                >
                                     <MilestoneCard>
-                                        <MilestoneIcon isExperience={ms.isExperience}><FontAwesomeIcon icon={ms.icon} /></MilestoneIcon>
+                                        <MilestoneIcon $isExperience={ms.isExperience}>
+                                            <FontAwesomeIcon icon={ms.icon} />
+                                        </MilestoneIcon>
                                         <CountUpNumber targetNumber={ms.number} isVisible={isMilestonesVisible} delay={ms.delay} />
                                         <MilestoneDescription>{ms.description}</MilestoneDescription>
                                     </MilestoneCard>
@@ -671,17 +767,25 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                     </MilestonesGrid>
                 </MilestonesSection>
 
-                {/* PARTNERS */}
+                {/* PARTNERS (INFINITE SCROLL MARQUEE) */}
                 <PartnersSection>
                     <PartnersHeader>TRUSTED PARTNERS & COLLABORATORS</PartnersHeader>
-                    <PartnersGrid>
-                        {partnerData.map((p, i) => (
-                            <PartnerLogo key={i}>
-                                <div className="icon-box"><FontAwesomeIcon icon={faStar} color={LIGHT_TEXT} /></div>
-                                <p>{p.name}</p><p style={{ color: NEON_COLOR, fontWeight: 600, marginTop: 4 }}>{p.role}</p>
-                            </PartnerLogo>
-                        ))}
-                    </PartnersGrid>
+                    {partners.length > 0 ? (
+                        <MarqueeContainer>
+                            <MarqueeTrack>
+                                {[...partners, ...partners, ...partners, ...partners].map((p, i) => (
+                                    <PartnerLogoImg 
+                                        key={`p-${p._id || i}-${i}`} 
+                                        src={p.logoUrl} 
+                                        alt={p.name} 
+                                        title={p.name}
+                                    />
+                                ))}
+                            </MarqueeTrack>
+                        </MarqueeContainer>
+                    ) : (
+                        <div style={{color: MUTED_TEXT, opacity: 0.5}}>No partners listed yet.</div>
+                    )}
                 </PartnersSection>
 
                 {/* TECH STACK */}
@@ -690,7 +794,12 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                     <StackSubtitle>We use the latest enterprise-grade technologies.</StackSubtitle>
                     <StackGrid>
                         {stackData.map((s, i) => (
-                            <AnimatedSection key={i} isVisible={true} delay={`${(i*0.15).toFixed(2)}s`} style={{opacity:1, transform:'none'}}>
+                            <AnimatedSection
+                                key={i}
+                                $isVisible={true}
+                                $delay={`${(i*0.15).toFixed(2)}s`}
+                                style={{opacity:1, transform:'none'}}
+                            >
                                 <StackCard><h3>{s.title}</h3><p>{s.tech}</p></StackCard>
                             </AnimatedSection>
                         ))}
@@ -702,7 +811,11 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                     <StoriesTitle>CLIENT <span>STORIES</span></StoriesTitle>
                     <StoriesGrid ref={storiesRef}>
                         {clientStories.map((story, i) => (
-                            <StoryCard key={story._id || i} isVisible={isStoriesVisible} delay={`${(i*0.15).toFixed(2)}s`}>
+                            <StoryCard
+                                key={story._id || i}
+                                $isVisible={isStoriesVisible}
+                                $delay={`${(i*0.15).toFixed(2)}s`}
+                            >
                                 <FontAwesomeIcon icon={faStar} className="quote-icon" />
                                 <p className="quote-text">{story.quote}</p>
                                 <div className="author-info">
