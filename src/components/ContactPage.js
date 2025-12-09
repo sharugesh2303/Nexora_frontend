@@ -16,9 +16,13 @@ import {
    API CONFIG
 ======================= */
 const DEPLOYED_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-const API_URL = DEPLOYED_BASE_URL
+const MESSAGE_API_URL = DEPLOYED_BASE_URL
   ? `${DEPLOYED_BASE_URL}/api/messages`
   : "http://localhost:5000/api/messages";
+
+const SCHEDULE_API_URL = DEPLOYED_BASE_URL
+  ? `${DEPLOYED_BASE_URL}/api/schedule`
+  : "http://localhost:5000/api/schedule";
 
 /* =======================
    THEME
@@ -107,7 +111,7 @@ const Nav = styled.nav`
   }
 `;
 
-/* ✅ underline only on hover, not when active */
+/* underline only on hover, not when active */
 const NavItem = styled.button`
   position: relative;
   background: transparent;
@@ -145,7 +149,6 @@ const NavItem = styled.button`
     transition: width 0.25s ease;
   }
 
-  /* underline only on hover */
   &:hover::after {
     width: 100%;
   }
@@ -271,7 +274,45 @@ const InfoRow = styled.div`
 `;
 
 /* =======================
-   FORM
+   MODE TOGGLE (Contact vs Schedule)
+======================= */
+const ModeSwitch = styled.div`
+  display: flex;
+  background: rgba(4,10,25,0.9);
+  border-radius: 999px;
+  padding: 4px;
+  border: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 18px;
+`;
+
+const ModeButton = styled.button`
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: ${({ $active }) =>
+    $active ? `linear-gradient(90deg, ${NEON}, ${ACCENT})` : "transparent"};
+  color: ${({ $active }) => ($active ? "#00130e" : MUTED)};
+  opacity: ${({ $active }) => ($active ? 1 : 0.6)};
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease,
+    transform 0.15s ease;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &:hover {
+    transform: translateY(-1px);
+    opacity: ${({ $active }) => ($active ? 1 : 0.8)};
+  }
+`;
+
+/* =======================
+   FORMS
 ======================= */
 const Form = styled.form`
   display: grid;
@@ -335,6 +376,12 @@ const TextArea = styled.textarea`
     box-shadow: 0 0 14px rgba(0, 255, 198, 0.25),
                 inset 0 0 8px rgba(0, 255, 198, 0.12);
   }
+`;
+
+const InputRow = styled.div`
+  display: flex;
+  gap: 12px;
+  & > * { flex: 1; }
 `;
 
 const Button = styled.button`
@@ -456,37 +503,60 @@ function useStarfield(containerRef, density = 120) {
 ======================= */
 export default function ContactPage({ onNavigate, generalData }) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // mode: "contact" or "schedule"
+  const [mode, setMode] = useState("contact");
+
+  // contact form
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState({ type: "", text: "" });
-  const [form, setForm] = useState({
+  const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
     mobile: "",
     message: "",
   });
 
+  // schedule meeting form
+  const [scheduleForm, setScheduleForm] = useState({
+    name: "",
+    companyName: "",
+    role: "",
+    mobile: "",
+    email: "",
+    message: "",
+    meetingDate: "",
+    meetingTime: "",
+  });
+
   const sectionRef = useRef(null);
   const canvasRef = useStarfield(sectionRef, 130);
 
   const safe = generalData || {};
-
-  const onChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const today = new Date().toISOString().split("T")[0];
 
   const navigateAndClose = (route) => {
     onNavigate?.(route);
     setMenuOpen(false);
   };
 
-  const submit = async (e) => {
+  /* --- handlers --- */
+  const onContactChange = (e) =>
+    setContactForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const onScheduleChange = (e) =>
+    setScheduleForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  /* --- submit contact --- */
+  const submitContact = async (e) => {
     e.preventDefault();
     setSending(true);
     setStatus({ type: "", text: "Sending..." });
 
     try {
-      await axios.post(API_URL, form);
+      await axios.post(MESSAGE_API_URL, contactForm);
       setStatus({ type: "success", text: "✅ Message sent successfully!" });
-      setForm({ name: "", email: "", mobile: "", message: "" });
+      setContactForm({ name: "", email: "", mobile: "", message: "" });
     } catch (err) {
       let msg = "❌ Failed to send. Please check network connection.";
       if (err?.response) {
@@ -505,6 +575,46 @@ export default function ContactPage({ onNavigate, generalData }) {
     }
   };
 
+  /* --- submit schedule --- */
+  const submitSchedule = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    setStatus({ type: "", text: "Sending..." });
+
+    try {
+      await axios.post(SCHEDULE_API_URL, scheduleForm);
+      setStatus({
+        type: "success",
+        text:
+          "✅ Meeting request submitted! We'll contact you soon to confirm.",
+      });
+      setScheduleForm({
+        name: "",
+        companyName: "",
+        role: "",
+        mobile: "",
+        email: "",
+        message: "",
+        meetingDate: "",
+        meetingTime: "",
+      });
+    } catch (error) {
+      const msg =
+        error?.response?.data?.msg ||
+        "❌ Failed to schedule. Please try again.";
+      setStatus({ type: "error", text: msg });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const isScheduleValid =
+    scheduleForm.name &&
+    scheduleForm.companyName &&
+    scheduleForm.email &&
+    scheduleForm.meetingDate &&
+    scheduleForm.meetingTime;
+
   return (
     <>
       <GlobalStyle />
@@ -522,15 +632,13 @@ export default function ContactPage({ onNavigate, generalData }) {
               Projects
             </NavItem>
             <NavItem onClick={() => navigateAndClose("blog")}>Blog</NavItem>
+            {/* 🔥 Team now between Blog and Contact */}
+            <NavItem onClick={() => navigateAndClose("team")}>Team</NavItem>
             <NavItem
               className="active"
               onClick={() => navigateAndClose("contact")}
             >
               Contact
-            </NavItem>
-            <NavItem onClick={() => navigateAndClose("schedule")}>
-              <FontAwesomeIcon icon={faCalendarCheck} />
-              <span>Schedule Meeting</span>
             </NavItem>
           </Nav>
 
@@ -542,7 +650,7 @@ export default function ContactPage({ onNavigate, generalData }) {
           </MobileToggle>
         </Header>
 
-        {/* CONTACT SECTION (stars are scoped inside) */}
+        {/* CONTACT / SCHEDULE SECTION (stars are scoped inside) */}
         <Section ref={sectionRef}>
           <StarLayer ref={canvasRef} aria-hidden />
           <StarGlow />
@@ -552,7 +660,10 @@ export default function ContactPage({ onNavigate, generalData }) {
               <Title>
                 Let’s <span>Connect</span>
               </Title>
-              <Subtitle>Have a project or idea? Reach out to collaborate!</Subtitle>
+              <Subtitle>
+                Choose how you’d like to reach us — a quick message or a
+                scheduled meeting.
+              </Subtitle>
             </TitleWrap>
 
             <Grid>
@@ -580,72 +691,206 @@ export default function ContactPage({ onNavigate, generalData }) {
                   <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
                   <div>
                     <strong>Location</strong>
-                    <small>Palakarai,Tiruchirappalli, Tamil Nadu</small>
+                    <small>Palakarai, Tiruchirappalli, Tamil Nadu</small>
                   </div>
                 </InfoRow>
               </Card>
 
-              {/* RIGHT: FORM */}
+              {/* RIGHT: MODE SWITCH + FORM */}
               <Card>
-                <Form onSubmit={submit} noValidate>
-                  <div>
-                    <Label htmlFor="name">Your Name</Label>
-                    <InputField
-                      id="name"
-                      name="name"
-                      placeholder="John Doe"
-                      value={form.name}
-                      onChange={onChange}
-                      required
-                    />
-                  </div>
+                <ModeSwitch>
+                  <ModeButton
+                    type="button"
+                    $active={mode === "contact"}
+                    onClick={() => {
+                      setMode("contact");
+                      setStatus({ type: "", text: "" });
+                    }}
+                  >
+                    Contact
+                  </ModeButton>
+                  <ModeButton
+                    type="button"
+                    $active={mode === "schedule"}
+                    onClick={() => {
+                      setMode("schedule");
+                      setStatus({ type: "", text: "" });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faCalendarCheck} />
+                    Schedule Meeting
+                  </ModeButton>
+                </ModeSwitch>
 
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <InputField
-                      id="email"
-                      type="email"
-                      name="email"
-                      placeholder="you@example.com"
-                      value={form.email}
-                      onChange={onChange}
-                      required
-                    />
-                  </div>
+                {mode === "contact" ? (
+                  <Form onSubmit={submitContact} noValidate>
+                    <div>
+                      <Label htmlFor="name">Your Name</Label>
+                      <InputField
+                        id="name"
+                        name="name"
+                        placeholder="John Doe"
+                        value={contactForm.name}
+                        onChange={onContactChange}
+                        required
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="mobile">Mobile</Label>
-                    <InputField
-                      id="mobile"
-                      name="mobile"
-                      placeholder="+91 9xxxx xxxxx"
-                      value={form.mobile}
-                      onChange={onChange}
-                      required
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <InputField
+                        id="email"
+                        type="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        value={contactForm.email}
+                        onChange={onContactChange}
+                        required
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="message">Message</Label>
-                    <TextArea
-                      id="message"
-                      name="message"
-                      placeholder="Tell us about your project…"
-                      value={form.message}
-                      onChange={onChange}
-                      required
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="mobile">Mobile</Label>
+                      <InputField
+                        id="mobile"
+                        name="mobile"
+                        placeholder="+91 9xxxx xxxxx"
+                        value={contactForm.mobile}
+                        onChange={onContactChange}
+                        required
+                      />
+                    </div>
 
-                  <Button type="submit" disabled={sending} aria-busy={sending}>
-                    <FontAwesomeIcon icon={faPaperPlane} />
-                    {sending ? "Sending..." : "Send Message"}
-                  </Button>
+                    <div>
+                      <Label htmlFor="message">Message</Label>
+                      <TextArea
+                        id="message"
+                        name="message"
+                        placeholder="Tell us about your project…"
+                        value={contactForm.message}
+                        onChange={onContactChange}
+                        required
+                      />
+                    </div>
 
-                  {status.text && (
-                    <Status type={status.type}>{status.text}</Status>
-                  )}
-                </Form>
+                    <Button type="submit" disabled={sending} aria-busy={sending}>
+                      <FontAwesomeIcon icon={faPaperPlane} />
+                      {sending ? "Sending..." : "Send Message"}
+                    </Button>
+
+                    {status.text && (
+                      <Status type={status.type}>{status.text}</Status>
+                    )}
+                  </Form>
+                ) : (
+                  <Form onSubmit={submitSchedule} noValidate>
+                    <div>
+                      <Label htmlFor="name">Your Name *</Label>
+                      <InputField
+                        id="name"
+                        name="name"
+                        value={scheduleForm.name}
+                        onChange={onScheduleChange}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="companyName">Name of the Company *</Label>
+                      <InputField
+                        id="companyName"
+                        name="companyName"
+                        value={scheduleForm.companyName}
+                        onChange={onScheduleChange}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="role">Your Role in the Company</Label>
+                      <InputField
+                        id="role"
+                        name="role"
+                        value={scheduleForm.role}
+                        onChange={onScheduleChange}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="mobile">Mobile No.</Label>
+                      <InputField
+                        id="mobile"
+                        name="mobile"
+                        value={scheduleForm.mobile}
+                        onChange={onScheduleChange}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email">Email ID *</Label>
+                      <InputField
+                        id="email"
+                        type="email"
+                        name="email"
+                        value={scheduleForm.email}
+                        onChange={onScheduleChange}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="message">
+                        What you want to talk about (Message)
+                      </Label>
+                      <TextArea
+                        id="message"
+                        name="message"
+                        value={scheduleForm.message}
+                        onChange={onScheduleChange}
+                      />
+                    </div>
+
+                    <InputRow>
+                      <div>
+                        <Label htmlFor="meetingDate">Date Choosing *</Label>
+                        <InputField
+                          id="meetingDate"
+                          type="date"
+                          name="meetingDate"
+                          value={scheduleForm.meetingDate}
+                          onChange={onScheduleChange}
+                          min={today}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="meetingTime">Time Deciding *</Label>
+                        <InputField
+                          id="meetingTime"
+                          type="time"
+                          name="meetingTime"
+                          value={scheduleForm.meetingTime}
+                          onChange={onScheduleChange}
+                          required
+                        />
+                      </div>
+                    </InputRow>
+
+                    <Button
+                      type="submit"
+                      disabled={sending || !isScheduleValid}
+                      aria-busy={sending}
+                    >
+                      <FontAwesomeIcon icon={faCalendarCheck} />
+                      {sending ? "Sending..." : "Submit Request"}
+                    </Button>
+
+                    {status.text && (
+                      <Status type={status.type}>{status.text}</Status>
+                    )}
+                  </Form>
+                )}
               </Card>
             </Grid>
           </SectionInner>

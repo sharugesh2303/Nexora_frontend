@@ -14,9 +14,7 @@ import ProjectsPage from './components/ProjectsPage';
 import ProjectDetailPage from './components/ProjectDetailPage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsAndConditions from './components/TermsAndConditions';
-
-// ✅ ADD THIS IMPORT
-import ScheduleMeetingPage from './components/ScheduleMeetingPage';
+import TeamPage from './components/TeamPage'; // ⭐ Team page
 
 // --- Global Styles ---
 const GlobalStyle = createGlobalStyle`
@@ -35,12 +33,12 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 // ============================================================
-// ⭐ FIXED: API BASE URL (works with your Vercel env variable)
+// API BASE URL
 // ============================================================
 const API_BASE_URL =
     process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
-// ⭐ GLOBAL AXIOS CONFIG (required to fix milestones error)
+// global axios base
 axios.defaults.baseURL = API_BASE_URL;
 
 // For content:
@@ -134,83 +132,101 @@ function App() {
                 {/* Home */}
                 <Route 
                     path="/" 
-                    element={<HomePage 
-                        onNavigate={handleNavigate} 
-                        homeData={content.home}
-                        servicesData={content.services.slice(0, 6)} 
-                        generalData={content.general}
-                    />} 
+                    element={
+                        <HomePage 
+                            onNavigate={handleNavigate} 
+                            homeData={content.home}
+                            servicesData={content.services.slice(0, 6)} 
+                            generalData={content.general}
+                        />
+                    } 
                 />
                 
                 {/* About */}
                 <Route 
                     path="/about" 
-                    element={<AboutPage 
-                        onNavigate={handleNavigate} 
-                        aboutData={content.about}
-                        teamData={content.team}
-                        fixedRoles={FIXED_ROLES_HIERARCHY}
-                    />} 
+                    element={
+                        <AboutPage 
+                            onNavigate={handleNavigate} 
+                            aboutData={content.about}
+                            teamData={content.team}
+                            fixedRoles={FIXED_ROLES_HIERARCHY}
+                        />
+                    } 
+                />
+
+                {/* Team */}
+                <Route
+                    path="/team"
+                    element={
+                        <TeamPage
+                            onNavigate={handleNavigate}
+                            teamData={content.team}
+                            fixedRoles={FIXED_ROLES_HIERARCHY}
+                        />
+                    }
                 />
 
                 {/* Services */}
                 <Route 
                     path="/services" 
-                    element={<ServicesPage 
-                        onNavigate={handleNavigate} 
-                        servicesData={content.services}
-                    />} 
+                    element={
+                        <ServicesPage 
+                            onNavigate={handleNavigate} 
+                            servicesData={content.services}
+                        />
+                    } 
                 />
 
-                {/* Contact */}
+                {/* Contact (includes Schedule Meeting mode now) */}
                 <Route 
                     path="/contact" 
-                    element={<ContactPage 
-                        onNavigate={handleNavigate} 
-                        generalData={content.general}
-                    />} 
+                    element={
+                        <ContactPage 
+                            onNavigate={handleNavigate} 
+                            generalData={content.general}
+                        />
+                    } 
                 />
 
                 {/* Blog */}
                 <Route 
                     path="/blog" 
-                    element={<BlogPage 
-                        onNavigate={handleNavigate} 
-                        posts={content.posts}
-                    />} 
+                    element={
+                        <BlogPage 
+                            onNavigate={handleNavigate} 
+                            posts={content.posts}
+                        />
+                    } 
                 />
                 <Route 
                     path="/blog/:id" 
-                    element={<PostPage 
-                        onNavigate={handleNavigate} 
-                        posts={content.posts}
-                    />} 
+                    element={
+                        <PostPage 
+                            onNavigate={handleNavigate} 
+                            posts={content.posts}
+                        />
+                    } 
                 />
 
                 {/* Projects */}
                 <Route 
                     path="/projects" 
-                    element={<ProjectsPage 
-                        onNavigate={handleNavigate} 
-                        projects={content.projects}
-                    />} 
+                    element={
+                        <ProjectsPage 
+                            onNavigate={handleNavigate} 
+                            projects={content.projects}
+                        />
+                    } 
                 />
                 <Route 
                     path="/projects/:id" 
-                    element={<ProjectDetailPage 
-                        onNavigate={handleNavigate} 
-                        projects={content.projects}
-                    />} 
-                />
-
-                {/* ✅ Schedule Meeting */}
-                <Route
-                    path="/schedule"
                     element={
-                        <ScheduleMeetingPage
-                            onNavigate={handleNavigate}
+                        <ProjectDetailPage 
+                            onNavigate={handleNavigate} 
+                            projects={content.projects}
                         />
-                    }
+                    } 
                 />
 
                 {/* Legal */}

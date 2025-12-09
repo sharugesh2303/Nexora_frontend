@@ -1,11 +1,11 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+// src/components/AboutPage.jsx
+import React, { useEffect, useRef } from 'react';
 import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faBullseye, faEye, faRocket, faPencilAlt,
-    faGlobe, faLink, faAddressCard, faCalendarCheck
+    faCalendarCheck
 } from '@fortawesome/free-solid-svg-icons';
-import { faLinkedin, faGithub, faInstagram, faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
 
 /* ---------------- THEME ---------------- */
 const NEON_COLOR = '#00e0b3';
@@ -82,6 +82,11 @@ const Header = styled.header`
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255,255,255,0.04);
     z-index: 10;
+
+    @media (max-width: 780px) {
+        padding: 12px 20px;
+        gap: 18px;
+    }
 `;
 
 const Logo = styled.h1`
@@ -229,94 +234,6 @@ const MVJCard = styled.div`
     p { color: ${TEXT_MUTED}; line-height: 1.55; }
 `;
 
-/* Team Section */
-const TeamContainer = styled.div`
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 46px;
-`;
-
-/* Horizontal row for members (axis X) */
-const MembersRow = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 120px;                /* HUGE gap between each member */
-    overflow-x: auto;
-    padding: 40px 32px 28px;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    align-items: flex-start;
-
-    &::-webkit-scrollbar {
-        height: 6px;
-    }
-    &::-webkit-scrollbar-track {
-        background: rgba(15,23,42,0.6);
-    }
-    &::-webkit-scrollbar-thumb {
-        background: rgba(148,163,184,0.7);
-        border-radius: 999px;
-    }
-`;
-
-/* avatar circle */
-const MEMBER_CIRCLE_SIZE = '220px';
-
-const TeamMemberCard = styled.div`
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-
-    padding-top: calc(${MEMBER_CIRCLE_SIZE} / 2 + 26px);
-    margin-top: calc(${MEMBER_CIRCLE_SIZE} / 2 + 10px);
-
-    width: 260px;
-    flex: 0 0 260px;
-
-    .image-wrapper {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: ${MEMBER_CIRCLE_SIZE};
-        height: ${MEMBER_CIRCLE_SIZE};
-        border-radius: 50%;
-        overflow: hidden;
-        border: 4px solid ${NEON_COLOR};
-        box-shadow: 0 0 20px rgba(0,224,179,0.6);
-        background: #020617;
-    }
-
-    .meta {
-        background: rgba(15,23,42,0.82);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255,255,255,0.09);
-        border-radius: 14px;
-        padding: 20px 18px 22px;
-        text-align: center;
-        box-shadow: 0 10px 32px rgba(0,0,0,0.55);
-        width: 100%;
-
-        h3 { 
-            margin: 8px 0 4px; 
-        }
-        span { 
-            color: ${NEON_COLOR}; 
-            font-size: 0.95rem;
-        }
-        p { 
-            color: ${TEXT_MUTED}; 
-            line-height: 1.45; 
-            margin-top: 10px;
-            word-break: break-word;
-            white-space: normal;
-        }
-    }
-`;
-
 /* Footer */
 const Footer = styled.footer`
     padding: 28px 36px;
@@ -326,47 +243,20 @@ const Footer = styled.footer`
     margin-top: 60px;
 `;
 
-/* Icons */
-const PLATFORM_ICONS = {
-    linkedin: faLinkedin,
-    github: faGithub,
-    instagram: faInstagram,
-    twitter: faTwitter,
-    facebook: faFacebook,
-    website: faGlobe,
-    default: faLink
-};
-
-const getSocialIcon = (platform) => {
-    const lower = (platform || '').toLowerCase();
-    if (lower.includes('linkedin')) return PLATFORM_ICONS.linkedin;
-    if (lower.includes('github')) return PLATFORM_ICONS.github;
-    if (lower.includes('instagram')) return PLATFORM_ICONS.instagram;
-    if (lower.includes('twitter')) return PLATFORM_ICONS.twitter;
-    if (lower.includes('facebook')) return PLATFORM_ICONS.facebook;
-    if (lower.includes('web') || lower.includes('site')) return PLATFORM_ICONS.website;
-    return PLATFORM_ICONS.default;
-};
-
+/* Section icons */
 const SECTION_ICONS = {
     Mission: faBullseye,
     Vision: faEye,
     Journey: faRocket,
-    Custom: faAddressCard,
-    Text: faAddressCard,
+    Custom: faPencilAlt,
+    Text: faPencilAlt,
     default: faPencilAlt
 };
 
 const getSectionIcon = (type) => SECTION_ICONS[type] || SECTION_ICONS.default;
 
-/* Sorting roles inside a group: use group then subGroup */
-const customRoleSorter = (a, b) => {
-    if (a.group !== b.group) return a.group - b.group;
-    return a.subGroup - b.subGroup;
-};
-
 /* ---------------- COMPONENT ---------------- */
-const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixedRoles = [] }) => {
+const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
     const canvasRef = useRef(null);
 
     /* Star animation */
@@ -450,139 +340,6 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
         ? safeAboutData.sections.filter(s => s.type === 'Custom' || s.type === 'Text')
         : [];
 
-    /* -------- GROUP MEMBERS BY GROUP (IGNORE SUBGROUP) -------- */
-    const groupedTeamByGroup = useMemo(() => {
-        const roleMetaMap = fixedRoles.reduce((acc, r) => {
-            acc[r.name] = r;
-            return acc;
-        }, {});
-
-        const groupLabelMap = fixedRoles.reduce((acc, r) => {
-            if (r.group != null) {
-                if (!acc[r.group]) {
-                    acc[r.group] = r.groupLabel || r.groupName || null;
-                }
-            }
-            return acc;
-        }, {});
-
-        const groups = {};
-
-        teamData.forEach((member) => {
-            const roleName = member.role || 'Unassigned';
-            const meta = roleMetaMap[roleName] || {};
-            const groupId = meta.group != null ? meta.group : 999;
-            const subGroup = meta.subGroup != null ? meta.subGroup : 0;
-
-            if (!groups[groupId]) {
-                groups[groupId] = {
-                    groupId,
-                    members: []
-                };
-            }
-
-            groups[groupId].members.push({
-                ...member,
-                _sortGroup: groupId,
-                _sortSubGroup: subGroup
-            });
-        });
-
-        const groupArray = Object.values(groups).sort((a, b) => a.groupId - b.groupId);
-
-        groupArray.forEach((g) => {
-            g.members.sort((m1, m2) =>
-                customRoleSorter(
-                    { group: m1._sortGroup, subGroup: m1._sortSubGroup },
-                    { group: m2._sortGroup, subGroup: m2._sortSubGroup }
-                )
-            );
-
-            // compute label:
-            const customLabel = groupLabelMap[g.groupId];
-            if (customLabel) {
-                g.label = customLabel;
-            } else if (g.groupId === 999) {
-                g.label = ''; // NO "Group 999"
-            } else {
-                g.label = `Group ${g.groupId}`;
-            }
-        });
-
-        return groupArray;
-    }, [teamData, fixedRoles]);
-
-    /* Render Team Group (by group, horizontal row) */
-    const renderTeamGroup = (group) => (
-        <div key={group.groupId} className="animate-in">
-            {group.label && (
-                <h3
-                    style={{
-                        color: NEON_COLOR,
-                        margin: '12px 0 6px',
-                        fontSize: '1.4rem',
-                        textShadow: `0 0 8px ${NEON_COLOR}`
-                    }}
-                >
-                    {group.label}
-                </h3>
-            )}
-
-            <MembersRow>
-                {group.members.map((member, idx) => (
-                    <TeamMemberCard key={idx} className="animate-in">
-                        <div className="image-wrapper">
-                            <img
-                                src={
-                                    member.img ||
-                                    `https://via.placeholder.com/220x220/0f172a/00e0b3?text=Member`
-                                }
-                                alt={member.name}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover',
-                                    transform: `translate(${member.imgOffsetX || 0}%, ${
-                                        member.imgOffsetY || 0
-                                    }%) scale(${member.imgScale || 1})`
-                                }}
-                            />
-                        </div>
-
-                        <div className="meta">
-                            <h3>{member.name}</h3>
-                            <span>{member.role}</span>
-                            <p>{member.bio}</p>
-
-                            {member.social?.length > 0 && (
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        gap: 12,
-                                        marginTop: 10,
-                                        justifyContent: 'center'
-                                    }}
-                                >
-                                    {member.social.map((link, i) => (
-                                        <a
-                                            key={i}
-                                            href={link.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ color: TEXT_MUTED }}
-                                        >
-                                            <FontAwesomeIcon icon={getSocialIcon(link.platform)} />
-                                        </a>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </TeamMemberCard>
-                ))}
-            </MembersRow>
-        </div>
-    );
-
     return (
         <>
             <GlobalStyle />
@@ -594,22 +351,22 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
                     <Logo onClick={() => onNavigate('home')}>NEXORA</Logo>
                     <NavGroup>
                         <span onClick={() => onNavigate('home')}>Home</span>
-                        <span onClick={() => onNavigate('about')} style={{ color: NEON_COLOR }}>
+                        <span
+                            onClick={() => onNavigate('about')}
+                            style={{ color: NEON_COLOR }}
+                        >
                             About
                         </span>
                         <span onClick={() => onNavigate('services')}>Services</span>
                         <span onClick={() => onNavigate('projects')}>Projects</span>
                         <span onClick={() => onNavigate('blog')}>Blog</span>
+                        <span onClick={() => onNavigate('team')}>Team</span>
                         <span onClick={() => onNavigate('contact')}>Contact</span>
-
                         <span
                             onClick={() => onNavigate('schedule')}
-                            style={{ color: NEON_COLOR }}
+                            style={{ color: NEON_COLOR, display: 'inline-flex', alignItems: 'center', gap: 6 }}
                         >
-                            <FontAwesomeIcon
-                                icon={faCalendarCheck}
-                                style={{ marginRight: 5 }}
-                            />
+                            <FontAwesomeIcon icon={faCalendarCheck} />
                             Schedule Meeting
                         </span>
                     </NavGroup>
@@ -681,22 +438,6 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {}, teamData = [], fixed
                         </p>
                     </Section>
                 ))}
-
-                {/* TEAM */}
-                {groupedTeamByGroup.length > 0 && (
-                    <Section>
-                        <SectionHeader>
-                            Meet Our <span>Team</span>
-                        </SectionHeader>
-                        <SectionSubtitle>
-                            The innovators, engineers, creators, and visionaries behind NEXORA.
-                        </SectionSubtitle>
-
-                        <TeamContainer>
-                            {groupedTeamByGroup.map(renderTeamGroup)}
-                        </TeamContainer>
-                    </Section>
-                )}
 
                 {/* CTA BUTTON */}
                 <Section style={{ textAlign: 'center' }}>
