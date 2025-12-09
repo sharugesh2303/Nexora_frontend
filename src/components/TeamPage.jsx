@@ -328,7 +328,7 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [] }) => 
           <BrandRow onClick={() => handleNav("home")}>
             
             <BrandText>
-              NEXORA<span></span>
+              NEXORA<span>CREW</span>
             </BrandText>
           </BrandRow>
 
