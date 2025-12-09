@@ -912,7 +912,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {}, homeData = {} }) =>
                         </a>
                     </div>
                     <div style={{ color: MUTED_TEXT }}>
-                        © NEXORACREW Team, Palakarai, Tiruchirappalli, Tamil Nadu — All Rights Reserved.
+                        © NEXORACREW Team, Palakarai, Tiruchirappalli, Tamil Nadu
                     </div>
                 </Footer>
             </PageLayer>
