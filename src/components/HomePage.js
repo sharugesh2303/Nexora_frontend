@@ -34,6 +34,7 @@ const VERY_DARK_BG = '#02040a'; // For sections like Footer
 // --- API Configuration ---
 const API_BASE_URL = API_CONFIG_KEY.replace(/\/$/, '');
 const MILESTONE_FETCH_URL = API_BASE_URL ? `${API_BASE_URL}/api/milestones` : '/api/milestones';
+const STORY_FETCH_URL = API_BASE_URL ? `${API_BASE_URL}/api/stories` : '/api/stories'; // <--- NEW ENDPOINT
 
 /* -------------------------
     GLOBAL STYLE
@@ -949,6 +950,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {}, homeData = {} }) =>
     const dprReference = useRef(typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1);
 
     const [milestones, setMilestones] = useState([]);
+    const [clientStories, setClientStories] = useState([]); // <--- NEW STATE FOR STORIES
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     // Intersection Observers for new sections
@@ -1004,6 +1006,35 @@ const HomePage = ({ onNavigate = () => {}, generalData = {}, homeData = {} }) =>
             clearInterval(intervalId);
             document.removeEventListener('visibilitychange', onVis);
         };
+    }, []);
+
+    /* ---------- fetch client stories (NEW) ---------- */
+    useEffect(() => {
+        const fetchStories = async () => {
+            try {
+                const res = await axios.get(STORY_FETCH_URL);
+                const data = Array.isArray(res.data) ? res.data : [];
+                if (data.length > 0) {
+                    setClientStories(data);
+                } else {
+                    // Fallback data if API returns empty
+                    setClientStories([
+                       { _id: 'default1', quote: "Nexoracrew built a fully functional digital canteen portal with modern UI. Excellent work.", author: "Principal", role: "JJ College of Engineering" },
+                       { _id: 'default2', quote: "A strong team with dedication and talent. We truly appreciate their passion.", author: "Team Securix", role: "Security Partner" },
+                       { _id: 'default3', quote: "The Nexoracrew team delivered a secure and user-friendly payslip system ahead of time.", author: "HOD", role: "Cybersecurity Dept." },
+                    ]);
+                }
+            } catch (err) {
+                console.error('Could not fetch stories:', err);
+                // Fallback data on error
+                setClientStories([
+                    { _id: 'default1', quote: "Nexoracrew built a fully functional digital canteen portal with modern UI. Excellent work.", author: "Principal", role: "JJ College of Engineering" },
+                    { _id: 'default2', quote: "A strong team with dedication and talent. We truly appreciate their passion.", author: "Team Securix", role: "Security Partner" },
+                    { _id: 'default3', quote: "The Nexoracrew team delivered a secure and user-friendly payslip system ahead of time.", author: "HOD", role: "Cybersecurity Dept." },
+                 ]);
+            }
+        };
+        fetchStories();
     }, []);
 
     /* ---------- Canvas / stars drawing ---------- */
@@ -1272,12 +1303,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {}, homeData = {} }) =>
         { title: 'Marketing', tech: 'Analytics, SEO Suite' },
     ];
 
-    const clientStories = [
-        { quote: "Nexoracrew built a fully functional digital canteen portal with modern UI. Excellent work.", author: "Principal", role: "JJ College of Engineering" },
-        { quote: "A strong team with dedication and talent. We truly appreciate their passion.", author: "Team Securix", role: "Security Partner" },
-        { quote: "The Nexoracrew team delivered a secure and user-friendly payslip system ahead of time.", author: "HOD", role: "Cybersecurity Dept." },
-    ];
-
     /* --- Mobile Menu component definition --- */
     const MobileNavMenu = styled.div`
         position: fixed;
@@ -1464,7 +1489,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {}, homeData = {} }) =>
                     <StoriesGrid ref={storiesRef}>
                         {clientStories.map((story, index) => (
                             <StoryCard
-                                key={index}
+                                key={story._id || index}
                                 isVisible={isStoriesVisible}
                                 delay={`${(index * 0.15).toFixed(2)}s`}
                             >
