@@ -15,6 +15,7 @@ import ProjectDetailPage from './components/ProjectDetailPage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsAndConditions from './components/TermsAndConditions';
 import TeamPage from './components/TeamPage'; // ⭐ Team page
+import ProgressPage from './components/ProgressPage'; // ⭐ NEW – Strategic Analysis page
 
 // --- Global Styles ---
 const GlobalStyle = createGlobalStyle`
@@ -113,7 +114,7 @@ function App() {
 
     const handleNavigate = (path) => {
         if (path === 'home') navigate('/');
-        else navigate(`/${path}`);
+        else navigate(`/${path}`);   // "progress" -> "/progress"
     };
 
     if (loading) {
@@ -167,6 +168,16 @@ function App() {
                     }
                 />
 
+                {/* Progress / Strategic Analysis */}
+                <Route
+                    path="/progress"
+                    element={
+                        <ProgressPage
+                            onNavigate={handleNavigate}
+                        />
+                    }
+                />
+
                 {/* Services */}
                 <Route 
                     path="/services" 
@@ -178,7 +189,7 @@ function App() {
                     } 
                 />
 
-                {/* Contact (includes Schedule Meeting mode now) */}
+                {/* Contact */}
                 <Route 
                     path="/contact" 
                     element={

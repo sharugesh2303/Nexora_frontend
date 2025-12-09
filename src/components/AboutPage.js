@@ -361,6 +361,10 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                         <span onClick={() => onNavigate('projects')}>Projects</span>
                         <span onClick={() => onNavigate('blog')}>Blog</span>
                         <span onClick={() => onNavigate('team')}>Team</span>
+
+                        {/* NEW PROGRESS NAV ITEM */}
+                        <span onClick={() => onNavigate('progress')}>Progress</span>
+
                         <span onClick={() => onNavigate('contact')}>Contact</span>
                         <span
                             onClick={() => onNavigate('schedule')}
