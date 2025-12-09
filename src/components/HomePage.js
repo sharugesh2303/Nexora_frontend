@@ -471,6 +471,9 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
         location: generalData?.location || 'JJ College of Engineering, Trichy',
     };
 
+    // --- NAVIGATION LIST ---
+    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+
     // --- FETCH DATA ---
     useEffect(() => {
         let cancelled = false;
@@ -607,7 +610,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                 <Header>
                     <Logo onClick={() => handleNavigation('home')}>NEXORACREW</Logo>
                     <NavGroup>
-                        {['home','about','services','projects','blog','contact'].map(item => (
+                        {navItems.map(item => (
                             <span key={item} onClick={() => handleNavigation(item)} style={item === 'home' ? {color: NEON_COLOR} : {}}>
                                 {item.charAt(0).toUpperCase() + item.slice(1)}
                             </span>
@@ -619,7 +622,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                 {/* MOBILE MENU */}
                 <MobileNavMenu isOpen={isMobileMenuOpen}>
                     <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)}><FontAwesomeIcon icon={faTimes} /></button>
-                    {['home','about','services','projects','blog','contact'].map(item => (
+                    {navItems.map(item => (
                         <span key={item} onClick={() => handleNavigation(item)} style={item === 'home' ? {color: NEON_COLOR} : {}}>
                             {item.charAt(0).toUpperCase() + item.slice(1)}
                         </span>
@@ -735,8 +738,8 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                         <FooterColumn>
                             <h4>Quick Links</h4>
                             <ul>
-                                {['Home','About Us','Services','Careers','Contact'].map((l,i) => (
-                                    <li key={i}><a onClick={() => handleNavigation(l.split(' ')[0].toLowerCase())}>{l}</a></li>
+                                {['Home','About','Team','Progress','Contact'].map((l,i) => (
+                                    <li key={i}><a onClick={() => handleNavigation(l.toLowerCase())}>{l}</a></li>
                                 ))}
                             </ul>
                         </FooterColumn>
