@@ -909,9 +909,13 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <BoxTitle>Strengths</BoxTitle>
                                     </HeaderRow>
                                     <BulletList>
-                                        <li>Agile, student-led expert team</li>
-                                        <li>Cost-effective enterprise solutions</li>
-                                        <li>Strong incubation support</li>
+                                        <li>Human-centered design approach — Users-ah focus pannina products</li>
+                                        <li>Strong UI/UX + Development expertise</li>
+                                        <li> Customized digital solutions (web, app, SaaS)</li>
+                                        <li> Fast execution & modern workflows</li>
+                                        <li>Innovation-focused team</li>
+                                        <li>Quality-first development → High performance, scalability</li>
+                                        <li>Clear brand identity → “Meaningful technology”</li>
                                     </BulletList>
                                 </StrengthBox>
 
@@ -923,8 +927,11 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <BoxTitle>Weaknesses</BoxTitle>
                                     </HeaderRow>
                                     <BulletList>
-                                        <li>Limited initial capital (Bootstrapped)</li>
-                                        <li>Balancing academics with delivery</li>
+                                        <li>Brand awareness still developing </li>
+                                        <li>Limited portfolio compared to big agencies</li>
+                                        <li>Small team size → higher workload during multiple projects</li>
+                                        <li>Scaling challenges when project volume increases</li>
+                                        <li>Depends on digital marketing consistency</li>
                                     </BulletList>
                                 </WeaknessBox>
 
@@ -936,8 +943,12 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <BoxTitle>Opportunities</BoxTitle>
                                     </HeaderRow>
                                     <BulletList>
-                                        <li>Expanding AI &amp; IoT markets</li>
-                                        <li>Partnerships with TANSIM &amp; DPIIT</li>
+                                        <li>High demand for websites, mobile apps & SaaS platforms</li>
+                                        <li>Global freelancing & outsourcing market growth</li>
+                                        <li>AI automation & tech integration opportunities</li>
+                                        <li>Cloud technology demand increasing</li>
+                                        <li>Social media presence can boost brand visibility</li>
+                                        <li> Corporate branding, design, consulting areas expandable</li>
                                     </BulletList>
                                 </OpportunityBox>
 
@@ -949,8 +960,11 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <BoxTitle>Threats</BoxTitle>
                                     </HeaderRow>
                                     <BulletList>
-                                        <li>High market saturation</li>
-                                        <li>Rapid tech obsolescence</li>
+                                        <li> Heavy competition in tech & IT service industry</li>
+                                        <li>Price competition from freelancers & low-cost agencies</li>
+                                        <li> Fast-changing technologies → continuous skill upgrade needed</li>
+                                        <li>Client expectations increasing day by day</li>
+                                        <li>Economic slowdowns affecting project budgets</li>
                                     </BulletList>
                                 </ThreatBox>
                             </Grid>
