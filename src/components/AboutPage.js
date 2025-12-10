@@ -547,12 +547,13 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
         {
             type: 'Mission',
             title: 'Our Mission',
-            body: safeAboutData.mission || 'Empower creativity through AI and innovation.'
+            body: safeAboutData.mission || 'Our mission is to help businesses grow through powerful digital solutions.'
+
         },
         {
             type: 'Vision',
             title: 'Our Vision',
-            body: safeAboutData.vision || 'To become the most impactful student-led innovation hub.'
+            body: safeAboutData.vision || '💫To become a leading force in digital innovation by creating meaningful, human-centered technology that transforms businesses and shapes the future of digital experiences.'
         },
         {
             type: 'Journey',
