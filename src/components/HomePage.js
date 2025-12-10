@@ -31,29 +31,33 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
 
-// --- Placeholder/External Tech Logos (for demonstration based on your image) ---
-// Note: You should replace these with actual local image imports for best performance
+// --- Placeholder/External Tech Logos (FINAL CORRECTED URLs) ---
 const TECH_LOGOS = {
-  // Provided in your image
+  // Mobile/Web
   'React Native': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg',
-  'Flutter': 'https://upload.wikimedia.org/wikipedia/commons/4/44/Flutter_logo.svg',
-  'Swift': 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Swift_logo.svg',
-  'Kotlin': 'https://upload.wikimedia.org/wikipedia/commons/7/74/Kotlin-logo.svg',
-  // Design tools
-  'Figma': 'https://www.vectorlogo.zone/logos/figma/figma-icon.svg',
-  'Canva': 'https://www.vectorlogo.zone/logos/canva/canva-icon.svg',
-  'Adobe Suite': 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Adobe_Inc.-logo.svg',
-  'Spline': 'https://spline.design/icon.png', // Using Spline's icon as a placeholder
-  // AI/ML Tools
-  'Gemini': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Google_gemini_logo.svg/100px-Google_gemini_logo.svg.png',
-  'OpenAI': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/120px-OpenAI_Logo.svg.png',
-  'Python': 'https://www.vectorlogo.zone/logos/python/python-icon.svg',
-  // General Tech
+  'Flutter': 'https://www.vectorlogo.zone/logos/flutterio/flutterio-icon.svg',
+  // CORRECTED: Replaced non-working Swift URL with a direct link to the logo on a stable CDN
+  'Swift': 'https://cdn.iconscout.com/icon/free/png-256/swift-15-283844.png', 
+  'Kotlin': 'https://www.vectorlogo.zone/logos/kotlinlang/kotlinlang-icon.svg',
+  // Web/Backend
   'Node.js': 'https://www.vectorlogo.zone/logos/nodejs/nodejs-icon.svg',
   'MongoDB': 'https://www.vectorlogo.zone/logos/mongodb/mongodb-icon.svg',
   'AWS': 'https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg',
+  // Blockchain
   'Solidity': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Solidity_logo.svg',
-  'Ethereum': 'https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2021.svg',
+  'Ethereum': 'https://www.vectorlogo.zone/logos/ethereum/ethereum-icon.svg',
+  // AI/ML Tools
+  // PREVIOUSLY CORRECTED: Replaced non-working Gemini URL
+  'Gemini': 'https://img.shields.io/badge/Google_Gemini-60A5FA?style=flat&logo=google-gemini&logoColor=white', 
+  'OpenAI': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/120px-OpenAI_Logo.svg.png',
+  'Python': 'https://www.vectorlogo.zone/logos/python/python-icon.svg',
+  // Design tools
+  'Figma': 'https://www.vectorlogo.zone/logos/figma/figma-icon.svg',
+  'Canva': 'https://www.vectorlogo.zone/logos/canva/canva-icon.svg',
+  // PREVIOUSLY CORRECTED: Adobe Creative Cloud
+  'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg', 
+  // CORRECTED: Replaced non-working Spline URL with a high-quality icon from a stable source
+  'Spline': 'https://raw.githubusercontent.com/SplineTool/spline-tool-logo/main/logo.png', 
 };
 
 // ====================================================================
@@ -711,7 +715,7 @@ const TechName = styled.h4`
 // --- END NEW STYLES FOR TECH GRID ---
 
 
-// --- OLD STACK STYLES (Kept for compatibility, though not used in the final design structure) ---
+// --- OLD STACK STYLES (Retained but unused in final dynamic structure) ---
 const StackGrid = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -731,7 +735,6 @@ const StackCard = styled.div`
   transition: all 0.3s ease;
   cursor: default;
   
-  // Custom styling for the single focused card (like AI/ML)
   ${({ $isSingle }) => 
     $isSingle && css`
       max-width: 800px;
@@ -982,7 +985,16 @@ const TechCard = ({ tech, name, delay, isVisible }) => (
     <TechCardInner>
       <TechIconBox>
         {tech.logoUrl ? (
-          <img src={tech.logoUrl} alt={name} />
+          // Use inline style for logo image to handle different logo types (SVG, shields.io PNG/SVG)
+          <img 
+            src={tech.logoUrl} 
+            alt={name} 
+            style={{ 
+              width: name === 'Gemini' ? '120%' : '100%', // Adjust width for the shield logo to look better
+              height: name === 'Gemini' ? 'auto' : '100%',
+              objectFit: name === 'Gemini' ? 'contain' : 'contain', 
+            }}
+          />
         ) : (
           <FontAwesomeIcon icon={tech.icon || faCode} size="3x" color={NEON_COLOR} />
         )}
@@ -1060,8 +1072,8 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   const [clientStories, setClientStories] = useState([]);
   const [partners, setPartners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Setting default to 'ai' as requested/shown in the active tab image
-  const [activeStackTab, setActiveStackTab] = useState('ai'); 
+  // Setting default to 'design' based on the active tab in the visible images
+  const [activeStackTab, setActiveStackTab] = useState('design'); 
 
   const [milestonesRef, isMilestonesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -100px 0px' });
   const [storiesRef, isStoriesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
@@ -1074,6 +1086,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
       { key: 'web', label: 'Web', icon: faCode },
       { key: 'mobile', label: 'Mobile', icon: faMobileAlt },
       { key: 'blockchain', label: 'Blockchain', icon: faProjectDiagram },
+      // REMOVED: Game tab (as per your last explicit request)
       { key: 'ai', label: 'AI/ML', icon: faMagic },
       { key: 'design', label: 'Design', icon: faPaintBrush },
       { key: 'marketing', label: 'Marketing', icon: faBullhorn },
@@ -1097,7 +1110,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
         { name: 'Hyperledger', icon: faProjectDiagram },
         { name: 'Web3.js', icon: faCode },
       ],
-      // UPDATED: AI/ML Stack now uses TechCard format
       ai: [
         { name: 'Gemini', logoUrl: TECH_LOGOS['Gemini'] },
         { name: 'OpenAI', logoUrl: TECH_LOGOS['OpenAI'] },
@@ -1110,7 +1122,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
         { name: 'Adobe Suite', logoUrl: TECH_LOGOS['Adobe Suite'] },
         { name: 'Spline (3D)', logoUrl: TECH_LOGOS['Spline'] },
       ],
-      // UPDATED: Marketing Stack now uses TechCard format
       marketing: [
         { name: 'Analytics', icon: faChartBar, description: 'Google Analytics, Mixpanel' },
         { name: 'SEO Suite', icon: faBullhorn, description: 'Ahrefs, SEMrush' },
@@ -1128,7 +1139,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
 
   const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
 
-  // --- FETCH DATA ---
+  // --- FETCH DATA (omitted for brevity) ---
   useEffect(() => {
     let cancelled = false;
 
@@ -1287,7 +1298,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   const renderStackContent = (activeTab, isVisible) => {
     const techKeys = ['web', 'mobile', 'blockchain', 'design', 'ai', 'marketing'];
     
-    // Check if the tab uses the TechGrid (with logos/icons)
+    // All available tabs now use the TechGrid format
     if (techKeys.includes(activeTab)) {
       const techList = stackData.tech[activeTab] || [];
       return (
