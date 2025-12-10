@@ -1,58 +1,65 @@
 // src/components/AboutPage.jsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faBullseye, 
-    faEye, 
-    faRocket, 
+    faBullseye,
+    faEye,
+    faRocket,
     faPencilAlt,
-    faCalendar, // Used for 'Founded' date
-    faServer, // Used for 'Incubation Access'
-    faCheckCircle, // Used for 'Projects Done'
-    faUsers, // Used for 'Interns'
-    faBars, // Added for mobile menu icon
+    faCalendar,
+    faServer,
+    faCheckCircle,
+    faUsers,
+    faBars,
     faEnvelope,
-    faMapMarkerAlt, 
-    faPhone, 
+    faMapMarkerAlt,
+    faPhone,
 } from '@fortawesome/free-solid-svg-icons';
-import { faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'; // Import brand icons
+import { faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 
 /* ---------------- THEME ---------------- */
-const NEON_COLOR = '#00e0b3';
-// PURPLE_HIGHLIGHT removed
-const NAVY_BG = '#071025';
-const PANEL_BG = '#0F172A';
-const TEXT_LIGHT = '#E6F0F2';
-const TEXT_MUTED = '#9AA8B8';
-const BORDER_LIGHT = 'rgba(255,255,255,0.04)';
-const VERY_DARK_BG = '#02040a'; // For the main footer background
+
+const NEON_COLOR = '#123165';          // primary navy
+const PANEL_BG = '#FFFFFF';
+const TEXT_LIGHT = '#111827';
+const TEXT_MUTED = '#6B7280';
+const BORDER_LIGHT = 'rgba(15,23,42,0.08)';
+const VERY_DARK_BG = '#F3F4F6';       // light footer bg
+const GOLD_ACCENT = '#D4A937';
+const NAVY_STRIP_BG = '#050f25';      // navy strip bg
 
 /* ---------------- KEYFRAMES ---------------- */
+
 const softGlow = keyframes`
-    0% { text-shadow: 0 0 10px ${NEON_COLOR}, 0 0 20px rgba(0,224,179,0.2); }
-    50% { text-shadow: 0 0 18px ${NEON_COLOR}, 0 0 30px rgba(0,224,179,0.5); }
-    100% { text-shadow: 0 0 10px ${NEON_COLOR}, 0 0 20px rgba(0,224,179,0.2); }
+    0% { text-shadow: 0 0 10px ${GOLD_ACCENT}, 0 0 20px rgba(212,169,55,0.2); }
+    50% { text-shadow: 0 0 18px ${GOLD_ACCENT}, 0 0 30px rgba(212,169,55,0.5); }
+    100% { text-shadow: 0 0 10px ${GOLD_ACCENT}, 0 0 20px rgba(212,169,55,0.2); }
 `;
+
 const rollIn = keyframes`
     from { opacity: 0; transform: translateY(30px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 `;
 
 /* ---------------- GLOBAL STYLE ---------------- */
+
 const GlobalStyle = createGlobalStyle`
     html, body, #root { height: 100%; }
 
     body {
         margin: 0;
         font-family: 'Poppins', sans-serif;
-        background: radial-gradient(circle at 20% 10%, #0a132f 0%, #050817 40%, #01030a 100%);
+        background:
+            radial-gradient(circle at 0% 0%, #fff9e8 0, #ffffff 35%, transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, #f5f7fb 40%, #e5edf7 100%);
         color: ${TEXT_LIGHT};
         overflow-x: hidden;
     }
 
     .neon-text-shadow {
-        text-shadow: 0 0 12px ${NEON_COLOR}, 0 0 25px rgba(0,224,179,0.25);
+        text-shadow: 0 0 12px ${GOLD_ACCENT}, 0 0 25px rgba(212,169,55,0.25);
     }
 
     .animate-in {
@@ -70,6 +77,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 /* ---------------- STAR CANVAS ---------------- */
+
 const StarCanvas = styled.canvas`
     position: fixed;
     inset: 0;
@@ -80,6 +88,7 @@ const StarCanvas = styled.canvas`
 `;
 
 /* ---------------- LAYOUT ---------------- */
+
 const PageWrapper = styled.div`
     position: relative;
     z-index: 1;
@@ -87,6 +96,7 @@ const PageWrapper = styled.div`
 `;
 
 /* Header */
+
 const Header = styled.header`
     display: flex;
     align-items: center;
@@ -95,9 +105,9 @@ const Header = styled.header`
     position: sticky;
     top: 0;
     width: 100%;
-    background: rgba(7,16,38,0.65);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid ${BORDER_LIGHT};
     z-index: 10;
 
     @media (max-width: 780px) {
@@ -112,7 +122,7 @@ const Logo = styled.h1`
     font-weight: 800;
     cursor: pointer;
     letter-spacing: 1px;
-    text-shadow: 0 0 12px ${NEON_COLOR};
+    text-shadow: 0 0 8px rgba(18,49,101,0.35);
 `;
 
 const NavGroup = styled.div`
@@ -120,11 +130,10 @@ const NavGroup = styled.div`
     gap: 22px;
     align-items: center;
     margin-right: auto;
-    
-    @media (max-width: 1024px) {
-        display: none; /* Hide desktop nav for mobile responsiveness */
-    }
 
+    @media (max-width: 1024px) {
+        display: none;
+    }
 
     span {
         color: ${TEXT_MUTED};
@@ -136,16 +145,16 @@ const NavGroup = styled.div`
 
         &:hover {
             color: ${NEON_COLOR};
-            text-shadow: 0 0 10px ${NEON_COLOR};
         }
 
         &:after {
             content: '';
             position: absolute;
-            left: 0; bottom: -2px;
+            left: 0;
+            bottom: -2px;
             width: 0;
             height: 2px;
-            background: ${NEON_COLOR};
+            background: ${GOLD_ACCENT};
             transition: 0.3s;
             border-radius: 4px;
         }
@@ -174,7 +183,7 @@ const MobileNavMenu = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: ${PANEL_BG};
+    background: #ffffff;
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -182,6 +191,7 @@ const MobileNavMenu = styled.div`
     padding-top: 80px;
     transform: translateX(${props => (props.isOpen ? '0' : '100%')});
     transition: transform 0.3s ease-in-out;
+    box-shadow: -4px 0 20px rgba(15,23,42,0.15);
 
     .close-btn {
         position: absolute;
@@ -195,11 +205,11 @@ const MobileNavMenu = styled.div`
     }
 
     span {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         margin: 15px 0;
         cursor: pointer;
         color: ${TEXT_MUTED};
-        
+
         &:hover {
             color: ${NEON_COLOR};
         }
@@ -207,26 +217,29 @@ const MobileNavMenu = styled.div`
 `;
 
 /* Hero Section */
+
 const HeroAbout = styled.section`
-    padding: 150px 36px 80px;
+    padding: 140px 36px 70px;
     max-width: 1200px;
     margin: 0 auto;
 
     @media (max-width: 780px) {
-        padding: 120px 20px 60px;
+        padding: 120px 20px 50px;
         text-align: center;
     }
 `;
 
 const HeroTitle = styled.h1`
-    font-size: 3.8rem;
-    font-weight: 700;
+    font-size: 3.6rem;
+    font-weight: 800;
     margin-bottom: 16px;
     line-height: 1.05;
+    text-shadow: 0 8px 24px rgba(15,23,42,0.25);
 
     span {
-        color: ${NEON_COLOR};
-        text-shadow: 0 0 15px ${NEON_COLOR};
+        background: linear-gradient(120deg, ${NEON_COLOR}, ${GOLD_ACCENT});
+        -webkit-background-clip: text;
+        color: transparent;
     }
 
     &.glow {
@@ -234,14 +247,14 @@ const HeroTitle = styled.h1`
     }
 
     @media (max-width: 780px) {
-        font-size: 2.4rem;
+        font-size: 2.6rem;
     }
 `;
 
 const HeroParagraph = styled.p`
     max-width: 760px;
     color: ${TEXT_MUTED};
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     line-height: 1.7;
 
     @media (max-width: 780px) {
@@ -251,11 +264,13 @@ const HeroParagraph = styled.p`
     }
 `;
 
-/* Section Wrapper */
+/* Generic Section */
+
 const Section = styled.section`
     padding: 60px 36px;
     max-width: 1200px;
     margin: 0 auto;
+    background: transparent;
 
     @media (max-width: 780px) {
         padding: 40px 20px;
@@ -263,28 +278,42 @@ const Section = styled.section`
 `;
 
 const SectionHeader = styled.h2`
-    font-size: 2.4rem;
+    font-size: 2.3rem;
     margin-bottom: 8px;
+    color: ${TEXT_LIGHT};
 
     span {
-        color: ${NEON_COLOR};
+        color: ${GOLD_ACCENT};
     }
 
     @media (max-width: 780px) {
         font-size: 2rem;
     }
 `;
+
 const SectionSubtitle = styled.p`
     color: ${TEXT_MUTED};
     max-width: 900px;
 `;
 
-/* ---------------- METRICS CARDS (Who We Are) ---------------- */
+/* Navy strip wrapper */
+
+const PhilosophyStrip = styled.div`
+    width: 100%;
+    margin: 0;
+    background: radial-gradient(circle at top, rgba(212,169,55,0.18), transparent 55%),
+                ${NAVY_STRIP_BG};
+    color: #f9fafb;
+    padding: 50px 0 60px;
+`;
+
+/* METRICS */
+
 const MetricsGrid = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-top: 50px;
+    gap: 24px;
+    margin-top: 40px;
 
     @media (max-width: 780px) {
         grid-template-columns: 1fr;
@@ -292,25 +321,36 @@ const MetricsGrid = styled.div`
 `;
 
 const MetricCard = styled.div`
-    background: ${PANEL_BG};
-    border-radius: 10px;
-    padding: 20px;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    padding: 22px 24px;
+    border: 1px solid ${BORDER_LIGHT};
+    box-shadow: 0 18px 45px rgba(15,23,42,0.12);
+    animation: ${rollIn} 0.5s ease forwards;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
     .icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(18,49,101,0.05), rgba(212,169,55,0.15));
         color: ${NEON_COLOR};
-        font-size: 1.5rem;
-        margin-bottom: 8px;
+        font-size: 1.3rem;
+        margin-bottom: 4px;
     }
 
     .value {
         color: ${TEXT_LIGHT};
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         font-weight: 700;
         margin: 0;
     }
-    
+
     .label {
         color: ${TEXT_MUTED};
         font-size: 0.9rem;
@@ -318,14 +358,12 @@ const MetricCard = styled.div`
     }
 `;
 
-/* ---------------- POWERFUL STACK SECTION COMPONENTS (REMOVED) ---------------- */
-// All components related to Stack were removed here.
+/* Philosophy Cards */
 
-/* About Cards (Mission / Vision / Journey) */
 const MVJGrid = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
-    gap: 20px;
+    gap: 22px;
     margin-top: 28px;
 
     @media (max-width: 780px) {
@@ -334,41 +372,67 @@ const MVJGrid = styled.div`
 `;
 
 const MVJCard = styled.div`
-    background: rgba(15,23,42,0.55);
-    backdrop-filter: blur(12px);
-    border-radius: 14px;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
     padding: 26px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid ${BORDER_LIGHT};
     transition: 0.3s ease;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+    box-shadow: 0 12px 40px rgba(15,23,42,0.35);
+    position: relative;
+    overflow: hidden;
+
+    &:before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(212,169,55,0.22), transparent 55%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
 
     &:hover {
         transform: translateY(-10px);
-        border-color: ${NEON_COLOR};
-        box-shadow: 0 20px 60px rgba(0,224,179,0.12);
+        border-color: ${GOLD_ACCENT};
+        box-shadow: 0 22px 70px rgba(15,23,42,0.5);
+    }
+
+    &:hover:before {
+        opacity: 1;
     }
 
     .icon-box {
         width: 62px;
         height: 62px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.03);
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(18,49,101,0.08), rgba(212,169,55,0.25));
         display: flex;
         justify-content: center;
         align-items: center;
         margin-bottom: 14px;
     }
 
-    h3 { font-size: 1.2rem; }
-    p { color: ${TEXT_MUTED}; line-height: 1.55; }
+    h3 {
+        font-size: 1.2rem;
+        color: ${TEXT_LIGHT};
+    }
+
+    /* allow multiline + bullet spacing */
+    p {
+        color: ${TEXT_MUTED};
+        line-height: 1.55;
+        white-space: pre-line;
+    }
 `;
 
-/* ---------------- FULL FOOTER COMPONENTS ---------------- */
+/* FOOTER */
+
 const FullFooter = styled.footer`
     background: ${VERY_DARK_BG};
     padding: 60px 50px 20px;
     color: ${TEXT_MUTED};
-    border-top: 1px solid rgba(255,255,255,0.04);
+    border-top: 1px solid ${BORDER_LIGHT};
 
     @media (max-width: 768px) {
         padding: 40px 20px 20px;
@@ -407,16 +471,27 @@ const FooterColumn = styled.div`
         &:after {
             content: '';
             position: absolute;
-            left: 0; bottom: -5px;
+            left: 0;
+            bottom: -5px;
             width: 30px;
             height: 2px;
-            background: ${NEON_COLOR};
+            background: ${GOLD_ACCENT};
         }
     }
 
-    p { font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px 0; }
-    ul { list-style: none; padding: 0; margin: 0; }
-    li { margin-bottom: 10px; }
+    p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 0 0 10px 0;
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    li {
+        margin-bottom: 10px;
+    }
     a, span {
         color: ${TEXT_MUTED};
         text-decoration: none;
@@ -426,7 +501,9 @@ const FooterColumn = styled.div`
         align-items: center;
         gap: 8px;
 
-        &:hover { color: ${NEON_COLOR}; }
+        &:hover {
+            color: ${NEON_COLOR};
+        }
     }
 `;
 
@@ -441,19 +518,20 @@ const SocialIcons = styled.div`
     margin-top: 15px;
 
     a {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.05);
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        background: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: ${TEXT_LIGHT};
-        transition: background 0.3s, color 0.3s;
+        color: ${NEON_COLOR};
+        transition: background 0.3s, color 0.3s, box-shadow 0.3s;
 
         &:hover {
-            background: ${NEON_COLOR};
-            color: ${NAVY_BG};
+            background: linear-gradient(135deg, ${NEON_COLOR}, ${GOLD_ACCENT});
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(15,23,42,0.35);
         }
     }
 `;
@@ -462,30 +540,30 @@ const Copyright = styled.div`
     text-align: center;
     font-size: 0.8rem;
     padding-top: 30px;
-    border-top: 1px solid rgba(255,255,255,0.02);
+    border-top: 1px solid ${BORDER_LIGHT};
     margin-top: 50px;
 `;
-/* ---------------- END FULL FOOTER ---------------- */
-
 
 /* Section icons */
+
 const SECTION_ICONS = {
     Mission: faBullseye,
     Vision: faEye,
     Journey: faRocket,
     Custom: faPencilAlt,
     Text: faPencilAlt,
-    default: faPencilAlt
+    default: faPencilAlt,
 };
 
 const getSectionIcon = (type) => SECTION_ICONS[type] || SECTION_ICONS.default;
 
 /* ---------------- COMPONENT ---------------- */
+
 const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
     const canvasRef = useRef(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    /* Star animation */
+    /* Gold particle animation in background */
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -502,13 +580,13 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
         }
         resize();
 
-        const stars = Array.from({ length: 160 }, () => ({
+        const stars = Array.from({ length: 140 }, () => ({
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight,
-            r: 0.8 + Math.random() * 1.4,
-            dx: (Math.random() - 0.5) * 0.3,
-            dy: 0.15 + Math.random() * 0.6,
-            alpha: 0.4 + Math.random() * 0.6
+            r: 1 + Math.random() * 2.2,
+            dx: (Math.random() - 0.5) * 0.25,
+            dy: 0.08 + Math.random() * 0.35,
+            alpha: 0.15 + Math.random() * 0.35,
         }));
 
         let raf;
@@ -519,11 +597,11 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                 s.x += s.dx;
                 s.y += s.dy;
 
-                if (s.y > window.innerHeight) s.y = -5;
-                if (s.x > window.innerWidth) s.x = -5;
-                if (s.x < -5) s.x = window.innerWidth;
+                if (s.y > window.innerHeight + 10) s.y = -10;
+                if (s.x > window.innerWidth + 10) s.x = -10;
+                if (s.x < -10) s.x = window.innerWidth + 10;
 
-                ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+                ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                 ctx.fill();
@@ -547,38 +625,56 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
         {
             type: 'Mission',
             title: 'Our Mission',
-            body: safeAboutData.mission || 'Our mission is to help businesses grow through powerful digital solutions.'
+            body:
+                safeAboutData.mission ||
+                `Nexora-Mission Statement 
 
+Our mission is to help businesses grow through powerful digital solutions.
+
+We aim to:
+
+✨Design intuitive and impactful user experiences
+✨Build high-performance websites, apps, and SaaS platforms
+✨Deliver technology that improves efficiency and customer engagement
+✨Provide scalable and customized solutions for every business need
+✨Blend creativity, strategy, and engineering to deliver real value
+
+
+At Nexora, we transform ideas into digital realities, ensuring that every project contributes to our clients’ long-term success.`,
         },
         {
             type: 'Vision',
             title: 'Our Vision',
-            body: safeAboutData.vision || '💫To become a leading force in digital innovation by creating meaningful, human-centered technology that transforms businesses and shapes the future of digital experiences.'
+            body:
+                safeAboutData.vision ||
+                `Nexora – Vision Statement 
+
+💫To become a leading force in digital innovation by creating meaningful, human-centered technology that transforms businesses and shapes the future of digital experiences.`,
         },
         {
             type: 'Journey',
             title: 'Our Journey',
-            body: safeAboutData.journey || 'Started small, grown to a powerful creative team.'
-        }
+            body:
+                safeAboutData.journey ||
+                'We started as a small student team and grew into a focused digital product studio, blending technology, creativity, and AI.',
+        },
     ];
 
-    const mvjSections = initialSections.filter(s => s.body);
+    const mvjSections = initialSections.filter((s) => s.body);
     const customBlocks = Array.isArray(safeAboutData.sections)
-        ? safeAboutData.sections.filter(s => s.type === 'Custom' || s.type === 'Text')
+        ? safeAboutData.sections.filter((s) => s.type === 'Custom' || s.type === 'Text')
         : [];
-    
+
     const metricData = [
         { icon: faCalendar, label: 'Founded', value: '25 Sep 2025' },
         { icon: faServer, label: 'Incubation Access', value: 'Nov 2025' },
         { icon: faCheckCircle, label: 'Projects Done', value: 'Major 2+' },
         { icon: faUsers, label: 'Interns', value: '30+' },
     ];
-    
-    // Stack data is intentionally omitted per request.
 
     const handleNavigation = (route) => {
         onNavigate(route);
-        setIsMobileMenuOpen(false); // Close menu after navigation
+        setIsMobileMenuOpen(false);
     };
 
     return (
@@ -594,7 +690,7 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                         <span onClick={() => handleNavigation('home')}>Home</span>
                         <span
                             onClick={() => handleNavigation('about')}
-                            style={{ color: NEON_COLOR }}
+                            style={{ color: NEON_COLOR}}
                         >
                             About
                         </span>
@@ -602,10 +698,7 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                         <span onClick={() => handleNavigation('projects')}>Projects</span>
                         <span onClick={() => handleNavigation('blog')}>Blog</span>
                         <span onClick={() => handleNavigation('team')}>Team</span>
-
-                        {/* PROGRESS NAV ITEM */}
                         <span onClick={() => handleNavigation('progress')}>Progress</span>
-
                         <span onClick={() => handleNavigation('contact')}>Contact</span>
                     </NavGroup>
                     <MobileMenuButton onClick={() => setIsMobileMenuOpen(true)}>
@@ -619,7 +712,9 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                         &times;
                     </button>
                     <span onClick={() => handleNavigation('home')}>Home</span>
-                    <span onClick={() => handleNavigation('about')} style={{ color: NEON_COLOR }}>About</span>
+                    <span onClick={() => handleNavigation('about')} style={{ color: NEON_COLOR }}>
+                        About
+                    </span>
                     <span onClick={() => handleNavigation('services')}>Services</span>
                     <span onClick={() => handleNavigation('projects')}>Projects</span>
                     <span onClick={() => handleNavigation('blog')}>Blog</span>
@@ -628,11 +723,10 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                     <span onClick={() => handleNavigation('contact')}>Contact</span>
                 </MobileNavMenu>
 
-
-                {/* WHO WE ARE SECTION (Combines Hero & Metrics) */}
+                {/* WHO WE ARE */}
                 <HeroAbout>
                     <div className="animate-in">
-                        <HeroTitle>
+                        <HeroTitle className="glow">
                             Who We <span>Are</span>
                         </HeroTitle>
 
@@ -640,11 +734,13 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                             className="animate-in"
                             style={{ animationDelay: '0.2s' }}
                         >
-                            Nexoracrew is an **MSME-registered student startup** from JJ College of Engineering & Technology, Trichy. We don’t just write code; we **transform raw ideas into powerful digital products** using modern technology, creative design, and Artificial Intelligence.
+                            Nexoracrew is an MSME-registered student startup from JJ College of
+                            Engineering &amp; Technology, Trichy. We don’t just write code; we
+                            transform raw ideas into powerful, polished digital products using
+                            modern technology, thoughtful design, and Artificial Intelligence.
                         </HeroParagraph>
                     </div>
-                    
-                    {/* Metrics Grid */}
+
                     <MetricsGrid>
                         {metricData.map((metric, i) => (
                             <MetricCard
@@ -661,46 +757,73 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                         ))}
                     </MetricsGrid>
                 </HeroAbout>
-                
-                {/* HORIZONTAL LINE SEPARATOR */}
-                <hr style={{ border: BORDER_LIGHT, maxWidth: 1200, margin: '60px auto' }} />
 
-                {/* MISSION/VISION/JOURNEY CARDS (Original Section) */}
-                <Section>
-                    <SectionHeader>
-                        Our <span>Philosophy</span>
-                    </SectionHeader>
-                    <SectionSubtitle>
-                        These core values guide every decision we make, from the smallest code commit to major collaborations.
-                    </SectionSubtitle>
+                {/* Separator */}
+                <hr style={{ border: BORDER_LIGHT, maxWidth: 1200, margin: '50px auto' }} />
 
-                    <MVJGrid>
-                        {mvjSections.map((section, i) => (
-                            <MVJCard
-                                key={i}
-                                className="animate-in"
-                                style={{ animationDelay: `${0.3 + i * 0.15}s` }}
-                            >
-                                <div className="icon-box">
-                                    <FontAwesomeIcon
-                                        icon={getSectionIcon(section.type)}
-                                        color={NEON_COLOR}
-                                        size="lg"
-                                    />
-                                </div>
-                                <h3>{section.title}</h3>
-                                <p>{section.body}</p>
-                            </MVJCard>
-                        ))}
-                    </MVJGrid>
-                </Section>
+                {/* NAVY STRIP: Philosophy + CTA */}
+                <PhilosophyStrip>
+                    <Section>
+                        <SectionHeader style={{ color: '#F9FAFB' }}>
+                            Our <span>Philosophy</span>
+                        </SectionHeader>
+                        <SectionSubtitle style={{ color: 'rgba(249,250,251,0.82)' }}>
+                            These core values guide every decision we make, from the smallest code
+                            commit to major collaborations.
+                        </SectionSubtitle>
+
+                        <MVJGrid>
+                            {mvjSections.map((section, i) => (
+                                <MVJCard
+                                    key={i}
+                                    className="animate-in"
+                                    style={{ animationDelay: `${0.3 + i * 0.15}s` }}
+                                >
+                                    <div className="icon-box">
+                                        <FontAwesomeIcon
+                                            icon={getSectionIcon(section.type)}
+                                            color="#ffffff"
+                                            size="lg"
+                                        />
+                                    </div>
+                                    <h3>{section.title}</h3>
+                                    <p>{section.body}</p>
+                                </MVJCard>
+                            ))}
+                        </MVJGrid>
+                    </Section>
+
+                    <Section style={{ textAlign: 'center', paddingTop: 10 }}>
+                        <button
+                            onClick={() => handleNavigation('contact')}
+                            className="animate-in"
+                            style={{
+                                padding: '14px 32px',
+                                background: `linear-gradient(135deg, ${NEON_COLOR}, ${GOLD_ACCENT})`,
+                                border: 'none',
+                                borderRadius: 999,
+                                color: '#ffffff',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                boxShadow: '0 14px 40px rgba(0,0,0,0.45)',
+                                fontSize: '1.05rem',
+                            }}
+                        >
+                            Let’s Collaborate
+                        </button>
+                    </Section>
+                </PhilosophyStrip>
 
                 {/* CUSTOM TEXT SECTIONS */}
                 {customBlocks.map((block, idx) => (
                     <Section key={idx}>
                         <h2
                             className="animate-in"
-                            style={{ color: NEON_COLOR }}
+                            style={{
+                                background: `linear-gradient(120deg, ${NEON_COLOR}, ${GOLD_ACCENT})`,
+                                WebkitBackgroundClip: 'text',
+                                color: 'transparent',
+                            }}
                         >
                             {block.title}
                         </h2>
@@ -713,61 +836,89 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                     </Section>
                 ))}
 
-                {/* CTA BUTTON - Moved before the Full Footer */}
-                <Section style={{ textAlign: 'center', paddingBottom: '0' }}>
-                    <button
-                        onClick={() => handleNavigation('contact')}
-                        className="animate-in"
-                        style={{
-                            padding: '14px 32px',
-                            background: NEON_COLOR,
-                            border: 'none',
-                            borderRadius: 10,
-                            color: NAVY_BG,
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            boxShadow: '0 8px 30px rgba(0,224,179,0.25)',
-                            fontSize: '1.05rem'
-                        }}
-                    >
-                        Let’s Collaborate
-                    </button>
-                </Section>
-                
-                {/* NEW: FULL FOOTER */}
+                {/* FOOTER */}
                 <FullFooter>
                     <FooterGrid>
                         <FooterColumn style={{ minWidth: '300px' }}>
-                            <FooterLogo onClick={() => handleNavigation('home')}>NEXORACREW</FooterLogo>
+                            <FooterLogo onClick={() => handleNavigation('home')}>
+                                NEXORACREW
+                            </FooterLogo>
                             <p>
-                                Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where ideas Meet innovation.
+                                Transforming ideas into powerful digital products using modern
+                                technology, creativity, and AI. Where ideas meet innovation.
                             </p>
                             <SocialIcons>
-                                <a href="https://www.instagram.com/" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faInstagram} /></a>
-                                <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faLinkedinIn} /></a>
-                                <a href={`mailto:nexora.crew@gmail.com`}><FontAwesomeIcon icon={faEnvelope} /></a>
+                                <a
+                                    href="https://www.instagram.com/"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <FontAwesomeIcon icon={faInstagram} />
+                                </a>
+                                <a
+                                    href="https://www.linkedin.com/"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <FontAwesomeIcon icon={faLinkedinIn} />
+                                </a>
+                                <a href={`mailto:nexora.crew@gmail.com`}>
+                                    <FontAwesomeIcon icon={faEnvelope} />
+                                </a>
                             </SocialIcons>
                         </FooterColumn>
 
                         <FooterColumn>
                             <h4>Quick Links</h4>
                             <ul>
-                                <li><a onClick={() => handleNavigation('home')}>Home</a></li>
-                                <li><a onClick={() => handleNavigation('about')}>About Us</a></li>
-                                <li><a onClick={() => handleNavigation('services')}>Services</a></li>
-                                <li><a onClick={() => handleNavigation('contact')}>Careers & Process</a></li>
-                                <li><a onClick={() => handleNavigation('contact')}>Contact</a></li>
+                                <li>
+                                    <a onClick={() => handleNavigation('home')}>Home</a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('about')}>About Us</a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('services')}>Services</a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('contact')}>
+                                        Careers &amp; Process
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('contact')}>Contact</a>
+                                </li>
                             </ul>
                         </FooterColumn>
 
                         <FooterColumn>
                             <h4>Services</h4>
                             <ul>
-                                <li><a onClick={() => handleNavigation('services')}>Web Development</a></li>
-                                <li><a onClick={() => handleNavigation('services')}>AI Solutions</a></li>
-                                <li><a onClick={() => handleNavigation('services')}>SEO & Growth</a></li>
-                                <li><a onClick={() => handleNavigation('services')}>Branding & Design</a></li>
-                                <li><a onClick={() => handleNavigation('services')}>Server Architecture</a></li>
+                                <li>
+                                    <a onClick={() => handleNavigation('services')}>
+                                        Web Development
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('services')}>
+                                        AI Solutions
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('services')}>
+                                        SEO &amp; Growth
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('services')}>
+                                        Branding &amp; Design
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onClick={() => handleNavigation('services')}>
+                                        Server Architecture
+                                    </a>
+                                </li>
                             </ul>
                         </FooterColumn>
 
@@ -776,7 +927,8 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                             <ul>
                                 <li>
                                     <a href="#map" target="_blank" rel="noreferrer">
-                                        <FontAwesomeIcon icon={faMapMarkerAlt} /> JJ College of Engineering and Technology, Trichy
+                                        <FontAwesomeIcon icon={faMapMarkerAlt} /> JJ College of
+                                        Engineering and Technology, Trichy
                                     </a>
                                 </li>
                                 <li>
