@@ -4,6 +4,7 @@ import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faUsers,
+    faEnvelope,
     faClipboardList,
     faStar,
     faClock,
@@ -11,7 +12,7 @@ import {
     faPhone,
     faBars,
     faTimes,
-    faEnvelope
+    faHandshake // Added for Partner Placeholder
 } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
@@ -19,11 +20,14 @@ import axios from 'axios';
 // ====================================================================
 // ========== CONFIG & API ENDPOINTS ==========
 // ====================================================================
+/* Robust API Base URL detection. 
+   Matches AdminPage config to ensure consistency between Vercel/Localhost.
+*/
 const API_BASE = (process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_API_BASE || 'http://localhost:5000').replace(/\/$/, '');
 
 const MILESTONE_FETCH_URL = `${API_BASE}/api/milestones`;
 const STORY_FETCH_URL = `${API_BASE}/api/stories`;
-const PARTNER_FETCH_URL = `${API_BASE}/api/partners`;
+const PARTNER_FETCH_URL = `${API_BASE}/api/partners`; // <--- NEW ENDPOINT
 
 // ====================================================================
 // ========== DESIGN TOKENS ==========
@@ -138,8 +142,11 @@ const MobileMenuButton = styled.button`
     @media (max-width: 1024px) { display: block; }
 `;
 
-// --- ANIMATION UTILS (use transient props: $isVisible, $delay) ---
-const AnimatedSection = styled.div`
+// --- ANIMATION UTILS ---
+// IMPORTANT FIX: use transient prop $isVisible and $delay everywhere
+const AnimatedSection = styled.div.attrs(props => ({
+    'data-visible': props.$isVisible ? 'true' : 'false',
+}))`
     opacity: 0;
     transform: translateY(30px) scale(0.95);
     will-change: opacity, transform;
@@ -258,7 +265,7 @@ const MilestoneDescription = styled.p`
     @media (max-width: 480px) { font-size: 0.85rem; }
 `;
 
-// --- PARTNERS (INFINITE SCROLL MARQUEE - 3 VISIBLE & SHADED SIDES) ---
+// --- PARTNERS (INFINITE SCROLL MARQUEE) ---
 const PartnersSection = styled.section`
     padding: 60px 0;
     text-align: center;
@@ -277,7 +284,7 @@ const PartnersHeader = styled.p`
 `;
 
 const MarqueeContainer = styled.div`
-    max-width: 800px; 
+    max-width: 900px; 
     width: 100%;
     margin: 0 auto;
     position: relative;
@@ -303,7 +310,7 @@ const MarqueeTrack = styled.div`
     display: flex;
     gap: 80px;
     width: max-content;
-    animation: ${scrollX} 35s linear infinite; 
+    animation: ${scrollX} 40s linear infinite; 
     
     &:hover {
         animation-play-state: paused;
@@ -315,23 +322,60 @@ const MarqueeTrack = styled.div`
     }
 `;
 
-const PartnerLogoImg = styled.img`
-    height: 70px;
-    width: auto;
-    max-width: 180px; 
-    object-fit: contain;
-    opacity: 1;
-    filter: none;
-    transition: transform 0.3s ease;
+const PartnerCard = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
     cursor: pointer;
+    transition: transform 0.3s ease;
 
     &:hover {
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 8px ${NEON_COLOR});
+        transform: scale(1.05);
+        
+        .icon-box {
+            border-color: ${NEON_COLOR};
+            box-shadow: 0 0 15px rgba(0, 224, 179, 0.2);
+            color: ${NEON_COLOR};
+        }
+        h4 {
+            color: ${NEON_COLOR};
+        }
     }
 
-    @media (max-width: 768px) {
-        height: 50px;
+    .icon-box {
+        width: 80px;
+        height: 80px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        background: rgba(255,255,255,0.02);
+        color: ${MUTED_TEXT};
+        font-size: 2rem;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 16px;
+    }
+
+    h4 {
+        margin: 0;
+        font-size: 1rem;
+        color: ${LIGHT_TEXT};
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: center;
+        transition: color 0.3s ease;
     }
 `;
 
@@ -372,6 +416,8 @@ const StoriesTitle = styled.h2`
     span { color: ${NEON_COLOR}; text-shadow: 0 0 10px rgba(0,224,179,0.4); }
     @media (max-width: 480px) { font-size: 2rem; }
 `;
+
+// IMPORTANT: StoryCard still extends AnimatedSection and uses $isVisible / $delay
 const StoriesGrid = styled.div`
     max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;
     @media (max-width: 768px) { grid-template-columns: 1fr; }
@@ -444,8 +490,6 @@ const Copyright = styled.div`
     text-align: center; font-size: 0.8rem; padding-top: 30px;
     border-top: 1px solid rgba(255,255,255,0.02); margin-top: 50px;
 `;
-
-// NOTE: use transient prop $isOpen here
 const MobileNavMenu = styled.div`
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: ${DARK_BG}; z-index: 1100; display: flex; flex-direction: column; align-items: center;
@@ -628,7 +672,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
             canvas.height = window.innerHeight * dpr;
             canvas.style.width = `${window.innerWidth}px`;
             canvas.style.height = `${window.innerHeight}px`;
-            ctx.setTransform(1, 0, 0, 1, 0, 0); // reset before scaling
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(dpr, dpr);
         };
         resize();
@@ -672,18 +716,15 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     const neonWord = 'NEXORACREW';
     const [typedCount, setTypedCount] = useState(0);
     useEffect(() => {
-        let intervalId;
-        const timeoutId = setTimeout(() => {
+        const t = setTimeout(() => {
             let idx = 0;
-            intervalId = setInterval(() => {
+            const interval = setInterval(() => {
                 idx++; setTypedCount(idx);
-                if (idx >= neonWord.length) clearInterval(intervalId);
+                if (idx >= neonWord.length) clearInterval(interval);
             }, 120);
+            return () => clearInterval(interval);
         }, 300);
-        return () => {
-            clearTimeout(timeoutId);
-            if (intervalId) clearInterval(intervalId);
-        };
+        return () => clearTimeout(t);
     }, []);
 
     const handleNavigation = (route) => {
@@ -749,6 +790,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                             <div style={{ color: MUTED_TEXT, gridColumn: '1/-1', padding: 20 }}>Loading Milestones...</div>
                         ) : (
                             milestones.map((ms, index) => (
+                                // IMPORTANT: use $isVisible and $delay
                                 <AnimatedSection
                                     key={ms.key || index}
                                     $isVisible={isMilestonesVisible}
@@ -758,7 +800,11 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                                         <MilestoneIcon $isExperience={ms.isExperience}>
                                             <FontAwesomeIcon icon={ms.icon} />
                                         </MilestoneIcon>
-                                        <CountUpNumber targetNumber={ms.number} isVisible={isMilestonesVisible} delay={ms.delay} />
+                                        <CountUpNumber
+                                            targetNumber={ms.number}
+                                            isVisible={isMilestonesVisible}
+                                            delay={ms.delay}
+                                        />
                                         <MilestoneDescription>{ms.description}</MilestoneDescription>
                                     </MilestoneCard>
                                 </AnimatedSection>
@@ -774,12 +820,16 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                         <MarqueeContainer>
                             <MarqueeTrack>
                                 {[...partners, ...partners, ...partners, ...partners].map((p, i) => (
-                                    <PartnerLogoImg 
-                                        key={`p-${p._id || i}-${i}`} 
-                                        src={p.logoUrl} 
-                                        alt={p.name} 
-                                        title={p.name}
-                                    />
+                                    <PartnerCard key={`p-${p._id || i}-${i}`}>
+                                        <div className="icon-box">
+                                            {p.logoUrl ? (
+                                                <img src={p.logoUrl} alt={p.name} />
+                                            ) : (
+                                                <FontAwesomeIcon icon={faHandshake} />
+                                            )}
+                                        </div>
+                                        <h4>{p.name}</h4>
+                                    </PartnerCard>
                                 ))}
                             </MarqueeTrack>
                         </MarqueeContainer>
@@ -798,9 +848,11 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                                 key={i}
                                 $isVisible={true}
                                 $delay={`${(i*0.15).toFixed(2)}s`}
-                                style={{opacity:1, transform:'none'}}
                             >
-                                <StackCard><h3>{s.title}</h3><p>{s.tech}</p></StackCard>
+                                <StackCard>
+                                    <h3>{s.title}</h3>
+                                    <p>{s.tech}</p>
+                                </StackCard>
                             </AnimatedSection>
                         ))}
                     </StackGrid>
