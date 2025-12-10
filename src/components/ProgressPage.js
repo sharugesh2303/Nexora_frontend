@@ -964,7 +964,7 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <li>Price competition from freelancers & low-cost agencies</li>
                                         <li> Fast-changing technologies → continuous skill upgrade needed</li>
                                         <li>Client expectations increasing day by day</li>
-                                        <li>Economic slowdowns affecting project budgets</li>
+                                        <li>Economic slowdowns affecting project budget</li>
                                     </BulletList>
                                 </ThreatBox>
                             </Grid>
