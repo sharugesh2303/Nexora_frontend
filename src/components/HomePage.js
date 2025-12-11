@@ -26,6 +26,8 @@ import {
 import {
   faInstagram,
   faLinkedinIn,
+  faWhatsapp,
+  faYoutube,
 } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
 
@@ -1446,14 +1448,20 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
               <FooterLogo onClick={() => handleNavigation('home')}>NEXORACREW</FooterLogo>
               <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI.</p>
               <SocialIcons>
-                <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">
+                <a href="https://www.instagram.com/nexoracrew?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="" rel="noreferrer">
                   <FontAwesomeIcon icon={faInstagram} />
                 </a>
-                <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">
+                <a href="https://www.linkedin.com/in/nexoracrew-%E2%80%8C-01842a396/" target="_blank" rel="noreferrer">
                   <FontAwesomeIcon icon={faLinkedinIn} />
                 </a>
-                <a href={`mailto:${safeGeneralData.email}`}>
+                <a href="mailto:nexora.crew@gmail.com">
                   <FontAwesomeIcon icon={faEnvelope} />
+                </a>
+                <a href="https://wa.me/9597646460" target="_blank" rel="noopener noreferrer">
+                  <FontAwesomeIcon icon={faWhatsapp} />
+                </a>
+                <a href="https://www.youtube.com/@Nexora-crew" target="_blank" rel="noopener noreferrer">
+                  <FontAwesomeIcon icon={faYoutube} />
                 </a>
               </SocialIcons>
             </FooterColumn>
