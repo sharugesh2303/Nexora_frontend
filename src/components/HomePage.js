@@ -14,14 +14,14 @@ import {
   faTimes,
   faHandshake,
   faArrowRight,
-  faCode, 
-  faMobileAlt, 
-  faProjectDiagram, 
-  faMagic, 
-  faPaintBrush, 
-  faBullhorn, 
-  faDatabase, 
-  faChartBar, 
+  faCode,
+  faMobileAlt,
+  faProjectDiagram,
+  faMagic,
+  faPaintBrush,
+  faBullhorn,
+  faDatabase,
+  faChartBar,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faInstagram,
@@ -35,20 +35,20 @@ import axios from 'axios';
 const TECH_LOGOS = {
   'React Native': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg',
   'Flutter': 'https://www.vectorlogo.zone/logos/flutterio/flutterio-icon.svg',
-  'Swift': 'https://cdn.iconscout.com/icon/free/png-256/swift-15-283844.png', 
+  'Swift': 'https://cdn.iconscout.com/icon/free/png-256/swift-15-283844.png',
   'Kotlin': 'https://www.vectorlogo.zone/logos/kotlinlang/kotlinlang-icon.svg',
   'Node.js': 'https://www.vectorlogo.zone/logos/nodejs/nodejs-icon.svg',
   'MongoDB': 'https://www.vectorlogo.zone/logos/mongodb/mongodb-icon.svg',
   'AWS': 'https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg',
   'Solidity': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Solidity_logo.svg',
   'Ethereum': 'https://www.vectorlogo.zone/logos/ethereum/ethereum-icon.svg',
-  'Gemini': 'https://img.shields.io/badge/Google_Gemini-60A5FA?style=flat&logo=google-gemini&logoColor=white', 
+  'Gemini': 'https://img.shields.io/badge/Google_Gemini-60A5FA?style=flat&logo=google-gemini&logoColor=white',
   'OpenAI': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/120px-OpenAI_Logo.svg.png',
   'Python': 'https://www.vectorlogo.zone/logos/python/python-icon.svg',
   'Figma': 'https://www.vectorlogo.zone/logos/figma/figma-icon.svg',
   'Canva': 'https://www.vectorlogo.zone/logos/canva/canva-icon.svg',
-  'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg', 
-  'Spline': 'https://raw.githubusercontent.com/SplineTool/spline-tool-logo/main/logo.png', 
+  'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg',
+  'Spline': 'https://raw.githubusercontent.com/SplineTool/spline-tool-logo/main/logo.png',
 };
 
 // ====================================================================
@@ -63,33 +63,23 @@ const PARTNER_FETCH_URL = `${API_BASE}/api/partners`;
 // ====================================================================
 // ========== DESIGN TOKENS (WHITE THEME) ==========
 // ====================================================================
-
-// Primary accent (navy)
 const NEON_COLOR = '#123165';
-
-// Page base colors - ALL SET TO PURE WHITE OR DARK TEXT
 const LIGHT_TEXT = '#111827';
 const MUTED_TEXT = '#6B7280';
-const CARD_BG = '#FFFFFF';    // Card Background
-const FOOTER_BG = '#FFFFFF';  // Footer Background
-const PAGE_BG = '#FFFFFF';    // Body Background
-
-// Slightly darker border for visibility against white
-const BORDER_LIGHT = '#e2e8f0'; 
-
-// Gold accent
+const CARD_BG = '#FFFFFF';
+const FOOTER_BG = '#FFFFFF';
+const BORDER_LIGHT = '#e2e8f0';
 const GOLD_ACCENT = '#D4A937';
 
 // ====================================================================
-// ========== GLOBAL STYLES ==========
+// ========== GLOBAL STYLES (PURE WHITE BACKGROUND) ==========
 // ====================================================================
 const GlobalStyle = createGlobalStyle`
   html, body, #root { height: 100%; }
   body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    /* STRICTLY WHITE BACKGROUND - NO GRADIENTS */
-    background: ${PAGE_BG};
+    background: #FFFFFF; /* FULL WHITE BACKGROUND */
     color: ${LIGHT_TEXT};
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
@@ -146,14 +136,15 @@ const StarCanvas = styled.canvas`
   display: block;
 `;
 
+/* PageLayer sits above the canvas */
 const PageLayer = styled.div`
   position: relative;
   z-index: 2;
   overflow-x: hidden;
-  background: transparent; /* Ensures the body white shows through */
+  background: transparent;
 `;
 
-// --- HEADER ---
+/* HEADER */
 const Header = styled.header`
   display: flex;
   align-items: center;
@@ -162,7 +153,7 @@ const Header = styled.header`
   position: sticky;
   top: 0;
   width: 100%;
-  background: #FFFFFF; /* White */
+  background: #FFFFFF;
   border-bottom: 1px solid ${BORDER_LIGHT};
   z-index: 1000;
   @media (max-width: 768px) {
@@ -231,7 +222,7 @@ const MobileNavMenu = styled.div`
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: #FFFFFF; /* White */
+  background: #FFFFFF;
   z-index: 1100;
   display: flex;
   flex-direction: column;
@@ -260,7 +251,7 @@ const MobileNavMenu = styled.div`
   }
 `;
 
-// --- ANIMATION WRAPPER ---
+/* ANIMATION WRAPPER */
 const AnimatedSection = styled.div.attrs(props => ({
   'data-visible': props.$isVisible ? 'true' : 'false',
 }))`
@@ -276,7 +267,7 @@ const AnimatedSection = styled.div.attrs(props => ({
     `}
 `;
 
-// --- HERO ---
+/* HERO */
 const HeroSection = styled.section`
   min-height: 90vh;
   display: flex;
@@ -284,7 +275,7 @@ const HeroSection = styled.section`
   justify-content: center;
   padding: 120px 20px 80px;
   box-sizing: border-box;
-  background: #FFFFFF; /* White */
+  background: transparent;
   animation: ${fadeUp} 0.9s ease forwards;
   @media (max-width: 768px) {
     min-height: 75vh;
@@ -386,10 +377,10 @@ const SecondaryBtn = styled(PrimaryBtn)`
   }
 `;
 
-// --- MILESTONES ---
+/* MILESTONES */
 const MilestonesSection = styled.section`
   padding: 80px 20px;
-  background: #FFFFFF; /* White */
+  background: transparent;
   text-align: center;
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
@@ -422,7 +413,8 @@ const MilestoneCard = styled.div`
   align-items: center;
   padding: 22px 20px;
   border-radius: 18px;
-  background: ${CARD_BG}; /* White */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(15,23,42,0.08);
   border: 1px solid ${BORDER_LIGHT};
 `;
@@ -435,7 +427,7 @@ const MilestoneIcon = styled.div`
   align-items: center;
   justify-content: center;
   margin-bottom: 18px;
-  background: #FFFFFF; /* White */
+  background: #FFFFFF;
   border: 1px solid ${BORDER_LIGHT};
   color: ${NEON_COLOR};
   box-shadow: 0 8px 22px rgba(15,23,42,0.05);
@@ -483,11 +475,11 @@ const MilestoneDescription = styled.p`
   @media (max-width: 480px) { font-size: 0.8rem; }
 `;
 
-// --- PARTNERS (INFINITE SCROLL MARQUEE) ---
+/* PARTNERS: use MarqueeContainer & MarqueeTrack (no inline animation) */
 const PartnersSection = styled.section`
   padding: 60px 0;
   text-align: center;
-  background: #FFFFFF; /* White */
+  background: transparent;
   overflow: hidden;
 `;
 
@@ -568,7 +560,7 @@ const PartnerCard = styled.div`
     align-items: center;
     justify-content: center;
     margin-bottom: 12px;
-    background: #FFFFFF; /* White */
+    background: #FFFFFF;
     color: ${MUTED_TEXT};
     font-size: 2rem;
     transition: all 0.3s ease;
@@ -593,11 +585,11 @@ const PartnerName = styled.div`
   white-space: nowrap;
 `;
 
-// --- STACK ---
+/* STACK */
 const StackSection = styled.section`
   padding: 80px 20px;
   text-align: center;
-  background: #FFFFFF; /* White */
+  background: transparent;
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
 
@@ -672,7 +664,7 @@ const TechCardInner = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 25px 20px;
-  background: ${CARD_BG}; /* White */
+  background: ${CARD_BG};
   border-radius: 14px;
   border: 1px solid ${BORDER_LIGHT};
   box-shadow: 0 10px 30px rgba(15,23,42,0.08);
@@ -708,10 +700,10 @@ const TechName = styled.h4`
   font-weight: 700;
 `;
 
-// --- STORIES ---
+/* STORIES */
 const StoriesSection = styled.section`
   padding: 80px 20px;
-  background: ${FOOTER_BG}; /* White */
+  background: transparent;
   text-align: center;
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
@@ -737,7 +729,7 @@ const StoriesGrid = styled.div`
 `;
 
 const StoryCard = styled(AnimatedSection)`
-  background: ${CARD_BG}; /* White */
+  background: ${CARD_BG};
   border-radius: 14px;
   padding: 30px;
   text-align: left;
@@ -769,11 +761,11 @@ const StoryCard = styled(AnimatedSection)`
   }
 `;
 
-// --- CTA ---
+/* CTA */
 const CtaSection = styled.section`
   padding: 100px 20px;
   text-align: center;
-  background: #FFFFFF; /* White */
+  background: transparent;
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
 
@@ -816,9 +808,9 @@ const CtaContainer = styled.div`
   }
 `;
 
-// --- FOOTER ---
+/* FOOTER */
 const FullFooter = styled.footer`
-  background: ${FOOTER_BG}; /* White */
+  background: ${FOOTER_BG};
   padding: 60px 50px 20px;
   color: ${MUTED_TEXT};
   border-top: 1px solid ${BORDER_LIGHT};
@@ -891,7 +883,7 @@ const SocialIcons = styled.div`
     width: 30px;
     height: 30px;
     border-radius: 999px;
-    background: #ffffff; /* White */
+    background: #ffffff;
     border: 1px solid ${BORDER_LIGHT};
     display: flex;
     align-items: center;
@@ -915,9 +907,7 @@ const Copyright = styled.div`
   margin-top: 50px;
 `;
 
-// ====================================================================
-// ========== HELPERS & COMPONENTS ==========
-// ====================================================================
+/* HELPERS & COMPONENTS */
 const ICON_MAP = {
   projects: faClipboardList,
   experience: faStar,
@@ -925,19 +915,18 @@ const ICON_MAP = {
   hours: faClock,
 };
 
-// --- Tech Card Component ---
 const TechCard = ({ tech, name, delay, isVisible }) => (
   <TechCardWrapper $isVisible={isVisible} $delay={delay}>
     <TechCardInner>
       <TechIconBox>
         {tech.logoUrl ? (
-          <img 
-            src={tech.logoUrl} 
-            alt={name} 
-            style={{ 
+          <img
+            src={tech.logoUrl}
+            alt={name}
+            style={{
               width: name === 'Gemini' ? '120%' : '100%',
               height: name === 'Gemini' ? 'auto' : '100%',
-              objectFit: 'contain', 
+              objectFit: 'contain',
             }}
           />
         ) : (
@@ -948,7 +937,6 @@ const TechCard = ({ tech, name, delay, isVisible }) => (
     </TechCardInner>
   </TechCardWrapper>
 );
-
 
 const useIntersectionObserver = (options) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -1006,19 +994,15 @@ const CountUpNumber = ({ targetNumber, duration = 1500, isVisible, delay = 0, sh
   );
 };
 
-// ====================================================================
-// ========== MAIN COMPONENT ==========
-// ====================================================================
+// MAIN COMPONENT
 const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   const canvasRef = useRef(null);
-  const rafRef = useRef(null);
 
   const [milestones, setMilestones] = useState([]);
   const [clientStories, setClientStories] = useState([]);
   const [partners, setPartners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // UPDATED: Default state changed from 'design' to 'web'
-  const [activeStackTab, setActiveStackTab] = useState('web'); 
+  const [activeStackTab, setActiveStackTab] = useState('web');
 
   const [milestonesRef, isMilestonesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -100px 0px' });
   const [storiesRef, isStoriesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
@@ -1153,61 +1137,60 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     };
   }, []);
 
+  // CANVAS: GOLD STARS + FULL WHITE FILL
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: true });
 
-    const resize = () => {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+    const DPR = window.devicePixelRatio || 1;
+    function resize() {
+      canvas.width = Math.max(1, window.innerWidth * DPR);
+      canvas.height = Math.max(1, window.innerHeight * DPR);
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-    };
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
     resize();
-    window.addEventListener('resize', resize);
 
-    let width = window.innerWidth,
-      height = window.innerHeight;
-    const starCount = Math.floor((width * height) / 60000);
-    const stars = Array.from({ length: starCount }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
+    const stars = Array.from({ length: 140 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
       r: 1 + Math.random() * 2.2,
-      a: 0.15 + Math.random() * 0.35,
       dx: (Math.random() - 0.5) * 0.25,
       dy: 0.08 + Math.random() * 0.35,
-      twinkle: Math.random() * Math.PI * 2,
+      alpha: 0.15 + Math.random() * 0.35,
     }));
 
+    let raf;
     const draw = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-
-      ctx.clearRect(0, 0, width, height);
+      // paint pure white background each frame (device space)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width / DPR, canvas.height / DPR);
+      ctx.restore();
 
       stars.forEach((s) => {
         s.x += s.dx;
         s.y += s.dy;
-        s.twinkle += 0.05;
-        if (s.y > height + 10) s.y = -10;
-        if (s.x > width + 10) s.x = -10;
-        if (s.x < -10) s.x = width + 10;
-        const alpha = s.a * (0.5 + Math.sin(s.twinkle) * 0.5);
-        ctx.fillStyle = `rgba(212,169,55,${alpha})`;
+        if (s.y > window.innerHeight + 10) s.y = -10;
+        if (s.x > window.innerWidth + 10) s.x = -10;
+        if (s.x < -10) s.x = window.innerWidth + 10;
+
         ctx.beginPath();
+        ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fill();
       });
-      rafRef.current = requestAnimationFrame(draw);
+
+      raf = requestAnimationFrame(draw);
     };
     draw();
 
+    window.addEventListener('resize', resize);
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
     };
   }, []);
@@ -1234,7 +1217,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
 
   const renderStackContent = (activeTab, isVisible) => {
     const techKeys = ['web', 'mobile', 'blockchain', 'design', 'ai', 'marketing'];
-    
+
     if (techKeys.includes(activeTab)) {
       const techList = stackData.tech[activeTab] || [];
       return (
@@ -1250,8 +1233,8 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
           ))}
         </TechGrid>
       );
-    } 
-    
+    }
+
     return <div style={{ color: MUTED_TEXT, opacity: 0.7, padding: 30 }}>Select a powerful stack category above to see the tools we use.</div>;
   };
 
@@ -1356,7 +1339,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
           </MilestonesGrid>
         </MilestonesSection>
 
-        {/* PARTNERS */}
+        {/* PARTNERS - uses MarqueeTrack (NO INLINE ANIMATION) */}
         <PartnersSection>
           <PartnersHeader>TRUSTED PARTNERS & COLLABORATORS</PartnersHeader>
           {partners.length > 0 ? (
@@ -1389,13 +1372,13 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
           )}
         </PartnersSection>
 
-        {/* TECH STACK - UPDATED */}
+        {/* STACK */}
         <StackSection ref={stackRef}>
           <StackTitle>
             POWERFUL <span>STACK</span>
           </StackTitle>
           <StackSubtitle>We use the latest enterprise-grade technologies.</StackSubtitle>
-          
+
           <StackTabs>
             {stackData.tabs.map((tab) => (
               <StackTabButton
@@ -1410,7 +1393,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
           </StackTabs>
 
           {renderStackContent(activeStackTab, isStackVisible)}
-          
         </StackSection>
 
         {/* CLIENT STORIES */}
@@ -1448,13 +1430,13 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
               <FooterLogo onClick={() => handleNavigation('home')}>NEXORACREW</FooterLogo>
               <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI.</p>
               <SocialIcons>
-                <a href="https://www.instagram.com/nexoracrew?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="" rel="noreferrer">
+                <a href="https://www.instagram.com/nexoracrew?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noreferrer">
                   <FontAwesomeIcon icon={faInstagram} />
                 </a>
                 <a href="https://www.linkedin.com/in/nexoracrew-%E2%80%8C-01842a396/" target="_blank" rel="noreferrer">
                   <FontAwesomeIcon icon={faLinkedinIn} />
                 </a>
-                <a href="mailto:nexora.crew@gmail.com">
+                <a href={`mailto:${safeGeneralData.email}`}>
                   <FontAwesomeIcon icon={faEnvelope} />
                 </a>
                 <a href="https://wa.me/9597646460" target="_blank" rel="noopener noreferrer">
