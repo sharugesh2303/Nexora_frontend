@@ -44,8 +44,7 @@ const TECH_LOGOS = {
   'Python': 'https://www.vectorlogo.zone/logos/python/python-icon.svg',
   'Figma': 'https://www.vectorlogo.zone/logos/figma/figma-icon.svg',
   'Canva': 'https://www.vectorlogo.zone/logos/canva/canva-icon.svg',
-  'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg', 
-  'Spline': 'https://raw.githubusercontent.com/SplineTool/spline-tool-logo/main/logo.png', 
+  'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg',
 };
 
 // ====================================================================
@@ -1058,7 +1057,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
         { name: 'Figma', logoUrl: TECH_LOGOS['Figma'] },
         { name: 'Canva', logoUrl: TECH_LOGOS['Canva'] },
         { name: 'Adobe Suite', logoUrl: TECH_LOGOS['Adobe Suite'] },
-        { name: 'Spline (3D)', logoUrl: TECH_LOGOS['Spline'] },
       ],
       marketing: [
         { name: 'Analytics', icon: faChartBar, description: 'Google Analytics, Mixpanel' },
