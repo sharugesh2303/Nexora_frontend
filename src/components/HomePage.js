@@ -33,7 +33,6 @@ import axios from 'axios';
 const TECH_LOGOS = {
   'React Native': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg',
   'Flutter': 'https://www.vectorlogo.zone/logos/flutterio/flutterio-icon.svg',
-  'Swift': 'https://cdn.iconscout.com/icon/free/png-256/swift-15-283844.png', 
   'Kotlin': 'https://www.vectorlogo.zone/logos/kotlinlang/kotlinlang-icon.svg',
   'Node.js': 'https://www.vectorlogo.zone/logos/nodejs/nodejs-icon.svg',
   'MongoDB': 'https://www.vectorlogo.zone/logos/mongodb/mongodb-icon.svg',
@@ -1506,4 +1505,4 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   );
 };
 
-export default HomePage;
+export default HomePage; 
