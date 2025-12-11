@@ -2,20 +2,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle, keyframes } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faMapMarkerAlt, faPhone, faEnvelope as faEnvelopeSolid } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCalendarAlt,
+  faMapMarkerAlt,
+  faPhone,
+  faEnvelope as faEnvelopeSolid,
+  faBars,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faLinkedin, faWhatsapp, faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 /* =========================
-   THEME
-   (white background, navy + gold accents)
+   THEME CONSTANTS
    ========================= */
-const NAVY = '#012a4a';
-const GOLD = '#d4af37';
+const NAVY = '#123165';
+const GOLD = '#D4A937';
 const ACCENT = '#0b3b58';
-const BG_WHITE = '#ffffff';
-const LIGHT_TEXT = '#0f2640';
-const MUTED_TEXT = '#6f7b86';
-const BORDER = 'rgba(1,42,74,0.08)';
+const BG_WHITE = '#FFFFFF';
+const LIGHT_TEXT = '#111827';
+const MUTED_TEXT = '#6B7280';
+const BORDER = '#e2e8f0';
 
 /* =========================
    ANIMATIONS & GLOBAL STYLES
@@ -30,28 +36,34 @@ const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background: ${BG_WHITE};
+    background: ${BG_WHITE}; /* Permanent pure white background */
     color: ${LIGHT_TEXT};
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
-  canvas { display: none; } /* keep canvas logic but hide visual by default */
-`;
 
-/* ---------- (hidden) star canvas (kept for logic parity) ---------- */
-const StarCanvas = styled.canvas`
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  display: none;
+  /* ensure no default background on html elements */
+  * { background-repeat: no-repeat; }
 `;
 
 /* =========================
-   LAYOUT & NAV
+   STAR CANVAS — sits behind content
+   (kept — draws gold stars on top of pure white)
+   ========================= */
+const StarCanvas = styled.canvas`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  background: transparent; /* transparent so the page remains pure white */
+`;
+
+/* =========================
+   LAYOUT & HEADER
    ========================= */
 const Page = styled.div`
   position: relative;
@@ -59,100 +71,126 @@ const Page = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: ${BG_WHITE}; /* Page layer solid white */
 `;
 
+/* Header: switched to solid white (no glass/transparency) */
 const Header = styled.header`
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 40px;
   padding: 14px 48px;
   position: sticky;
   top: 0;
   width: 100%;
-  background: ${BG_WHITE};
-  border-bottom: 1px solid rgba(2,36,60,0.04);
-  z-index: 10;
-
+  background: ${BG_WHITE}; /* solid white */
+  border-bottom: 1px solid ${BORDER};
+  z-index: 1000;
   @media (max-width: 768px) {
-    padding: 12px 20px;
-    gap: 18px;
-    flex-wrap: wrap;
+    padding: 14px 20px;
+    gap: 20px;
+    justify-content: space-between;
   }
 `;
 
 const Logo = styled.h1`
   margin: 0;
-  font-weight: 900;
-  font-size: 1.6rem;
+  font-weight: 800;
+  font-size: 1.8rem;
   cursor: pointer;
-  letter-spacing: 0.0px;
+  letter-spacing: 1px;
   display: inline-flex;
   align-items: center;
   gap: 0px;
+  @media (max-width: 480px) { font-size: 1.5rem; }
 `;
 const LogoN = styled.span` color: ${NAVY}; `;
-const LogoCrew = styled.span` color: ${GOLD}; font-weight:900;`;
+const LogoCrew = styled.span` color: ${GOLD}; `;
 
-/* Nav group */
 const NavGroup = styled.nav`
-  display:flex;
-  gap: 20px;
-  align-items:center;
-  margin-right:auto;
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  margin-right: auto;
 
   span.navItem {
     color: ${MUTED_TEXT};
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     position: relative;
-    padding: 6px 6px;
-    transition: color 0.2s ease, transform 0.12s ease;
-    border-radius: 6px;
-    font-size: 0.95rem;
+    padding: 6px 4px;
+    transition: 0.3s ease;
+    font-size: 1rem;
     display: inline-flex;
     align-items: center;
     gap: 8px;
   }
 
-  span.navItem:hover { color: ${NAVY}; transform: translateY(-1px); }
-  span.navItem.active { color: ${NAVY}; font-weight: 700; }
+  span.navItem:hover { color: ${NAVY}; }
 
-  span.navItem::after{
+  span.navItem::after {
     content: '';
     position: absolute;
-    left: 12%;
-    bottom: -6px;
+    left: 0;
+    bottom: -2px;
     width: 0;
-    height: 3px;
+    height: 2px;
     background: ${GOLD};
-    transition: width .22s ease;
+    transition: 0.3s;
     border-radius: 4px;
   }
-  span.navItem:hover::after { width: 76%; }
+  span.navItem:hover::after { width: 100%; }
 
-  @media (max-width: 768px) {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
+  span.navItem.active { color: ${NAVY}; font-weight: 600; }
+
+  @media (max-width: 1024px) { display: none; }
 `;
 
-/* Progress button (just the word) */
-const NavProgressText = styled.button`
-  background: transparent;
-  border: 0;
+const MobileMenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
   color: ${NAVY};
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 6px;
-  display: inline-flex;
+  @media (max-width: 1024px) { display: block; }
+`;
+
+const MobileNavMenu = styled.div`
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: ${BG_WHITE};
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  &:hover { background: rgba(1,42,74,0.03); transform: translateY(-1px); }
+  padding-top: 80px;
+  transform: translateX(${props => (props.$isOpen ? '0' : '100%')});
+  transition: transform 0.3s ease-in-out;
+  box-shadow: -4px 0 20px rgba(15,23,42,0.08);
+
+  .close-btn {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: none;
+    border: none;
+    color: ${LIGHT_TEXT};
+    font-size: 2rem;
+    cursor: pointer;
+  }
+
+  span {
+    font-size: 1.3rem;
+    margin: 15px 0;
+    cursor: pointer;
+    color: ${MUTED_TEXT};
+    &:hover { color: ${NAVY}; }
+  }
 `;
 
 /* =========================
-   HERO / INTRO
+   BLOG CONTENT STYLES
    ========================= */
 const Intro = styled.section`
   padding: 84px 20px 20px;
@@ -168,6 +206,7 @@ const IntroTitle = styled.h2`
   font-size: 2.4rem;
   margin: 0 0 8px;
   color: ${NAVY};
+  font-weight: 800;
   span { color: ${GOLD}; }
   @media (max-width: 768px) { font-size: 1.9rem; }
 `;
@@ -177,6 +216,7 @@ const IntroSubtitle = styled.p`
   max-width: 820px;
   margin-left: auto;
   margin-right: auto;
+  font-size: 1.1rem;
 `;
 
 /* =========================
@@ -201,7 +241,7 @@ const PostCard = styled.article`
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid ${BORDER};
-  box-shadow: 0 10px 30px rgba(2,6,23,0.04);
+  box-shadow: 0 10px 30px rgba(15,23,42,0.04);
   transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
   transform-origin: center;
   animation: ${fadeUp} 0.6s ease forwards;
@@ -210,7 +250,7 @@ const PostCard = styled.article`
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 30px 50px rgba(2,36,60,0.06);
+    box-shadow: 0 30px 50px rgba(15,23,42,0.08);
     border-color: ${GOLD};
   }
 
@@ -219,11 +259,11 @@ const PostCard = styled.article`
 
 const ImageWrapper = styled.div`
   width: 100%;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 16 / 9;
   position: relative;
   background: ${ACCENT};
   overflow: hidden;
-  border-bottom: 1px solid rgba(2,36,60,0.04);
+  border-bottom: 1px solid ${BORDER};
 `;
 const PostImage = styled.img`
   position: absolute;
@@ -231,10 +271,8 @@ const PostImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
   transition: transform 0.45s ease;
-  display: block;
-  &:hover { transform: scale(1.03); }
+  &:hover { transform: scale(1.05); }
 `;
 
 const CardBody = styled.div` padding: 18px 20px 22px; `;
@@ -243,33 +281,33 @@ const Meta = styled.div`
   justify-content:space-between;
   align-items:center;
   color: ${MUTED_TEXT};
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin-bottom: 10px;
-  svg { color: ${NAVY}; margin-right: 8px; }
+  svg { color: ${NAVY}; margin-right: 6px; }
 `;
-const Title = styled.h3` color: ${NAVY}; font-size: 1.15rem; margin: 0 0 8px; `;
-const Summary = styled.p` color: ${MUTED_TEXT}; margin: 0 0 14px; line-height: 1.6; `;
+const Title = styled.h3` color: ${LIGHT_TEXT}; font-size: 1.2rem; font-weight: 700; margin: 0 0 8px; `;
+const Summary = styled.p` color: ${MUTED_TEXT}; margin: 0 0 14px; line-height: 1.6; font-size: 0.95rem;`;
 const ReadMore = styled.span`
   display:inline-flex;
   align-items:center;
   gap:8px;
-  padding: 9px 14px;
-  background: linear-gradient(90deg, ${GOLD}, ${ACCENT});
-  color: ${NAVY};
-  border-radius: 10px;
-  font-weight: 700;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, ${NAVY}, ${ACCENT});
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: transform .12s ease, box-shadow .12s ease;
-  box-shadow: 0 6px 14px rgba(2,36,60,0.04);
-  &:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(2,36,60,0.06); }
+  box-shadow: 0 6px 14px rgba(18,49,101,0.2);
+  &:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(18,49,101,0.3); }
 `;
 
 /* =========================
-   FOOTER (4-column layout similar to screenshot)
-   - NEXORACREW where CREW is gold
+   FOOTER
    ========================= */
 const FooterWrap = styled.footer`
-  padding: 40px 20px;
+  padding: 60px 20px;
   background: ${BG_WHITE};
   border-top: 1px solid ${BORDER};
   color: ${MUTED_TEXT};
@@ -282,84 +320,92 @@ const FooterInner = styled.div`
   grid-template-columns: 1fr 180px 1fr 220px;
   gap: 28px;
   align-items: start;
-
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 40px;
   }
 `;
 
-const FooterCol = styled.div``;
-
-const FooterBrand = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+const FooterCol = styled.div`
+  h4 {
+    color: ${LIGHT_TEXT};
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+  }
+  h4:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 30px;
+    height: 2px;
+    background: ${GOLD};
+  }
 `;
 
 const FooterBrandTitle = styled.div`
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: ${NAVY};
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0;
+  margin-bottom: 15px;
 `;
 
 const SocialRow = styled.div`
   display:flex;
-  gap: 10px;
+  gap: 12px;
   align-items:center;
+  margin-top: 20px;
 `;
 
 const SocialIcon = styled.a`
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:34px;
-  height:34px;
-  border-radius:8px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
   background: #fff;
-  border: 1px solid rgba(2,36,60,0.06);
+  border: 1px solid ${BORDER};
   color: ${NAVY};
-  text-decoration:none;
-  font-size: 14px;
-  transition: transform .12s ease, box-shadow .12s ease;
-  &:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(2,36,60,0.06); }
+  transition: all 0.3s ease;
+  &:hover { 
+    background: ${NAVY}; 
+    color: #fff; 
+    border-color: ${NAVY};
+    transform: translateY(-3px);
+  }
 `;
 
 const FooterList = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 8px 0 0 0;
-  color: ${MUTED_TEXT};
-
+  margin: 0;
   li { margin-bottom: 10px; }
   li a {
     color: ${MUTED_TEXT};
     text-decoration: none;
-    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s;
     cursor: pointer;
   }
   li a:hover { color: ${NAVY}; }
 `;
 
-const ServicesList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 8px 0 0 0;
-  color: ${MUTED_TEXT};
-  li { margin-bottom: 8px; font-size: 0.95rem; }
-`;
-
 const ContactInfo = styled.div`
-  color: ${MUTED_TEXT};
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap: 15px;
+  font-size: 0.95rem;
 
-  div { display:flex; gap:10px; align-items:flex-start; }
-  strong { color: ${NAVY}; display:block; margin-bottom:4px; font-weight:700; }
+  div.item { display:flex; gap:12px; align-items:flex-start; }
+  svg { color: ${GOLD}; margin-top: 4px; }
+  strong { color: ${NAVY}; display:block; font-weight:600; }
 `;
 
 /* =========================
@@ -368,16 +414,29 @@ const ContactInfo = styled.div`
 const BlogPage = ({ onNavigate = () => {}, posts }) => {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
-  const [progressPct] = useState(68);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // canvas drawing logic preserved (canvas hidden via CSS)
+  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+
+  // CANVAS: Gold stars (kept) — canvas is transparent so page is permanently white
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: true });
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    // DPR handling for crispness
+    const DPR = Math.max(1, window.devicePixelRatio || 1);
+    function resize() {
+      canvas.width = Math.floor(window.innerWidth * DPR);
+      canvas.height = Math.floor(window.innerHeight * DPR);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resize();
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
     const stars = Array.from({ length: 120 }, () => ({
       x: Math.random() * width,
@@ -385,37 +444,29 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
       baseR: 0.6 + Math.random() * 1.6,
       dx: (Math.random() - 0.5) * 0.35,
       dy: 0.2 + Math.random() * 0.6,
-      alpha: 0.4 + Math.random() * 0.6,
-      twSpeed: 0.002 + Math.random() * 0.01,
-      twPhase: Math.random() * Math.PI * 2,
+      alpha: 0.2 + Math.random() * 0.6,
     }));
 
     function onResize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      resize();
     }
     window.addEventListener('resize', onResize);
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
-      // subtle background gradient for drawing (won't show because canvas hidden)
-      const gBg = ctx.createLinearGradient(0, 0, 0, height);
-      gBg.addColorStop(0, '#ffffff');
-      gBg.addColorStop(1, '#ffffff');
-      ctx.fillStyle = gBg;
-      ctx.fillRect(0, 0, width, height);
-
+      // Only draw gold points — canvas background left transparent so white page shows through
       stars.forEach((s) => {
         s.x += s.dx;
         s.y += s.dy;
         if (s.y > height + 10) s.y = -10;
         if (s.x > width + 10) s.x = -10;
         if (s.x < -10) s.x = width + 10;
-        const r = s.baseR * (0.8 + Math.sin(s.twPhase) * 0.5);
-        s.twPhase += s.twSpeed;
+
         ctx.beginPath();
-        ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(1,42,74,${0.08 * s.alpha})`;
+        ctx.arc(s.x, s.y, s.baseR, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(212, 169, 55, ${s.alpha})`; // GOLD
         ctx.fill();
       });
 
@@ -429,7 +480,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
     };
   }, []);
 
-  // fallback posts
+  // --- MOCK DATA ---
   const getPostsData = () => {
     if (posts && posts.length > 0) return posts;
     return [
@@ -466,35 +517,59 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
     return da - db;
   });
 
+  const handleNavigation = (route) => {
+    onNavigate(route);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <>
       <GlobalStyle />
       <StarCanvas ref={canvasRef} />
 
       <Page>
+        {/* HEADER */}
         <Header>
-          <Logo onClick={() => onNavigate('home')}>
+          <Logo onClick={() => handleNavigation('home')}>
             <LogoN>NEXORA</LogoN>
             <LogoCrew>CREW</LogoCrew>
           </Logo>
 
           <NavGroup>
-            <span className="navItem" onClick={() => onNavigate('home')}>Home</span>
-            <span className="navItem" onClick={() => onNavigate('about')}>About</span>
-            <span className="navItem" onClick={() => onNavigate('services')}>Services</span>
-            <span className="navItem" onClick={() => onNavigate('projects')}>Projects</span>
-            <span className="navItem active" onClick={() => onNavigate('blog')} style={{ color: NAVY }}>Blog</span>
-
-            <span className="navItem" onClick={() => onNavigate('team')}>Team</span>
-
-            <NavProgressText onClick={() => onNavigate('progress')} aria-label="Open progress page">
-              Progress
-            </NavProgressText>
-
-            <span className="navItem" onClick={() => onNavigate('contact')}>Contact</span>
+            {navItems.map((item) => (
+              <span
+                key={item}
+                className={`navItem ${item === 'blog' ? 'active' : ''}`}
+                onClick={() => handleNavigation(item)}
+              >
+                {item.charAt(0).toUpperCase() + item.slice(1)}
+              </span>
+            ))}
           </NavGroup>
+
+          <MobileMenuButton onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
+            <FontAwesomeIcon icon={faBars} />
+          </MobileMenuButton>
         </Header>
 
+        {/* MOBILE MENU */}
+        <MobileNavMenu $isOpen={isMobileMenuOpen}>
+          <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+
+          {navItems.map((item) => (
+            <span
+              key={`mob-${item}`}
+              onClick={() => handleNavigation(item)}
+              style={item === 'blog' ? { color: NAVY } : {}}
+            >
+              {item.charAt(0).toUpperCase() + item.slice(1)}
+            </span>
+          ))}
+        </MobileNavMenu>
+
+        {/* MAIN CONTENT */}
         <Intro>
           <IntroTitle>Our <span>Blog</span></IntroTitle>
           <IntroSubtitle>Updates, insights, and stories from the NEXORACREW team.</IntroSubtitle>
@@ -509,7 +584,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
 
               <CardBody>
                 <Meta>
-                  <span>By {post.author}</span>
+                  <span>{post.author}</span>
                   <span>
                     <FontAwesomeIcon icon={faCalendarAlt} />
                     {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -519,7 +594,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
                 <Title>{post.title}</Title>
                 <Summary>{post.summary}</Summary>
 
-                <ReadMore onClick={() => onNavigate(`blog/${post._id}`)}>
+                <ReadMore onClick={() => handleNavigation(`blog/${post._id}`)}>
                   Read More →
                 </ReadMore>
               </CardBody>
@@ -527,87 +602,67 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
           ))}
         </PostGrid>
 
-        {/* Footer: 4-column layout */}
+        {/* FOOTER */}
         <FooterWrap>
           <FooterInner>
-            {/* Column 1: Brand & short text + social icons */}
             <FooterCol>
-              <FooterBrand>
-                <FooterBrandTitle>
-                  <LogoN>NEXORA</LogoN>
-                  <LogoCrew>CREW</LogoCrew>
-                </FooterBrandTitle>
-                <div style={{ maxWidth: 360, color: MUTED_TEXT }}>
-                  Transforming ideas into powerful digital products using modern
-                  technology, creativity, and AI.
-                </div>
-
-                <SocialRow>
-                  <SocialIcon href="#" aria-label="Instagram"><FontAwesomeIcon icon={faInstagram} /></SocialIcon>
-                  <SocialIcon href="#" aria-label="LinkedIn"><FontAwesomeIcon icon={faLinkedin} /></SocialIcon>
-                  <SocialIcon href="mailto:nexoracrew@email.com" aria-label="Email"><FontAwesomeIcon icon={faEnvelopeSolid} /></SocialIcon>
-                  <SocialIcon href="#" aria-label="WhatsApp"><FontAwesomeIcon icon={faWhatsapp} /></SocialIcon>
-                  <SocialIcon href="#" aria-label="YouTube"><FontAwesomeIcon icon={faYoutube} /></SocialIcon>
-                </SocialRow>
-              </FooterBrand>
+              <FooterBrandTitle>
+                <LogoN>NEXORA</LogoN>
+                <LogoCrew>CREW</LogoCrew>
+              </FooterBrandTitle>
+              <div style={{ maxWidth: 360, color: MUTED_TEXT, lineHeight: 1.6 }}>
+                Transforming ideas into powerful digital products using modern
+                technology, creativity, and AI.
+              </div>
+              <SocialRow>
+                <SocialIcon href="#" aria-label="Instagram"><FontAwesomeIcon icon={faInstagram} /></SocialIcon>
+                <SocialIcon href="#" aria-label="LinkedIn"><FontAwesomeIcon icon={faLinkedin} /></SocialIcon>
+                <SocialIcon href="mailto:nexoracrew@email.com" aria-label="Email"><FontAwesomeIcon icon={faEnvelopeSolid} /></SocialIcon>
+                <SocialIcon href="#" aria-label="WhatsApp"><FontAwesomeIcon icon={faWhatsapp} /></SocialIcon>
+                <SocialIcon href="#" aria-label="YouTube"><FontAwesomeIcon icon={faYoutube} /></SocialIcon>
+              </SocialRow>
             </FooterCol>
 
-            {/* Column 2: Quick links */}
             <FooterCol>
-              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
-                Quick Links
-              </strong>
+              <h4>Quick Links</h4>
               <FooterList>
-                <li><a onClick={() => onNavigate('home')}>Home</a></li>
-                <li><a onClick={() => onNavigate('about')}>About</a></li>
-                <li><a onClick={() => onNavigate('projects')}>Projects</a></li>
-                <li><a onClick={() => onNavigate('team')}>Team</a></li>
-                <li><a onClick={() => onNavigate('progress')}>Progress</a></li>
-                <li><a onClick={() => onNavigate('blog')}>Blog</a></li>
-                <li><a onClick={() => onNavigate('contact')}>Contact</a></li>
+                {navItems.slice(0, 6).map(item => (
+                   <li key={item}><a onClick={() => handleNavigation(item)}>{item.charAt(0).toUpperCase() + item.slice(1)}</a></li>
+                ))}
               </FooterList>
             </FooterCol>
 
-            {/* Column 3: Services */}
             <FooterCol>
-              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
-                Services
-              </strong>
-              <ServicesList>
+              <h4>Services</h4>
+              <FooterList>
                 <li>Web Development</li>
                 <li>Poster designing & logo making</li>
                 <li>Content creation</li>
                 <li>Digital marketing & SEO</li>
                 <li>AI and automation</li>
                 <li>Hosting & Support</li>
-                <li>Printing & Branding solutions</li>
-              </ServicesList>
+              </FooterList>
             </FooterCol>
 
-            {/* Column 4: Contact Info */}
             <FooterCol>
-              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
-                Contact Info
-              </strong>
+              <h4>Contact Info</h4>
               <ContactInfo>
-                <div>
-                  <div style={{ color: GOLD, marginTop: 2 }}><FontAwesomeIcon icon={faMapMarkerAlt} /></div>
+                <div className="item">
+                  <FontAwesomeIcon icon={faMapMarkerAlt} />
                   <div>
                     <strong>JJCET</strong>
                     <div style={{ color: MUTED_TEXT }}>Palakarai, Tiruchirappalli</div>
                   </div>
                 </div>
-
-                <div>
-                  <div style={{ color: GOLD, marginTop: 2 }}><FontAwesomeIcon icon={faEnvelopeSolid} /></div>
+                <div className="item">
+                  <FontAwesomeIcon icon={faEnvelopeSolid} />
                   <div>
                     <strong>Email</strong>
                     <div style={{ color: MUTED_TEXT }}>nexoracrew@email.com</div>
                   </div>
                 </div>
-
-                <div>
-                  <div style={{ color: GOLD, marginTop: 2 }}><FontAwesomeIcon icon={faPhone} /></div>
+                <div className="item">
+                  <FontAwesomeIcon icon={faPhone} />
                   <div>
                     <strong>Phone</strong>
                     <div style={{ color: MUTED_TEXT }}>+91 95976 46460</div>
