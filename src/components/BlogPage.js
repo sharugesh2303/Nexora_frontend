@@ -1,42 +1,45 @@
-import React, { useEffect, useRef } from 'react';
-import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
+// src/components/BlogPage.jsx
+import React, { useEffect, useRef, useState } from 'react';
+import styled, { createGlobalStyle, keyframes } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faMapMarkerAlt, faPhone, faEnvelope as faEnvelopeSolid } from '@fortawesome/free-solid-svg-icons';
+import { faInstagram, faLinkedin, faWhatsapp, faYoutube } from '@fortawesome/free-brands-svg-icons';
 
-// --- THEME TOKENS ---
-const NEON = '#00e0b3';
-const ACCENT = '#1ddc9f';
-const NAVY_BG = '#071025';
-const MID_NAVY = '#0B1724';
-const LIGHT_TEXT = '#D6E2F0';
-const MUTED_TEXT = '#9AA6B3';
-const BORDER = 'rgba(255,255,255,0.06)';
+/* =========================
+   THEME
+   (white background, navy + gold accents)
+   ========================= */
+const NAVY = '#012a4a';
+const GOLD = '#d4af37';
+const ACCENT = '#0b3b58';
+const BG_WHITE = '#ffffff';
+const LIGHT_TEXT = '#0f2640';
+const MUTED_TEXT = '#6f7b86';
+const BORDER = 'rgba(1,42,74,0.08)';
 
-// --- KEYFRAMES & GLOBAL ---
+/* =========================
+   ANIMATIONS & GLOBAL STYLES
+   ========================= */
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
 `;
-const pulseGlow = keyframes`
-  0%,100% { text-shadow: 0 0 8px ${NEON}, 0 0 18px rgba(0,224,179,0.14); }
-  50% { text-shadow: 0 0 14px ${NEON}, 0 0 28px rgba(0,224,179,0.24); }
-`;
 
 const GlobalStyle = createGlobalStyle`
+  html, body, #root { height: 100%; background: ${BG_WHITE}; }
   body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background: ${NAVY_BG};
+    background: ${BG_WHITE};
     color: ${LIGHT_TEXT};
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
     overflow-x: hidden;
   }
-  .neon-text-shadow { text-shadow: 0 0 6px ${NEON}, 0 0 12px rgba(0,224,179,0.12); }
-  .animate-in { opacity: 0; animation: ${css`${fadeUp} 0.85s ease forwards`}; }
+  canvas { display: none; } /* keep canvas logic but hide visual by default */
 `;
 
-/* ---------- STAR CANVAS ---------- */
+/* ---------- (hidden) star canvas (kept for logic parity) ---------- */
 const StarCanvas = styled.canvas`
   position: fixed;
   inset: 0;
@@ -44,11 +47,12 @@ const StarCanvas = styled.canvas`
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  display: block;
-  background: radial-gradient(circle at 15% 10%, #071022 0%, #081226 18%, #071020 45%, #02040a 100%);
+  display: none;
 `;
 
-/* ---------- LAYOUT & COMPONENTS ---------- */
+/* =========================
+   LAYOUT & NAV
+   ========================= */
 const Page = styled.div`
   position: relative;
   z-index: 2;
@@ -57,73 +61,74 @@ const Page = styled.div`
   flex-direction: column;
 `;
 
-/* Header – aligned like Home/About/Services/Projects */
 const Header = styled.header`
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 28px;
   padding: 14px 48px;
   position: sticky;
   top: 0;
   width: 100%;
-  background: rgba(7,16,38,0.65);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  background: ${BG_WHITE};
+  border-bottom: 1px solid rgba(2,36,60,0.04);
   z-index: 10;
 
   @media (max-width: 768px) {
     padding: 12px 20px;
-    gap: 24px;
+    gap: 18px;
     flex-wrap: wrap;
   }
 `;
 
 const Logo = styled.h1`
-  color: ${NEON};
   margin: 0;
-  font-weight: 800;
-  font-size: 1.8rem;
+  font-weight: 900;
+  font-size: 1.6rem;
   cursor: pointer;
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px ${NEON}, 0 0 22px rgba(0,224,179,0.12);
-  animation: ${css`${pulseGlow} 2.8s infinite alternate`};
+  letter-spacing: 0.0px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0px;
 `;
+const LogoN = styled.span` color: ${NAVY}; `;
+const LogoCrew = styled.span` color: ${GOLD}; font-weight:900;`;
 
-/* Nav like other pages, next to logo on left */
+/* Nav group */
 const NavGroup = styled.nav`
   display:flex;
-  gap: 22px;
+  gap: 20px;
   align-items:center;
   margin-right:auto;
 
-  span {
+  span.navItem {
     color: ${MUTED_TEXT};
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     position: relative;
-    padding: 6px 4px;
-    transition: 0.3s ease;
-
-    &:hover {
-      color: ${NEON};
-      text-shadow: 0 0 10px ${NEON};
-    }
-
-    &:after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -2px;
-      width: 0;
-      height: 2px;
-      background: ${NEON};
-      transition: 0.3s;
-      border-radius: 4px;
-    }
-    &:hover:after {
-      width: 100%;
-    }
+    padding: 6px 6px;
+    transition: color 0.2s ease, transform 0.12s ease;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
+
+  span.navItem:hover { color: ${NAVY}; transform: translateY(-1px); }
+  span.navItem.active { color: ${NAVY}; font-weight: 700; }
+
+  span.navItem::after{
+    content: '';
+    position: absolute;
+    left: 12%;
+    bottom: -6px;
+    width: 0;
+    height: 3px;
+    background: ${GOLD};
+    transition: width .22s ease;
+    border-radius: 4px;
+  }
+  span.navItem:hover::after { width: 76%; }
 
   @media (max-width: 768px) {
     flex-wrap: wrap;
@@ -131,24 +136,41 @@ const NavGroup = styled.nav`
   }
 `;
 
-/* Intro */
+/* Progress button (just the word) */
+const NavProgressText = styled.button`
+  background: transparent;
+  border: 0;
+  color: ${NAVY};
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  &:hover { background: rgba(1,42,74,0.03); transform: translateY(-1px); }
+`;
+
+/* =========================
+   HERO / INTRO
+   ========================= */
 const Intro = styled.section`
-  padding: 130px 20px 40px;
+  padding: 84px 20px 20px;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   z-index: 3;
   text-align: center;
+  animation: ${fadeUp} 0.5s ease forwards;
+  opacity: 0;
 `;
-
 const IntroTitle = styled.h2`
-  font-size: 2.6rem;
+  font-size: 2.4rem;
   margin: 0 0 8px;
-  color: ${LIGHT_TEXT};
-  span { color: ${NEON}; }
-  @media (max-width: 768px) { font-size: 2rem; }
+  color: ${NAVY};
+  span { color: ${GOLD}; }
+  @media (max-width: 768px) { font-size: 1.9rem; }
 `;
-
 const IntroSubtitle = styled.p`
   color: ${MUTED_TEXT};
   margin: 6px 0 0;
@@ -157,62 +179,52 @@ const IntroSubtitle = styled.p`
   margin-right: auto;
 `;
 
-/* Grid */
+/* =========================
+   GRID / CARDS
+   ========================= */
 const PostGrid = styled.div`
   width: 100%;
   max-width: 1200px;
-  margin: 40px auto 80px;
+  margin: 36px auto 80px;
   padding: 0 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 36px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
   z-index: 3;
   justify-items: center;
 `;
 
-/* Card */
 const PostCard = styled.article`
   width: 100%;
   max-width: 360px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
-  border-radius: 14px;
+  background: ${BG_WHITE};
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid ${BORDER};
-  box-shadow: 0 12px 30px rgba(2,6,23,0.6);
-  transition: transform .32s ease, box-shadow .32s ease, border-color .32s ease;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.04);
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
   transform-origin: center;
-  animation: ${css`${fadeUp} 0.85s ease forwards`};
+  animation: ${fadeUp} 0.6s ease forwards;
   opacity: 0;
   margin: 0;
 
   &:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 22px 46px rgba(0,224,179,0.12);
-    border-color: ${NEON};
+    transform: translateY(-8px);
+    box-shadow: 0 30px 50px rgba(2,36,60,0.06);
+    border-color: ${GOLD};
   }
 
-  @media (max-width: 480px) {
-    max-width: 280px;
-  }
+  @media (max-width: 480px) { max-width: 320px; }
 `;
 
-/* Image 9:16 aspect ratio */
 const ImageWrapper = styled.div`
   width: 100%;
   aspect-ratio: 9 / 16;
   position: relative;
-  background: ${MID_NAVY};
+  background: ${ACCENT};
   overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-
-  &::before {
-    content: '';
-    display: block;
-    padding-top: calc((16 / 9) * 100%);
-    line-height: 0;
-  }
+  border-bottom: 1px solid rgba(2,36,60,0.04);
 `;
-
 const PostImage = styled.img`
   position: absolute;
   inset: 0;
@@ -222,65 +234,143 @@ const PostImage = styled.img`
   object-position: center center;
   transition: transform 0.45s ease;
   display: block;
-  &:hover { transform: scale(1.04); }
+  &:hover { transform: scale(1.03); }
 `;
 
-/* Content */
-const CardBody = styled.div`
-  padding: 18px 20px 22px;
-`;
-
+const CardBody = styled.div` padding: 18px 20px 22px; `;
 const Meta = styled.div`
   display:flex;
   justify-content:space-between;
   align-items:center;
   color: ${MUTED_TEXT};
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   margin-bottom: 10px;
-  svg { color: ${NEON}; margin-right: 8px; }
+  svg { color: ${NAVY}; margin-right: 8px; }
 `;
-
-const Title = styled.h3`
-  color: ${LIGHT_TEXT};
-  font-size: 1.15rem;
-  margin: 0 0 8px;
-`;
-
-const Summary = styled.p`
-  color: ${MUTED_TEXT};
-  margin: 0 0 14px;
-  line-height: 1.6;
-`;
-
+const Title = styled.h3` color: ${NAVY}; font-size: 1.15rem; margin: 0 0 8px; `;
+const Summary = styled.p` color: ${MUTED_TEXT}; margin: 0 0 14px; line-height: 1.6; `;
 const ReadMore = styled.span`
   display:inline-flex;
   align-items:center;
   gap:8px;
   padding: 9px 14px;
-  background: linear-gradient(90deg, ${NEON}, ${ACCENT});
-  color: ${MID_NAVY};
+  background: linear-gradient(90deg, ${GOLD}, ${ACCENT});
+  color: ${NAVY};
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform .16s ease;
-  &:hover { transform: translateY(-3px); }
+  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: 0 6px 14px rgba(2,36,60,0.04);
+  &:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(2,36,60,0.06); }
 `;
 
-/* Footer */
-const Footer = styled.footer`
-  padding: 36px 20px;
-  text-align:center;
+/* =========================
+   FOOTER (4-column layout similar to screenshot)
+   - NEXORACREW where CREW is gold
+   ========================= */
+const FooterWrap = styled.footer`
+  padding: 40px 20px;
+  background: ${BG_WHITE};
+  border-top: 1px solid ${BORDER};
   color: ${MUTED_TEXT};
-  border-top: 1px solid rgba(255,255,255,0.02);
-  margin-top: auto;
 `;
 
-/* ---------- COMPONENT ---------- */
+const FooterInner = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 180px 1fr 220px;
+  gap: 28px;
+  align-items: start;
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+`;
+
+const FooterCol = styled.div``;
+
+const FooterBrand = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+`;
+
+const FooterBrandTitle = styled.div`
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: ${NAVY};
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const SocialRow = styled.div`
+  display:flex;
+  gap: 10px;
+  align-items:center;
+`;
+
+const SocialIcon = styled.a`
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  background: #fff;
+  border: 1px solid rgba(2,36,60,0.06);
+  color: ${NAVY};
+  text-decoration:none;
+  font-size: 14px;
+  transition: transform .12s ease, box-shadow .12s ease;
+  &:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(2,36,60,0.06); }
+`;
+
+const FooterList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  color: ${MUTED_TEXT};
+
+  li { margin-bottom: 10px; }
+  li a {
+    color: ${MUTED_TEXT};
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  li a:hover { color: ${NAVY}; }
+`;
+
+const ServicesList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  color: ${MUTED_TEXT};
+  li { margin-bottom: 8px; font-size: 0.95rem; }
+`;
+
+const ContactInfo = styled.div`
+  color: ${MUTED_TEXT};
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  div { display:flex; gap:10px; align-items:flex-start; }
+  strong { color: ${NAVY}; display:block; margin-bottom:4px; font-weight:700; }
+`;
+
+/* =========================
+   COMPONENT
+   ========================= */
 const BlogPage = ({ onNavigate = () => {}, posts }) => {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
+  const [progressPct] = useState(68);
 
-  // --- Star Canvas Logic ---
+  // canvas drawing logic preserved (canvas hidden via CSS)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -289,7 +379,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    const stars = Array.from({ length: 160 }, () => ({
+    const stars = Array.from({ length: 120 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
       baseR: 0.6 + Math.random() * 1.6,
@@ -298,147 +388,48 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
       alpha: 0.4 + Math.random() * 0.6,
       twSpeed: 0.002 + Math.random() * 0.01,
       twPhase: Math.random() * Math.PI * 2,
-      glowStrength: 3 + Math.random() * 5,
     }));
 
-    const orbs = Array.from({ length: 6 }, (_, i) => ({
-      x: Math.random() * width,
-      y: Math.random() * height * 0.6,
-      radius: 60 + Math.random() * 120,
-      vx: (Math.random() - 0.5) * 0.15,
-      vy: (Math.random() - 0.5) * 0.08,
-      color: i % 2 === 0 ? 'rgba(0,224,179,0.06)' : 'rgba(98,0,255,0.04)'
-    }));
-
-    let meteors = [];
-    function spawnMeteor() {
-      const startX = Math.random() < 0.5 ? -50 : width + 50;
-      const startY = Math.random() * height * 0.5;
-      const dir = startX < 0 ? 1 : -1;
-      meteors.push({
-        x: startX,
-        y: startY,
-        vx: dir * (4 + Math.random() * 6),
-        vy: 1 + Math.random() * 2,
-        length: 80 + Math.random() * 140,
-        life: 0,
-        maxLife: 60 + Math.floor(Math.random() * 40)
-      });
-    }
-
-    let meteorTimer = 0;
-    const meteorIntervalBase = 420;
-
-    const onResize = () => {
+    function onResize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-    };
+    }
     window.addEventListener('resize', onResize);
 
     function draw() {
+      ctx.clearRect(0, 0, width, height);
+      // subtle background gradient for drawing (won't show because canvas hidden)
       const gBg = ctx.createLinearGradient(0, 0, 0, height);
-      gBg.addColorStop(0, '#071025');
-      gBg.addColorStop(1, '#02040a');
+      gBg.addColorStop(0, '#ffffff');
+      gBg.addColorStop(1, '#ffffff');
       ctx.fillStyle = gBg;
       ctx.fillRect(0, 0, width, height);
 
-      orbs.forEach((orb) => {
-        orb.x += orb.vx;
-        orb.y += orb.vy;
-        if (orb.x < -200) orb.x = width + 200;
-        if (orb.x > width + 200) orb.x = -200;
-        if (orb.y < -200) orb.y = height + 200;
-        if (orb.y > height + 200) orb.y = -200;
-
-        const g = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-        g.addColorStop(0, orb.color);
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-        ctx.globalCompositeOperation = 'source-over';
-      });
-
       stars.forEach((s) => {
-        s.twPhase += s.twSpeed;
-        const tw = 0.5 + Math.sin(s.twPhase) * 0.5;
-        const radius = s.baseR * (0.8 + tw * 1.5);
-        const glowR = radius * s.glowStrength;
-
         s.x += s.dx;
         s.y += s.dy;
         if (s.y > height + 10) s.y = -10;
         if (s.x > width + 10) s.x = -10;
         if (s.x < -10) s.x = width + 10;
-
-        const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
-        grad.addColorStop(0, `rgba(255,255,255,${0.9 * s.alpha})`);
-        grad.addColorStop(0.15, `rgba(0,224,179,${0.6 * s.alpha})`);
-        grad.addColorStop(0.35, `rgba(0,224,179,${0.18 * s.alpha})`);
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = grad;
+        const r = s.baseR * (0.8 + Math.sin(s.twPhase) * 0.5);
+        s.twPhase += s.twSpeed;
         ctx.beginPath();
-        ctx.arc(s.x, s.y, glowR, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(1,42,74,${0.08 * s.alpha})`;
         ctx.fill();
-        ctx.closePath();
-
-        ctx.fillStyle = 'rgba(255,255,255,1)';
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-
-        ctx.globalCompositeOperation = 'source-over';
-      });
-
-      meteorTimer += 1;
-      if (meteorTimer > meteorIntervalBase + Math.random() * 600) {
-        spawnMeteor();
-        meteorTimer = 0;
-      }
-      meteors = meteors.filter(m => m.life < m.maxLife);
-      meteors.forEach((m) => {
-        ctx.globalCompositeOperation = 'lighter';
-        const trailGrad = ctx.createLinearGradient(m.x, m.y, m.x - m.vx * m.length, m.y - m.vy * m.length);
-        trailGrad.addColorStop(0, 'rgba(255,255,255,0.95)');
-        trailGrad.addColorStop(1, 'rgba(0,224,179,0.02)');
-        ctx.strokeStyle = trailGrad;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(m.x, m.y);
-        ctx.lineTo(m.x - m.vx * m.length, m.y - m.vy * m.length);
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.fillStyle = 'rgba(255,255,255,1)';
-        ctx.beginPath();
-        ctx.arc(m.x, m.y, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-        ctx.globalCompositeOperation = 'source-over';
-
-        m.x += m.vx;
-        m.y += m.vy;
-        m.life++;
       });
 
       rafRef.current = requestAnimationFrame(draw);
     }
 
     draw();
-
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', onResize);
     };
   }, []);
 
-  // default posts if none passed
+  // fallback posts
   const getPostsData = () => {
     if (posts && posts.length > 0) return posts;
     return [
@@ -472,7 +463,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
   const safePosts = (getPostsData() || []).slice().sort((a, b) => {
     const da = a && a.date ? new Date(a.date).getTime() : 0;
     const db = b && b.date ? new Date(b.date).getTime() : 0;
-    return da - db; // older first -> newer last
+    return da - db;
   });
 
   return (
@@ -482,55 +473,38 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
 
       <Page>
         <Header>
-          <Logo onClick={() => onNavigate('home')} className="neon-text-shadow">
-            NEXORA
+          <Logo onClick={() => onNavigate('home')}>
+            <LogoN>NEXORA</LogoN>
+            <LogoCrew>CREW</LogoCrew>
           </Logo>
-          <NavGroup>
-            <span onClick={() => onNavigate('home')}>Home</span>
-            <span onClick={() => onNavigate('about')}>About</span>
-            <span onClick={() => onNavigate('services')}>Services</span>
-            <span onClick={() => onNavigate('projects')}>Projects</span>
-            <span
-              onClick={() => onNavigate('blog')}
-              style={{ color: NEON }}
-            >
-              Blog
-            </span>
-            <span onClick={() => onNavigate('contact')}>Contact</span>
 
-            <span
-              onClick={() => onNavigate('schedule')}
-              style={{ color: NEON, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-            >
-              <FontAwesomeIcon icon={faCalendarCheck} />
-              <span>Schedule Meeting</span>
-            </span>
+          <NavGroup>
+            <span className="navItem" onClick={() => onNavigate('home')}>Home</span>
+            <span className="navItem" onClick={() => onNavigate('about')}>About</span>
+            <span className="navItem" onClick={() => onNavigate('services')}>Services</span>
+            <span className="navItem" onClick={() => onNavigate('projects')}>Projects</span>
+            <span className="navItem active" onClick={() => onNavigate('blog')} style={{ color: NAVY }}>Blog</span>
+
+            <span className="navItem" onClick={() => onNavigate('team')}>Team</span>
+
+            <NavProgressText onClick={() => onNavigate('progress')} aria-label="Open progress page">
+              Progress
+            </NavProgressText>
+
+            <span className="navItem" onClick={() => onNavigate('contact')}>Contact</span>
           </NavGroup>
         </Header>
 
-        <Intro className="animate-in" style={{ animationDelay: '0.05s' }}>
-          <IntroTitle>
-            Our <span>Blog</span>
-          </IntroTitle>
-          <IntroSubtitle>
-            Updates, insights, and stories from the NEXORA team.
-          </IntroSubtitle>
+        <Intro>
+          <IntroTitle>Our <span>Blog</span></IntroTitle>
+          <IntroSubtitle>Updates, insights, and stories from the NEXORACREW team.</IntroSubtitle>
         </Intro>
 
         <PostGrid>
           {safePosts.map((post, idx) => (
-            <PostCard
-              key={post._id}
-              className="animate-in"
-              style={{ animationDelay: `${0.12 * idx + 0.25}s` }}
-            >
+            <PostCard key={post._id} style={{ animationDelay: `${0.12 * idx + 0.12}s` }}>
               <ImageWrapper>
-                <PostImage
-                  src={post.headerImage}
-                  alt={post.title}
-                  width="1080"
-                  height="1920"
-                />
+                <PostImage src={post.headerImage} alt={post.title} width="1080" height="1920" />
               </ImageWrapper>
 
               <CardBody>
@@ -538,11 +512,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
                   <span>By {post.author}</span>
                   <span>
                     <FontAwesomeIcon icon={faCalendarAlt} />
-                    {new Date(post.date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+                    {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
                 </Meta>
 
@@ -557,9 +527,96 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
           ))}
         </PostGrid>
 
-        <Footer>
-          &copy; NEXORACREW Team, Palakarai, Tiruchirappalli, Tamil Nadu
-        </Footer>
+        {/* Footer: 4-column layout */}
+        <FooterWrap>
+          <FooterInner>
+            {/* Column 1: Brand & short text + social icons */}
+            <FooterCol>
+              <FooterBrand>
+                <FooterBrandTitle>
+                  <LogoN>NEXORA</LogoN>
+                  <LogoCrew>CREW</LogoCrew>
+                </FooterBrandTitle>
+                <div style={{ maxWidth: 360, color: MUTED_TEXT }}>
+                  Transforming ideas into powerful digital products using modern
+                  technology, creativity, and AI.
+                </div>
+
+                <SocialRow>
+                  <SocialIcon href="#" aria-label="Instagram"><FontAwesomeIcon icon={faInstagram} /></SocialIcon>
+                  <SocialIcon href="#" aria-label="LinkedIn"><FontAwesomeIcon icon={faLinkedin} /></SocialIcon>
+                  <SocialIcon href="mailto:nexoracrew@email.com" aria-label="Email"><FontAwesomeIcon icon={faEnvelopeSolid} /></SocialIcon>
+                  <SocialIcon href="#" aria-label="WhatsApp"><FontAwesomeIcon icon={faWhatsapp} /></SocialIcon>
+                  <SocialIcon href="#" aria-label="YouTube"><FontAwesomeIcon icon={faYoutube} /></SocialIcon>
+                </SocialRow>
+              </FooterBrand>
+            </FooterCol>
+
+            {/* Column 2: Quick links */}
+            <FooterCol>
+              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
+                Quick Links
+              </strong>
+              <FooterList>
+                <li><a onClick={() => onNavigate('home')}>Home</a></li>
+                <li><a onClick={() => onNavigate('about')}>About</a></li>
+                <li><a onClick={() => onNavigate('projects')}>Projects</a></li>
+                <li><a onClick={() => onNavigate('team')}>Team</a></li>
+                <li><a onClick={() => onNavigate('progress')}>Progress</a></li>
+                <li><a onClick={() => onNavigate('blog')}>Blog</a></li>
+                <li><a onClick={() => onNavigate('contact')}>Contact</a></li>
+              </FooterList>
+            </FooterCol>
+
+            {/* Column 3: Services */}
+            <FooterCol>
+              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
+                Services
+              </strong>
+              <ServicesList>
+                <li>Web Development</li>
+                <li>Poster designing & logo making</li>
+                <li>Content creation</li>
+                <li>Digital marketing & SEO</li>
+                <li>AI and automation</li>
+                <li>Hosting & Support</li>
+                <li>Printing & Branding solutions</li>
+              </ServicesList>
+            </FooterCol>
+
+            {/* Column 4: Contact Info */}
+            <FooterCol>
+              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
+                Contact Info
+              </strong>
+              <ContactInfo>
+                <div>
+                  <div style={{ color: GOLD, marginTop: 2 }}><FontAwesomeIcon icon={faMapMarkerAlt} /></div>
+                  <div>
+                    <strong>JJCET</strong>
+                    <div style={{ color: MUTED_TEXT }}>Palakarai, Tiruchirappalli</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ color: GOLD, marginTop: 2 }}><FontAwesomeIcon icon={faEnvelopeSolid} /></div>
+                  <div>
+                    <strong>Email</strong>
+                    <div style={{ color: MUTED_TEXT }}>nexoracrew@email.com</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ color: GOLD, marginTop: 2 }}><FontAwesomeIcon icon={faPhone} /></div>
+                  <div>
+                    <strong>Phone</strong>
+                    <div style={{ color: MUTED_TEXT }}>+91 95976 46460</div>
+                  </div>
+                </div>
+              </ContactInfo>
+            </FooterCol>
+          </FooterInner>
+        </FooterWrap>
       </Page>
     </>
   );

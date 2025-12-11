@@ -1,3 +1,4 @@
+// src/components/ContactPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle, keyframes } from "styled-components";
 import axios from "axios";
@@ -10,10 +11,18 @@ import {
   faBars,
   faTimes,
   faCalendarCheck,
+  faEnvelopeSquare,
+  faMapMarker,
 } from "@fortawesome/free-solid-svg-icons";
+import {
+  faInstagram,
+  faLinkedin,
+  faWhatsapp,
+  faYoutube,
+} from "@fortawesome/free-brands-svg-icons";
 
 /* =======================
-   API CONFIG
+   API CONFIG (unchanged)
 ======================= */
 const DEPLOYED_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const MESSAGE_API_URL = DEPLOYED_BASE_URL
@@ -25,15 +34,17 @@ const SCHEDULE_API_URL = DEPLOYED_BASE_URL
   : "http://localhost:5000/api/schedule";
 
 /* =======================
-   THEME
+   THEME (light / navy / gold)
 ======================= */
-const NEON = "#00ffc6";
-const NAVY_BG = "#040b1a";
-const LIGHT = "#e8f1ff";
-const MUTED = "#9aa8b8";
-const GLASS = "rgba(12, 20, 35, 0.55)";
-const BORDER = "rgba(255,255,255,0.08)";
-const ACCENT = "#12f3d4";
+const NAVY = "#012a4a";
+const GOLD = "#d4af37";
+const BG_WHITE = "#ffffff";
+const LIGHT_TEXT = "#012a4a"; // primary text (navy)
+const MUTED = "#6f7b86";
+const GLASS_LIGHT = "rgba(250, 251, 253, 0.95)"; // card bg
+const BORDER = "rgba(1,42,74,0.08)";
+const INPUT_BG = "#f6f8fb";
+const INPUT_BORDER = "rgba(1,42,74,0.12)";
 
 /* =======================
    GLOBAL
@@ -43,9 +54,9 @@ const GlobalStyle = createGlobalStyle`
   html, body, #root {
     height: 100%;
     margin: 0;
-    color: ${LIGHT};
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
-    background: ${NAVY_BG};
+    color: ${LIGHT_TEXT};
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    background: ${BG_WHITE};
   }
 `;
 
@@ -58,7 +69,7 @@ const Page = styled.div`
   flex-direction: column;
 `;
 
-/* Header – nav on the left like other pages */
+/* Header */
 const Header = styled.header`
   position: sticky;
   top: 0;
@@ -67,8 +78,7 @@ const Header = styled.header`
   align-items: center;
   gap: 40px;
   padding: 14px 48px;
-  background: rgba(7,16,38,0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.95);
   border-bottom: 1px solid ${BORDER};
 
   @media (max-width: 768px) {
@@ -77,15 +87,25 @@ const Header = styled.header`
   }
 `;
 
+/* Brand: NEXORA (navy) + CREW (gold) */
 const Brand = styled.div`
   font-weight: 800;
-  color: ${NEON};
   letter-spacing: 0.5px;
   cursor: pointer;
   font-size: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0px;
 `;
 
-/* Nav sits next to Brand on the left */
+const BrandN = styled.span`
+  color: ${NAVY};
+`;
+const BrandCrew = styled.span`
+  color: ${GOLD};
+`;
+
+/* Nav */
 const Nav = styled.nav`
   display: flex;
   gap: 18px;
@@ -98,8 +118,7 @@ const Nav = styled.nav`
     right: 0;
     width: 100%;
     max-width: 320px;
-    background: rgba(4,11,26,0.96);
-    backdrop-filter: blur(6px);
+    background: ${BG_WHITE};
     border-left: 1px solid ${BORDER};
     border-bottom: 1px solid ${BORDER};
     transform: ${({ open }) => (open ? "translateX(0)" : "translateX(100%)")};
@@ -111,7 +130,7 @@ const Nav = styled.nav`
   }
 `;
 
-/* underline only on hover, not when active */
+/* NavItem (no neon) — underline on hover only */
 const NavItem = styled.button`
   position: relative;
   background: transparent;
@@ -119,39 +138,38 @@ const NavItem = styled.button`
   color: ${MUTED};
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 8px;
+  padding: 8px 10px;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: color .2s ease, transform .2s ease, background .2s ease;
+  gap: 0px;
+  transition: color .18s ease, transform .12s ease, background .12s ease, font-size .12s ease;
+  font-size: 0.98rem;
 
   &:hover {
-    color: ${NEON};
+    color: ${NAVY};
     transform: translateY(-1px);
-    background: rgba(255,255,255,0.03);
+    background: rgba(1,42,74,0.03);
   }
 
   &.active {
-    color: ${NEON};
-    text-shadow: 0 0 10px rgba(0,255,198,.25);
+    color: ${NAVY};
+    font-weight: 700;
   }
 
   &::after {
     content: '';
     position: absolute;
     left: 0;
-    bottom: -2px;
-    height: 2px;
+    bottom: -6px;
+    height: 3px;
     width: 0;
-    background: ${NEON};
+    background: ${GOLD};
     border-radius: 4px;
-    transition: width 0.25s ease;
+    transition: width 0.22s ease;
   }
 
-  &:hover::after {
-    width: 100%;
-  }
+  &:hover::after { width: 72%; }
 `;
 
 const MobileToggle = styled.button`
@@ -159,7 +177,7 @@ const MobileToggle = styled.button`
   @media (max-width: 768px){ display: inline-flex; }
   border: 0;
   background: transparent;
-  color: ${NEON};
+  color: ${NAVY};
   font-size: 1.25rem;
   cursor: pointer;
 `;
@@ -168,7 +186,7 @@ const MobileToggle = styled.button`
    STARFIELD (scoped)
 ======================= */
 const floatUp = keyframes`
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 `;
 
@@ -177,6 +195,7 @@ const Section = styled.section`
   padding: clamp(56px, 6vw, 80px) 20px;
   display: grid;
   place-items: center;
+  background: ${BG_WHITE};
 `;
 
 const SectionInner = styled.div`
@@ -185,6 +204,7 @@ const SectionInner = styled.div`
   z-index: 2;
 `;
 
+/* subtle canvas on white */
 const StarLayer = styled.canvas`
   position: absolute;
   inset: 0;
@@ -194,16 +214,16 @@ const StarLayer = styled.canvas`
   z-index: 0;
   border-radius: 20px;
   overflow: hidden;
+  opacity: 0.06;
 `;
 
 const StarGlow = styled.div`
   position: absolute;
   inset: -20%;
-  background: radial-gradient(60% 40% at 50% 0%, rgba(0,255,198,0.10), transparent 55%),
-              radial-gradient(30% 30% at 85% 40%, rgba(0,255,198,0.06), transparent 60%);
-  filter: blur(30px);
   pointer-events: none;
   z-index: 1;
+  background: radial-gradient(60% 40% at 50% 0%, rgba(1,42,74,0.02), transparent 55%);
+  filter: blur(18px);
 `;
 
 /* =======================
@@ -217,11 +237,12 @@ const TitleWrap = styled.div`
 
 const Title = styled.h1`
   margin: 0 0 8px 0;
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(2rem, 4vw, 2.6rem);
   font-weight: 800;
   letter-spacing: 0.2px;
+  color: ${NAVY};
 
-  span { color: ${NEON}; }
+  span { color: ${GOLD}; }
 `;
 
 const Subtitle = styled.p`
@@ -243,22 +264,22 @@ const Grid = styled.div`
 `;
 
 /* =======================
-   CARDS
+   CARDS (light theme)
 ======================= */
 const Card = styled.div`
   position: relative;
-  background: ${GLASS};
+  background: ${GLASS_LIGHT};
   border: 1px solid ${BORDER};
   border-radius: 18px;
   padding: 22px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(2,36,60,0.06);
+  backdrop-filter: blur(4px);
   animation: ${floatUp} .6s ease both;
 `;
 
 const CardTitle = styled.h3`
   margin: 0 0 14px 0;
-  color: ${NEON};
+  color: ${NAVY};
 `;
 
 const InfoRow = styled.div`
@@ -267,21 +288,21 @@ const InfoRow = styled.div`
   gap: 12px;
   align-items: start;
   padding: 10px 0;
-  color: ${LIGHT};
+  color: ${LIGHT_TEXT};
 
   small { color: ${MUTED}; display: block; }
-  .icon { color: ${NEON}; font-size: 1.1rem; line-height: 1; margin-top: 2px; }
+  .icon { color: ${GOLD}; font-size: 1.1rem; line-height: 1; margin-top: 2px; }
 `;
 
 /* =======================
-   MODE TOGGLE (Contact vs Schedule)
+   MODE SWITCH
 ======================= */
 const ModeSwitch = styled.div`
   display: flex;
-  background: rgba(4,10,25,0.9);
+  background: rgba(250,250,252,0.9);
   border-radius: 999px;
   padding: 4px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(1,42,74,0.04);
   margin-bottom: 18px;
 `;
 
@@ -294,25 +315,21 @@ const ModeButton = styled.button`
   font-weight: 700;
   cursor: pointer;
   background: ${({ $active }) =>
-    $active ? `linear-gradient(90deg, ${NEON}, ${ACCENT})` : "transparent"};
-  color: ${({ $active }) => ($active ? "#00130e" : MUTED)};
-  opacity: ${({ $active }) => ($active ? 1 : 0.6)};
-  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease,
-    transform 0.15s ease;
+    $active ? `linear-gradient(90deg, ${NAVY}, ${GOLD})` : "transparent"};
+  color: ${({ $active }) => ($active ? "#fff" : MUTED)};
+  opacity: ${({ $active }) => ($active ? 1 : 0.85)};
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform .12s ease;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 
-  &:hover {
-    transform: translateY(-1px);
-    opacity: ${({ $active }) => ($active ? 1 : 0.8)};
-  }
+  &:hover { transform: translateY(-1px); opacity: 1; }
 `;
 
 /* =======================
-   FORMS
+   FORMS (light)
 ======================= */
 const Form = styled.form`
   display: grid;
@@ -328,27 +345,27 @@ const Label = styled.label`
 
 const InputField = styled.input`
   width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: ${LIGHT};
+  background: ${INPUT_BG};
+  border: 1px solid ${INPUT_BORDER};
+  color: ${LIGHT_TEXT};
   padding: 12px 14px;
   border-radius: 12px;
   outline: none;
-  transition: border .2s ease, box-shadow .2s ease, background .2s ease;
+  transition: border .16s ease, box-shadow .16s ease, background .16s ease;
 
-  &::placeholder { color: rgba(232,241,255,.5); }
+  &::placeholder { color: rgba(1,42,74,0.35); }
   &:focus {
-    border-color: ${NEON};
-    box-shadow: 0 0 0 4px rgba(0,255,198,0.12);
-    background: rgba(255,255,255,0.06);
+    border-color: ${NAVY};
+    box-shadow: 0 0 0 6px rgba(1,42,74,0.04);
+    background: #fff;
   }
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: ${LIGHT};
+  background: ${INPUT_BG};
+  border: 1px solid ${INPUT_BORDER};
+  color: ${LIGHT_TEXT};
   padding: 14px 16px;
   border-radius: 14px;
   font-size: 1rem;
@@ -356,25 +373,15 @@ const TextArea = styled.textarea`
   line-height: 1.6;
   outline: none;
   resize: none;
-  min-height: 160px;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.25),
-              0 0 0 rgba(0, 255, 198, 0.0);
+  min-height: 140px;
+  transition: all 0.2s ease;
 
-  &::placeholder {
-    color: rgba(232, 241, 255, 0.45);
-    font-style: italic;
-  }
-
-  &:hover {
-    border-color: rgba(0, 255, 198, 0.28);
-  }
+  &::placeholder { color: rgba(1,42,74,0.35); font-style: italic; }
 
   &:focus {
-    border-color: ${NEON};
-    background: rgba(255,255,255,0.08);
-    box-shadow: 0 0 14px rgba(0, 255, 198, 0.25),
-                inset 0 0 8px rgba(0, 255, 198, 0.12);
+    border-color: ${NAVY};
+    background: #fff;
+    box-shadow: 0 0 12px rgba(1,42,74,0.06);
   }
 `;
 
@@ -389,34 +396,119 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(90deg, ${NEON}, ${ACCENT});
-  color: #00130e;
+  background: linear-gradient(90deg, ${NAVY}, ${GOLD});
+  color: #fff;
   border: none;
   font-weight: 800;
   padding: 12px 16px;
   border-radius: 12px;
   cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
-
-  &:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,255,198,.28); }
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(1,42,74,0.12); }
   &:disabled { opacity: .6; cursor: not-allowed; transform: none; box-shadow: none; }
 `;
 
 const Status = styled.p`
   margin: 8px 0 0 0;
   font-weight: 600;
-  color: ${({ type }) => (type === "error" ? "#ff6b6b" : NEON)};
+  color: ${({ type }) => (type === "error" ? "#ff6b6b" : NAVY)};
 `;
 
 /* =======================
-   FOOTER
+   FOOTER (new)
 ======================= */
-const Footer = styled.footer`
+const FooterWrap = styled.footer`
   margin-top: auto;
-  padding: 22px;
-  text-align: center;
-  color: ${MUTED};
+  background: ${BG_WHITE};
   border-top: 1px solid ${BORDER};
+  padding: 40px 20px;
+  color: ${MUTED};
+`;
+
+const FooterInner = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 180px 1fr 220px;
+  gap: 28px;
+  align-items: start;
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+`;
+
+const FooterCol = styled.div``;
+
+const FooterBrand = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+`;
+
+const FooterBrandTitle = styled.div`
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: ${NAVY};
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const SocialRow = styled.div`
+  display:flex;
+  gap: 10px;
+  align-items:center;
+`;
+
+const SocialIcon = styled.a`
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  background: #fff;
+  border: 1px solid rgba(2,36,60,0.06);
+  color: ${NAVY};
+  text-decoration:none;
+  font-size: 14px;
+  transition: transform .12s ease, box-shadow .12s ease;
+  &:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(2,36,60,0.06); }
+`;
+
+const FooterList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  color: ${MUTED};
+
+  li { margin-bottom: 10px; }
+  li a {
+    color: ${MUTED};
+    text-decoration: none;
+    font-weight: 500;
+  }
+  li a:hover { color: ${NAVY}; }
+`;
+
+const ServicesList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  color: ${MUTED};
+  li { margin-bottom: 8px; font-size: 0.95rem; }
+`;
+
+const ContactInfo = styled.div`
+  color: ${MUTED};
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  div { display:flex; gap:10px; align-items:flex-start; }
+  strong { color: ${NAVY}; display:block; margin-bottom:4px; font-weight:700; }
 `;
 
 /* =======================
@@ -455,15 +547,15 @@ function useStarfield(containerRef, density = 120) {
       r: Math.random() * 1.6 + 0.5,
       dx: (Math.random() - 0.5) * 0.35,
       dy: 0.25 + Math.random() * 0.4,
-      a: 0.35 + Math.random() * 0.65,
+      a: 0.15 + Math.random() * 0.45,
     }));
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
 
       const g = ctx.createLinearGradient(0, 0, 0, height);
-      g.addColorStop(0, "rgba(4,11,26,0.85)");
-      g.addColorStop(1, "rgba(4,11,26,0.95)");
+      g.addColorStop(0, "rgba(255,255,255,0)");
+      g.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, width, height);
 
@@ -477,7 +569,7 @@ function useStarfield(containerRef, density = 120) {
 
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,255,198,${s.a})`;
+        ctx.fillStyle = `rgba(1,42,74,${s.a})`;
         ctx.fill();
       });
 
@@ -499,7 +591,7 @@ function useStarfield(containerRef, density = 120) {
 }
 
 /* =======================
-   PAGE
+   PAGE COMPONENT
 ======================= */
 export default function ContactPage({ onNavigate, generalData }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -620,7 +712,10 @@ export default function ContactPage({ onNavigate, generalData }) {
       <GlobalStyle />
       <Page>
         <Header>
-          <Brand onClick={() => navigateAndClose("home")}>NEXORA</Brand>
+          <Brand onClick={() => navigateAndClose("home")}>
+            <BrandN>NEXORA</BrandN>
+            <BrandCrew>CREW</BrandCrew>
+          </Brand>
 
           <Nav open={menuOpen}>
             <NavItem onClick={() => navigateAndClose("home")}>Home</NavItem>
@@ -632,8 +727,13 @@ export default function ContactPage({ onNavigate, generalData }) {
               Projects
             </NavItem>
             <NavItem onClick={() => navigateAndClose("blog")}>Blog</NavItem>
-            {/* 🔥 Team now between Blog and Contact */}
+
+            {/* Progress nav item added here (near Blog) */}
+            <NavItem onClick={() => navigateAndClose("progress")}>Progress</NavItem>
+
+            {/* Team between Progress and Contact */}
             <NavItem onClick={() => navigateAndClose("team")}>Team</NavItem>
+
             <NavItem
               className="active"
               onClick={() => navigateAndClose("contact")}
@@ -650,7 +750,7 @@ export default function ContactPage({ onNavigate, generalData }) {
           </MobileToggle>
         </Header>
 
-        {/* CONTACT / SCHEDULE SECTION (stars are scoped inside) */}
+        {/* CONTACT / SCHEDULE SECTION */}
         <Section ref={sectionRef}>
           <StarLayer ref={canvasRef} aria-hidden />
           <StarGlow />
@@ -896,7 +996,153 @@ export default function ContactPage({ onNavigate, generalData }) {
           </SectionInner>
         </Section>
 
-        <Footer>© NEXORACREW-Crafted with passion ✨</Footer>
+        {/* FOOTER: 4-column layout */}
+        <FooterWrap>
+          <FooterInner>
+            {/* Column 1: Brand & short text + social icons */}
+            <FooterCol>
+              <FooterBrand>
+                <FooterBrandTitle>
+                  <BrandN>NEXORA</BrandN>
+                  <BrandCrew>CREW</BrandCrew>
+                </FooterBrandTitle>
+                <div style={{ maxWidth: 360, color: MUTED }}>
+                  Transforming ideas into powerful digital products using modern
+                  technology, creativity, and AI.
+                </div>
+
+                <SocialRow>
+                  <SocialIcon
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Instagram"
+                  >
+                    <FontAwesomeIcon icon={faInstagram} />
+                  </SocialIcon>
+
+                  <SocialIcon
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="LinkedIn"
+                  >
+                    <FontAwesomeIcon icon={faLinkedin} />
+                  </SocialIcon>
+
+                  <SocialIcon
+                    href="mailto:nexoracrew@email.com"
+                    aria-label="Email"
+                  >
+                    <FontAwesomeIcon icon={faEnvelopeSquare} />
+                  </SocialIcon>
+
+                  <SocialIcon
+                    href="https://wa.me/919597646460"
+                    aria-label="WhatsApp"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FontAwesomeIcon icon={faWhatsapp} />
+                  </SocialIcon>
+
+                  <SocialIcon
+                    href="https://youtube.com"
+                    aria-label="YouTube"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FontAwesomeIcon icon={faYoutube} />
+                  </SocialIcon>
+                </SocialRow>
+              </FooterBrand>
+            </FooterCol>
+
+            {/* Column 2: Quick links */}
+            <FooterCol>
+              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
+                Quick Links
+              </strong>
+              <FooterList>
+                <li>
+                  <a href="#home" onClick={(e)=>{e.preventDefault(); onNavigate?.('home');}}>Home</a>
+                </li>
+                <li>
+                  <a href="#about" onClick={(e)=>{e.preventDefault(); onNavigate?.('about');}}>About</a>
+                </li>
+                <li>
+                  <a href="#projects" onClick={(e)=>{e.preventDefault(); onNavigate?.('projects');}}>Projects</a>
+                </li>
+                <li>
+                  <a href="#team" onClick={(e)=>{e.preventDefault(); onNavigate?.('team');}}>Team</a>
+                </li>
+                <li>
+                  <a href="#progress" onClick={(e)=>{e.preventDefault(); onNavigate?.('progress');}}>Progress</a>
+                </li>
+                <li>
+                  <a href="#blog" onClick={(e)=>{e.preventDefault(); onNavigate?.('blog');}}>Blog</a>
+                </li>
+                <li>
+                  <a href="#contact" onClick={(e)=>{e.preventDefault(); onNavigate?.('contact');}}>Contact</a>
+                </li>
+              </FooterList>
+            </FooterCol>
+
+            {/* Column 3: Services */}
+            <FooterCol>
+              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
+                Services
+              </strong>
+              <ServicesList>
+                <li>Web Development</li>
+                <li>Poster designing & logo making</li>
+                <li>Content creation</li>
+                <li>Digital marketing & SEO</li>
+                <li>AI and automation</li>
+                <li>Hosting & Support</li>
+                <li>Printing & Branding solutions</li>
+              </ServicesList>
+            </FooterCol>
+
+            {/* Column 4: Contact Info */}
+            <FooterCol>
+              <strong style={{ color: NAVY, display: "block", marginBottom: 8 }}>
+                Contact Info
+              </strong>
+              <ContactInfo>
+                <div>
+                  <div style={{ color: GOLD, marginTop: 2 }}>
+                    <FontAwesomeIcon icon={faMapMarker} />
+                  </div>
+                  <div>
+                    <strong>JJCET</strong>
+                    <div style={{ color: MUTED }}>Palakarai, Tiruchirappalli</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ color: GOLD, marginTop: 2 }}>
+                    <FontAwesomeIcon icon={faEnvelopeSquare} />
+                  </div>
+                  <div>
+                    <strong>Email</strong>
+                    <div style={{ color: MUTED }}>nexoracrew@email.com</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ color: GOLD, marginTop: 2 }}>
+                    <FontAwesomeIcon icon={faPhone} />
+                  </div>
+                  <div>
+                    <strong>Phone</strong>
+                    <div style={{ color: MUTED }}>+91 95976 46460</div>
+                  </div>
+                </div>
+              </ContactInfo>
+            </FooterCol>
+          </FooterInner>
+        </FooterWrap>
       </Page>
     </>
   );
