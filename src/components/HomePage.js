@@ -14,49 +14,38 @@ import {
   faTimes,
   faHandshake,
   faArrowRight,
-  faCode, // Icon for Web/Dev stack
-  faMobileAlt, // Icon for Mobile stack
-  faProjectDiagram, // Icon for Blockchain stack
-  faMagic, // Icon for AI/ML stack
-  faPaintBrush, // Icon for Design stack
-  faBullhorn, // Icon for Marketing stack
-  faDatabase, // Icon for Data Science
-  faChartBar, // Icon for Analytics/SEO Suite
+  faCode, 
+  faMobileAlt, 
+  faProjectDiagram, 
+  faMagic, 
+  faPaintBrush, 
+  faBullhorn, 
+  faDatabase, 
+  faChartBar, 
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faInstagram,
   faLinkedinIn,
-  faReact, // Icon for React
-  faNodeJs, // Icon for Node.js
 } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
 
-// --- Placeholder/External Tech Logos (FINAL CORRECTED URLs) ---
+// --- Placeholder/External Tech Logos ---
 const TECH_LOGOS = {
-  // Mobile/Web
   'React Native': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg',
   'Flutter': 'https://www.vectorlogo.zone/logos/flutterio/flutterio-icon.svg',
-  // CORRECTED: Replaced non-working Swift URL with a direct link to the logo on a stable CDN
   'Swift': 'https://cdn.iconscout.com/icon/free/png-256/swift-15-283844.png', 
   'Kotlin': 'https://www.vectorlogo.zone/logos/kotlinlang/kotlinlang-icon.svg',
-  // Web/Backend
   'Node.js': 'https://www.vectorlogo.zone/logos/nodejs/nodejs-icon.svg',
   'MongoDB': 'https://www.vectorlogo.zone/logos/mongodb/mongodb-icon.svg',
   'AWS': 'https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg',
-  // Blockchain
   'Solidity': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Solidity_logo.svg',
   'Ethereum': 'https://www.vectorlogo.zone/logos/ethereum/ethereum-icon.svg',
-  // AI/ML Tools
-  // PREVIOUSLY CORRECTED: Replaced non-working Gemini URL
   'Gemini': 'https://img.shields.io/badge/Google_Gemini-60A5FA?style=flat&logo=google-gemini&logoColor=white', 
   'OpenAI': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/120px-OpenAI_Logo.svg.png',
   'Python': 'https://www.vectorlogo.zone/logos/python/python-icon.svg',
-  // Design tools
   'Figma': 'https://www.vectorlogo.zone/logos/figma/figma-icon.svg',
   'Canva': 'https://www.vectorlogo.zone/logos/canva/canva-icon.svg',
-  // PREVIOUSLY CORRECTED: Adobe Creative Cloud
   'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg', 
-  // CORRECTED: Replaced non-working Spline URL with a high-quality icon from a stable source
   'Spline': 'https://raw.githubusercontent.com/SplineTool/spline-tool-logo/main/logo.png', 
 };
 
@@ -70,20 +59,24 @@ const STORY_FETCH_URL = `${API_BASE}/api/stories`;
 const PARTNER_FETCH_URL = `${API_BASE}/api/partners`;
 
 // ====================================================================
-// ========== DESIGN TOKENS (LIGHT THEME) ==========
+// ========== DESIGN TOKENS (WHITE THEME) ==========
 // ====================================================================
 
-// primary accent (navy)
+// Primary accent (navy)
 const NEON_COLOR = '#123165';
-// page base colors
+
+// Page base colors - ALL SET TO PURE WHITE OR DARK TEXT
 const LIGHT_TEXT = '#111827';
 const MUTED_TEXT = '#6B7280';
-const CARD_BG = '#FFFFFF';
-const BORDER_LIGHT = 'rgba(15,23,42,0.08)';
-const FOOTER_BG = '#F3F4F6';
-// gold accent
+const CARD_BG = '#FFFFFF';    // Card Background
+const FOOTER_BG = '#FFFFFF';  // Footer Background
+const PAGE_BG = '#FFFFFF';    // Body Background
+
+// Slightly darker border for visibility against white
+const BORDER_LIGHT = '#e2e8f0'; 
+
+// Gold accent
 const GOLD_ACCENT = '#D4A937';
-const NAVY_STRIP_BG = '#050f25'; // only if needed later
 
 // ====================================================================
 // ========== GLOBAL STYLES ==========
@@ -93,9 +86,8 @@ const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background:
-      radial-gradient(circle at 0% 0%, #fff9e8 0, #ffffff 35%, transparent 55%),
-      linear-gradient(180deg, #ffffff 0%, #f5f7fb 40%, #e5edf7 100%);
+    /* STRICTLY WHITE BACKGROUND - NO GRADIENTS */
+    background: ${PAGE_BG};
     color: ${LIGHT_TEXT};
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
@@ -156,6 +148,7 @@ const PageLayer = styled.div`
   position: relative;
   z-index: 2;
   overflow-x: hidden;
+  background: transparent; /* Ensures the body white shows through */
 `;
 
 // --- HEADER ---
@@ -167,8 +160,7 @@ const Header = styled.header`
   position: sticky;
   top: 0;
   width: 100%;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(12px);
+  background: #FFFFFF; /* White */
   border-bottom: 1px solid ${BORDER_LIGHT};
   z-index: 1000;
   @media (max-width: 768px) {
@@ -184,7 +176,7 @@ const Logo = styled.h1`
   font-weight: 800;
   cursor: pointer;
   letter-spacing: 1px;
-  text-shadow: 0 0 8px rgba(18,49,101,0.35);
+  text-shadow: 0 0 8px rgba(18,49,101,0.1);
   margin: 0;
   @media (max-width: 480px) { font-size: 1.5rem; }
 `;
@@ -237,7 +229,7 @@ const MobileNavMenu = styled.div`
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: #ffffff;
+  background: #FFFFFF; /* White */
   z-index: 1100;
   display: flex;
   flex-direction: column;
@@ -290,6 +282,7 @@ const HeroSection = styled.section`
   justify-content: center;
   padding: 120px 20px 80px;
   box-sizing: border-box;
+  background: #FFFFFF; /* White */
   animation: ${fadeUp} 0.9s ease forwards;
   @media (max-width: 768px) {
     min-height: 75vh;
@@ -394,7 +387,7 @@ const SecondaryBtn = styled(PrimaryBtn)`
 // --- MILESTONES ---
 const MilestonesSection = styled.section`
   padding: 80px 20px;
-  background: transparent;
+  background: #FFFFFF; /* White */
   text-align: center;
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
@@ -427,8 +420,8 @@ const MilestoneCard = styled.div`
   align-items: center;
   padding: 22px 20px;
   border-radius: 18px;
-  background: ${CARD_BG};
-  box-shadow: 0 10px 30px rgba(15,23,42,0.12);
+  background: ${CARD_BG}; /* White */
+  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
   border: 1px solid ${BORDER_LIGHT};
 `;
 
@@ -440,9 +433,10 @@ const MilestoneIcon = styled.div`
   align-items: center;
   justify-content: center;
   margin-bottom: 18px;
-  background: linear-gradient(135deg, rgba(18,49,101,0.08), rgba(212,169,55,0.25));
-  color: #ffffff;
-  box-shadow: 0 8px 22px rgba(15,23,42,0.25);
+  background: #FFFFFF; /* White */
+  border: 1px solid ${BORDER_LIGHT};
+  color: ${NEON_COLOR};
+  box-shadow: 0 8px 22px rgba(15,23,42,0.05);
 
   .svg-inline--fa {
     font-size: 30px;
@@ -491,7 +485,7 @@ const MilestoneDescription = styled.p`
 const PartnersSection = styled.section`
   padding: 60px 0;
   text-align: center;
-  background: transparent;
+  background: #FFFFFF; /* White */
   overflow: hidden;
 `;
 
@@ -558,7 +552,7 @@ const PartnerCard = styled.div`
     transform: scale(1.05);
     .icon-box {
       border-color: ${NEON_COLOR};
-      box-shadow: 0 0 15px rgba(18,49,101,0.3);
+      box-shadow: 0 0 15px rgba(18,49,101,0.2);
       color: ${NEON_COLOR};
     }
   }
@@ -572,7 +566,7 @@ const PartnerCard = styled.div`
     align-items: center;
     justify-content: center;
     margin-bottom: 12px;
-    background: radial-gradient(circle at 10% 10%, rgba(18,49,101,0.08), rgba(0,0,0,0.02));
+    background: #FFFFFF; /* White */
     color: ${MUTED_TEXT};
     font-size: 2rem;
     transition: all 0.3s ease;
@@ -601,6 +595,7 @@ const PartnerName = styled.div`
 const StackSection = styled.section`
   padding: 80px 20px;
   text-align: center;
+  background: #FFFFFF; /* White */
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
 
@@ -625,7 +620,6 @@ const StackSubtitle = styled.p`
   }
 `;
 
-// --- NEW STYLES FOR STACK TABS ---
 const StackTabs = styled.div`
   max-width: 900px;
   margin: 0 auto 40px;
@@ -651,13 +645,12 @@ const StackTabButton = styled.button`
   white-space: nowrap;
 
   &:hover {
-    background: ${props => (props.$isActive ? NEON_COLOR : FOOTER_BG)};
+    background: ${props => (props.$isActive ? NEON_COLOR : '#f9fafb')};
     color: ${props => (props.$isActive ? '#ffffff' : NEON_COLOR)};
     border-color: ${props => (props.$isActive ? NEON_COLOR : NEON_COLOR)};
   }
 `;
 
-// --- NEW STYLES FOR TECH GRID ---
 const TechGrid = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -677,16 +670,16 @@ const TechCardInner = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 25px 20px;
-  background: ${CARD_BG};
+  background: ${CARD_BG}; /* White */
   border-radius: 14px;
   border: 1px solid ${BORDER_LIGHT};
-  box-shadow: 0 10px 30px rgba(15,23,42,0.1);
+  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
   transition: all 0.3s ease;
   height: 100%;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 16px 40px rgba(15,23,42,0.15);
+    box-shadow: 0 16px 40px rgba(15,23,42,0.12);
     border-color: ${NEON_COLOR};
   }
 `;
@@ -712,63 +705,11 @@ const TechName = styled.h4`
   margin: 0;
   font-weight: 700;
 `;
-// --- END NEW STYLES FOR TECH GRID ---
-
-
-// --- OLD STACK STYLES (Retained but unused in final dynamic structure) ---
-const StackGrid = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 25px;
-  @media (max-width: 600px) { grid-template-columns: 1fr; }
-`;
-
-const StackCard = styled.div`
-  background: ${CARD_BG};
-  border-radius: 14px;
-  padding: 30px;
-  text-align: left;
-  border: 1px solid ${BORDER_LIGHT};
-  box-shadow: 0 12px 35px rgba(15,23,42,0.12);
-  transition: all 0.3s ease;
-  cursor: default;
-  
-  ${({ $isSingle }) => 
-    $isSingle && css`
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-    `}
-
-
-  h3 {
-    font-size: 1.3rem;
-    color: ${LIGHT_TEXT};
-    margin: 0 0 8px 0;
-    font-weight: 700;
-  }
-  p {
-    font-size: 0.9rem;
-    color: ${MUTED_TEXT};
-    margin: 0;
-  }
-
-  @media (max-width: 480px) {
-    padding: 20px;
-    h3 { font-size: 1.2rem; }
-    p { font-size: 0.85rem; }
-  }
-`;
-// --- END OLD STACK STYLES ---
-
 
 // --- STORIES ---
 const StoriesSection = styled.section`
   padding: 80px 20px;
-  background: ${FOOTER_BG};
+  background: ${FOOTER_BG}; /* White */
   text-align: center;
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
@@ -794,7 +735,7 @@ const StoriesGrid = styled.div`
 `;
 
 const StoryCard = styled(AnimatedSection)`
-  background: ${CARD_BG};
+  background: ${CARD_BG}; /* White */
   border-radius: 14px;
   padding: 30px;
   text-align: left;
@@ -803,7 +744,7 @@ const StoryCard = styled(AnimatedSection)`
   flex-direction: column;
   justify-content: space-between;
   border: 1px solid ${BORDER_LIGHT};
-  box-shadow: 0 10px 30px rgba(15,23,42,0.12);
+  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
 
   .quote-icon {
     color: ${GOLD_ACCENT};
@@ -830,6 +771,7 @@ const StoryCard = styled(AnimatedSection)`
 const CtaSection = styled.section`
   padding: 100px 20px;
   text-align: center;
+  background: #FFFFFF; /* White */
   @media (max-width: 768px) { padding: 60px 20px; }
 `;
 
@@ -839,7 +781,7 @@ const CtaContainer = styled.div`
   padding: 60px 40px;
   border-radius: 20px;
   background: linear-gradient(135deg, ${NEON_COLOR}, ${GOLD_ACCENT});
-  box-shadow: 0 20px 60px rgba(15,23,42,0.45);
+  box-shadow: 0 20px 60px rgba(15,23,42,0.3);
   @media (max-width: 768px) { padding: 40px 20px; }
 
   h2 {
@@ -864,17 +806,17 @@ const CtaContainer = styled.div`
     border-radius: 999px;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 8px 20px rgba(15,23,42,0.35);
+    box-shadow: 0 8px 20px rgba(15,23,42,0.2);
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 26px rgba(15,23,42,0.5);
+      box-shadow: 0 12px 26px rgba(15,23,42,0.3);
     }
   }
 `;
 
 // --- FOOTER ---
 const FullFooter = styled.footer`
-  background: ${FOOTER_BG};
+  background: ${FOOTER_BG}; /* White */
   padding: 60px 50px 20px;
   color: ${MUTED_TEXT};
   border-top: 1px solid ${BORDER_LIGHT};
@@ -947,7 +889,8 @@ const SocialIcons = styled.div`
     width: 30px;
     height: 30px;
     border-radius: 999px;
-    background: #ffffff;
+    background: #ffffff; /* White */
+    border: 1px solid ${BORDER_LIGHT};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -956,7 +899,8 @@ const SocialIcons = styled.div`
     &:hover {
       background: linear-gradient(135deg, ${NEON_COLOR}, ${GOLD_ACCENT});
       color: #ffffff;
-      box-shadow: 0 6px 18px rgba(15,23,42,0.4);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.3);
+      border-color: transparent;
     }
   }
 `;
@@ -985,14 +929,13 @@ const TechCard = ({ tech, name, delay, isVisible }) => (
     <TechCardInner>
       <TechIconBox>
         {tech.logoUrl ? (
-          // Use inline style for logo image to handle different logo types (SVG, shields.io PNG/SVG)
           <img 
             src={tech.logoUrl} 
             alt={name} 
             style={{ 
-              width: name === 'Gemini' ? '120%' : '100%', // Adjust width for the shield logo to look better
+              width: name === 'Gemini' ? '120%' : '100%',
               height: name === 'Gemini' ? 'auto' : '100%',
-              objectFit: name === 'Gemini' ? 'contain' : 'contain', 
+              objectFit: 'contain', 
             }}
           />
         ) : (
@@ -1072,7 +1015,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   const [clientStories, setClientStories] = useState([]);
   const [partners, setPartners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Setting default to 'design' based on the active tab in the visible images
   const [activeStackTab, setActiveStackTab] = useState('design'); 
 
   const [milestonesRef, isMilestonesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -100px 0px' });
@@ -1080,13 +1022,11 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   const [stackRef, isStackVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -100px 0px' });
   const [ctaRef] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
 
-  // --- UPDATED STACK DATA with Tech Sub-categories ---
   const stackData = {
     tabs: [
       { key: 'web', label: 'Web', icon: faCode },
       { key: 'mobile', label: 'Mobile', icon: faMobileAlt },
       { key: 'blockchain', label: 'Blockchain', icon: faProjectDiagram },
-      // REMOVED: Game tab (as per your last explicit request)
       { key: 'ai', label: 'AI/ML', icon: faMagic },
       { key: 'design', label: 'Design', icon: faPaintBrush },
       { key: 'marketing', label: 'Marketing', icon: faBullhorn },
@@ -1139,7 +1079,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
 
   const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
 
-  // --- FETCH DATA (omitted for brevity) ---
   useEffect(() => {
     let cancelled = false;
 
@@ -1213,7 +1152,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     };
   }, []);
 
-  // --- CANVAS EFFECTS (omitted for brevity) ---
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1273,7 +1211,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     };
   }, []);
 
-  // --- TYPING EFFECT (omitted for brevity) ---
   const neonWord = 'NEXORACREW';
   const [typedCount, setTypedCount] = useState(0);
   useEffect(() => {
@@ -1294,11 +1231,9 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     setIsMobileMenuOpen(false);
   };
 
-  // Logic to render the correct stack section
   const renderStackContent = (activeTab, isVisible) => {
     const techKeys = ['web', 'mobile', 'blockchain', 'design', 'ai', 'marketing'];
     
-    // All available tabs now use the TechGrid format
     if (techKeys.includes(activeTab)) {
       const techList = stackData.tech[activeTab] || [];
       return (
@@ -1316,7 +1251,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
       );
     } 
     
-    // Default return or loading state
     return <div style={{ color: MUTED_TEXT, opacity: 0.7, padding: 30 }}>Select a powerful stack category above to see the tools we use.</div>;
   };
 
