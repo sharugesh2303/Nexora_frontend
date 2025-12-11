@@ -416,7 +416,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
   const rafRef = useRef(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+  const navItems =['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
 
   // CANVAS: Gold stars (kept) — canvas is transparent so page is permanently white
   useEffect(() => {
