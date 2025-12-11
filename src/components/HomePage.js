@@ -1460,7 +1460,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
             <FooterColumn>
               <h4>Quick Links</h4>
               <ul>
-                {['Home', 'About', 'Team', 'Progress', 'Contact'].map((l, i) => (
+                {['Home', 'About', 'Projects' , 'Team', 'Progress', 'Blog' , 'Contact'].map((l, i) => (
                   <li key={i}>
                     <a onClick={() => handleNavigation(l.toLowerCase())}>{l}</a>
                   </li>
@@ -1470,7 +1470,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
             <FooterColumn>
               <h4>Services</h4>
               <ul>
-                {['Web Development', 'AI Solutions', 'SEO & Growth', 'Branding & Design'].map((l, i) => (
+                {['Web Development', 'Poster designing & logo making' , 'Content creation' , 'Digital marketing &SEO' , 'AI and automation' , 'Hosting & Support' , 'Printing &Branding solutions' , 'Enterprise networking &server architecture' , 'Bold branding&Immersive visual design' , 'Next gen web & mobile experience'].map((l, i) => (
                   <li key={i}>
                     <a onClick={() => handleNavigation('services')}>{l}</a>
                   </li>
