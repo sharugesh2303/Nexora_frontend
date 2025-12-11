@@ -1,42 +1,41 @@
-import React, { useEffect, useRef } from 'react';
-import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
+// src/components/BlogPage.jsx
+import React, { useEffect, useRef, useState } from 'react';
+import styled, { createGlobalStyle, keyframes } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 
-// --- THEME TOKENS ---
-const NEON = '#00e0b3';
-const ACCENT = '#1ddc9f';
-const NAVY_BG = '#071025';
-const MID_NAVY = '#0B1724';
-const LIGHT_TEXT = '#D6E2F0';
-const MUTED_TEXT = '#9AA6B3';
-const BORDER = 'rgba(255,255,255,0.06)';
+// THEME
+const NAVY = '#012a4a';
+const GOLD = '#d4af37';
+const ACCENT = '#0b3b58';
+const BG_WHITE = '#ffffff';
+const LIGHT_TEXT = '#0f2640';
+const MUTED_TEXT = '#6f7b86';
+const BORDER = 'rgba(1,42,74,0.08)';
 
-// --- KEYFRAMES & GLOBAL ---
+// KEYFRAMES & GLOBAL
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
 `;
-const pulseGlow = keyframes`
-  0%,100% { text-shadow: 0 0 8px ${NEON}, 0 0 18px rgba(0,224,179,0.14); }
-  50% { text-shadow: 0 0 14px ${NEON}, 0 0 28px rgba(0,224,179,0.24); }
-`;
 
 const GlobalStyle = createGlobalStyle`
+  html, body, #root { height: 100%; background: ${BG_WHITE}; }
   body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background: ${NAVY_BG};
+    background: ${BG_WHITE};
     color: ${LIGHT_TEXT};
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
     overflow-x: hidden;
   }
-  .neon-text-shadow { text-shadow: 0 0 6px ${NEON}, 0 0 12px rgba(0,224,179,0.12); }
-  .animate-in { opacity: 0; animation: ${css`${fadeUp} 0.85s ease forwards`}; }
+
+  /* hide the canvas visual — canvas logic is still present but hidden */
+  canvas { display: none; }
 `;
 
-/* ---------- STAR CANVAS ---------- */
+/* ---------- (hidden) star canvas kept for potential future use ---------- */
 const StarCanvas = styled.canvas`
   position: fixed;
   inset: 0;
@@ -44,11 +43,10 @@ const StarCanvas = styled.canvas`
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  display: block;
-  background: radial-gradient(circle at 15% 10%, #071022 0%, #081226 18%, #071020 45%, #02040a 100%);
+  display: none;
 `;
 
-/* ---------- LAYOUT & COMPONENTS ---------- */
+/* LAYOUT */
 const Page = styled.div`
   position: relative;
   z-index: 2;
@@ -57,73 +55,77 @@ const Page = styled.div`
   flex-direction: column;
 `;
 
-/* Header – aligned like Home/About/Services/Projects */
+/* Header */
 const Header = styled.header`
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 28px;
   padding: 14px 48px;
   position: sticky;
   top: 0;
   width: 100%;
-  background: rgba(7,16,38,0.65);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  background: ${BG_WHITE};
+  border-bottom: 1px solid rgba(2,36,60,0.04);
   z-index: 10;
 
   @media (max-width: 768px) {
     padding: 12px 20px;
-    gap: 24px;
+    gap: 18px;
     flex-wrap: wrap;
   }
 `;
 
+/* Logo (NEXORA navy + CREW gold) */
 const Logo = styled.h1`
-  color: ${NEON};
   margin: 0;
-  font-weight: 800;
-  font-size: 1.8rem;
+  font-weight: 900;
+  font-size: 1.6rem;
   cursor: pointer;
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px ${NEON}, 0 0 22px rgba(0,224,179,0.12);
-  animation: ${css`${pulseGlow} 2.8s infinite alternate`};
+  letter-spacing: 0.0px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0px;
 `;
+const LogoN = styled.span` color: ${NAVY}; `;
+const LogoCrew = styled.span` color: ${GOLD}; `;
 
-/* Nav like other pages, next to logo on left */
+/* Nav */
 const NavGroup = styled.nav`
   display:flex;
-  gap: 22px;
+  gap: 20px;
   align-items:center;
   margin-right:auto;
 
-  span {
+  span.navItem {
     color: ${MUTED_TEXT};
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     position: relative;
-    padding: 6px 4px;
-    transition: 0.3s ease;
-
-    &:hover {
-      color: ${NEON};
-      text-shadow: 0 0 10px ${NEON};
-    }
-
-    &:after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -2px;
-      width: 0;
-      height: 2px;
-      background: ${NEON};
-      transition: 0.3s;
-      border-radius: 4px;
-    }
-    &:hover:after {
-      width: 100%;
-    }
+    padding: 6px 6px;
+    transition: color 0.2s ease, transform 0.12s ease;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
+
+  span.navItem:hover { color: ${NAVY}; transform: translateY(-1px); }
+  span.navItem.active { color: ${NAVY}; font-weight: 700; }
+
+  /* subtle hover underline */
+  span.navItem::after{
+    content: '';
+    position: absolute;
+    left: 12%;
+    bottom: -6px;
+    width: 0;
+    height: 3px;
+    background: ${GOLD};
+    transition: width .22s ease;
+    border-radius: 4px;
+  }
+  span.navItem:hover::after { width: 76%; }
 
   @media (max-width: 768px) {
     flex-wrap: wrap;
@@ -131,24 +133,48 @@ const NavGroup = styled.nav`
   }
 `;
 
+/* Progress text control (clickable) — no percentage line, only the word "Progress" */
+const NavProgressText = styled.button`
+  background: transparent;
+  border: 0;
+  color: ${NAVY};
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+
+  &:hover {
+    background: rgba(1,42,74,0.03);
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: 2px solid rgba(1,42,74,0.08);
+    box-shadow: 0 2px 8px rgba(1,42,74,0.06);
+  }
+`;
+
 /* Intro */
 const Intro = styled.section`
-  padding: 130px 20px 40px;
+  padding: 84px 20px 20px;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   z-index: 3;
   text-align: center;
+  animation: ${fadeUp} 0.5s ease forwards;
+  opacity: 0;
 `;
-
 const IntroTitle = styled.h2`
-  font-size: 2.6rem;
+  font-size: 2.4rem;
   margin: 0 0 8px;
-  color: ${LIGHT_TEXT};
-  span { color: ${NEON}; }
-  @media (max-width: 768px) { font-size: 2rem; }
+  color: ${NAVY};
+  span { color: ${GOLD}; }
+  @media (max-width: 768px) { font-size: 1.9rem; }
 `;
-
 const IntroSubtitle = styled.p`
   color: ${MUTED_TEXT};
   margin: 6px 0 0;
@@ -157,62 +183,50 @@ const IntroSubtitle = styled.p`
   margin-right: auto;
 `;
 
-/* Grid */
+/* Grid & Card */
 const PostGrid = styled.div`
   width: 100%;
   max-width: 1200px;
-  margin: 40px auto 80px;
+  margin: 36px auto 80px;
   padding: 0 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 36px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
   z-index: 3;
   justify-items: center;
 `;
 
-/* Card */
 const PostCard = styled.article`
   width: 100%;
   max-width: 360px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
-  border-radius: 14px;
+  background: ${BG_WHITE};
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid ${BORDER};
-  box-shadow: 0 12px 30px rgba(2,6,23,0.6);
-  transition: transform .32s ease, box-shadow .32s ease, border-color .32s ease;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.04);
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
   transform-origin: center;
-  animation: ${css`${fadeUp} 0.85s ease forwards`};
+  animation: ${fadeUp} 0.6s ease forwards;
   opacity: 0;
   margin: 0;
 
   &:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 22px 46px rgba(0,224,179,0.12);
-    border-color: ${NEON};
+    transform: translateY(-8px);
+    box-shadow: 0 30px 50px rgba(2,36,60,0.06);
+    border-color: ${GOLD};
   }
 
-  @media (max-width: 480px) {
-    max-width: 280px;
-  }
+  @media (max-width: 480px) { max-width: 320px; }
 `;
 
-/* Image 9:16 aspect ratio */
 const ImageWrapper = styled.div`
   width: 100%;
   aspect-ratio: 9 / 16;
   position: relative;
-  background: ${MID_NAVY};
+  background: ${ACCENT};
   overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-
-  &::before {
-    content: '';
-    display: block;
-    padding-top: calc((16 / 9) * 100%);
-    line-height: 0;
-  }
+  border-bottom: 1px solid rgba(2,36,60,0.04);
 `;
-
 const PostImage = styled.img`
   position: absolute;
   inset: 0;
@@ -222,48 +236,35 @@ const PostImage = styled.img`
   object-position: center center;
   transition: transform 0.45s ease;
   display: block;
-  &:hover { transform: scale(1.04); }
+  &:hover { transform: scale(1.03); }
 `;
 
 /* Content */
-const CardBody = styled.div`
-  padding: 18px 20px 22px;
-`;
-
+const CardBody = styled.div` padding: 18px 20px 22px; `;
 const Meta = styled.div`
   display:flex;
   justify-content:space-between;
   align-items:center;
   color: ${MUTED_TEXT};
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   margin-bottom: 10px;
-  svg { color: ${NEON}; margin-right: 8px; }
+  svg { color: ${NAVY}; margin-right: 8px; }
 `;
-
-const Title = styled.h3`
-  color: ${LIGHT_TEXT};
-  font-size: 1.15rem;
-  margin: 0 0 8px;
-`;
-
-const Summary = styled.p`
-  color: ${MUTED_TEXT};
-  margin: 0 0 14px;
-  line-height: 1.6;
-`;
-
+const Title = styled.h3` color: ${NAVY}; font-size: 1.15rem; margin: 0 0 8px; `;
+const Summary = styled.p` color: ${MUTED_TEXT}; margin: 0 0 14px; line-height: 1.6; `;
 const ReadMore = styled.span`
   display:inline-flex;
   align-items:center;
   gap:8px;
   padding: 9px 14px;
-  background: linear-gradient(90deg, ${NEON}, ${ACCENT});
-  color: ${MID_NAVY};
+  background: linear-gradient(90deg, ${GOLD}, ${ACCENT});
+  color: ${NAVY};
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform .16s ease;
-  &:hover { transform: translateY(-3px); }
+  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: 0 6px 14px rgba(2,36,60,0.04);
+  &:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(2,36,60,0.06); }
 `;
 
 /* Footer */
@@ -271,16 +272,19 @@ const Footer = styled.footer`
   padding: 36px 20px;
   text-align:center;
   color: ${MUTED_TEXT};
-  border-top: 1px solid rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(2,36,60,0.02);
   margin-top: auto;
 `;
 
-/* ---------- COMPONENT ---------- */
+/* COMPONENT */
 const BlogPage = ({ onNavigate = () => {}, posts }) => {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
 
-  // --- Star Canvas Logic ---
+  // purely visual progress percentage can be set or derived later
+  const [progressPct] = useState(68);
+
+  // KEEP canvas animation logic (canvas is hidden by CSS)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -438,7 +442,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
     };
   }, []);
 
-  // default posts if none passed
+  // posts fallback
   const getPostsData = () => {
     if (posts && posts.length > 0) return posts;
     return [
@@ -472,7 +476,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
   const safePosts = (getPostsData() || []).slice().sort((a, b) => {
     const da = a && a.date ? new Date(a.date).getTime() : 0;
     const db = b && b.date ? new Date(b.date).getTime() : 0;
-    return da - db; // older first -> newer last
+    return da - db;
   });
 
   return (
@@ -482,55 +486,40 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
 
       <Page>
         <Header>
-          <Logo onClick={() => onNavigate('home')} className="neon-text-shadow">
-            NEXORA
+          <Logo onClick={() => onNavigate('home')}>
+            <LogoN>NEXORA</LogoN>
+            <LogoCrew>CREW</LogoCrew>
           </Logo>
-          <NavGroup>
-            <span onClick={() => onNavigate('home')}>Home</span>
-            <span onClick={() => onNavigate('about')}>About</span>
-            <span onClick={() => onNavigate('services')}>Services</span>
-            <span onClick={() => onNavigate('projects')}>Projects</span>
-            <span
-              onClick={() => onNavigate('blog')}
-              style={{ color: NEON }}
-            >
-              Blog
-            </span>
-            <span onClick={() => onNavigate('contact')}>Contact</span>
 
-            <span
-              onClick={() => onNavigate('schedule')}
-              style={{ color: NEON, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-            >
-              <FontAwesomeIcon icon={faCalendarCheck} />
-              <span>Schedule Meeting</span>
-            </span>
+          <NavGroup>
+            <span className="navItem" onClick={() => onNavigate('home')}>Home</span>
+            <span className="navItem" onClick={() => onNavigate('about')}>About</span>
+            <span className="navItem" onClick={() => onNavigate('services')}>Services</span>
+            <span className="navItem" onClick={() => onNavigate('projects')}>Projects</span>
+            <span className="navItem active" onClick={() => onNavigate('blog')} style={{ color: NAVY }}>Blog</span>
+
+            {/* Team nav item */}
+            <span className="navItem" onClick={() => onNavigate('team')}>Team</span>
+
+            {/* Progress word (clickable) - no percentage/line */}
+            <NavProgressText onClick={() => onNavigate('progress')} aria-label="Open progress page">
+              Progress
+            </NavProgressText>
+
+            <span className="navItem" onClick={() => onNavigate('contact')}>Contact</span>
           </NavGroup>
         </Header>
 
-        <Intro className="animate-in" style={{ animationDelay: '0.05s' }}>
-          <IntroTitle>
-            Our <span>Blog</span>
-          </IntroTitle>
-          <IntroSubtitle>
-            Updates, insights, and stories from the NEXORA team.
-          </IntroSubtitle>
+        <Intro>
+          <IntroTitle>Our <span>Blog</span></IntroTitle>
+          <IntroSubtitle>Updates, insights, and stories from the NEXORACREW team.</IntroSubtitle>
         </Intro>
 
         <PostGrid>
           {safePosts.map((post, idx) => (
-            <PostCard
-              key={post._id}
-              className="animate-in"
-              style={{ animationDelay: `${0.12 * idx + 0.25}s` }}
-            >
+            <PostCard key={post._id} style={{ animationDelay: `${0.12 * idx + 0.12}s` }}>
               <ImageWrapper>
-                <PostImage
-                  src={post.headerImage}
-                  alt={post.title}
-                  width="1080"
-                  height="1920"
-                />
+                <PostImage src={post.headerImage} alt={post.title} width="1080" height="1920" />
               </ImageWrapper>
 
               <CardBody>
@@ -538,11 +527,7 @@ const BlogPage = ({ onNavigate = () => {}, posts }) => {
                   <span>By {post.author}</span>
                   <span>
                     <FontAwesomeIcon icon={faCalendarAlt} />
-                    {new Date(post.date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+                    {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
                 </Meta>
 
