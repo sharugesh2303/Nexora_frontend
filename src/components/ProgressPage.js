@@ -8,24 +8,24 @@ import {
     faBolt,
     faUserShield,
     faCalendarCheck,
-    faEnvelope, // For email contact info
-    faPhone, // For phone contact info
-    faDownload // For the Download button
+    faEnvelope,
+    faPhone,
+    faDownload
 } from '@fortawesome/free-solid-svg-icons';
 import {
-    faInstagram, // For Instagram social link
-    faLinkedinIn, // For LinkedIn social link
+    faInstagram,
+    faLinkedinIn,
 } from '@fortawesome/free-brands-svg-icons';
 import {
-    faLocationDot // For location contact info
+    faLocationDot
 } from '@fortawesome/free-solid-svg-icons';
 
 /* ---------------- THEME ---------------- */
 const NEON_COLOR = '#00e0b3';
 const TEXT_LIGHT = '#E6F0F2';
 const TEXT_MUTED = '#9AA8B8';
-const DARK_BLUE = '#050817'; // Main background color for a section
-const HIGHLIGHT_BLUE = '#526ed5'; // Color for the active progress line
+const DARK_BLUE = '#050817'; 
+const HIGHLIGHT_BLUE = '#526ed5'; 
 
 /* ---------------- GLOBAL STYLE ---------------- */
 const GlobalStyle = createGlobalStyle`
@@ -47,7 +47,7 @@ const glowPulse = keyframes`
   100% { box-shadow: 0 0 0px rgba(34,197,94,0.0); }
 `;
 
-/* ---------------- HEADER (same style as About) ---------------- */
+/* ---------------- HEADER ---------------- */
 const Header = styled.header`
     display: flex;
     align-items: center;
@@ -169,7 +169,7 @@ const Grid = styled.div`
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 28px;
-    margin-top: 40px; /* Separator for the SWOT grid */
+    margin-top: 40px; 
 
     @media (max-width: 900px) {
         grid-template-columns: 1fr;
@@ -299,7 +299,7 @@ const WorkflowContainer = styled.div`
     text-align: center;
     margin-bottom: 60px;
     padding: 30px 20px;
-    background: rgba(0,0,0,0.2); /* Slight background to separate it visually */
+    background: rgba(0,0,0,0.2); 
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 
@@ -340,7 +340,7 @@ const Line = styled.div`
     top: 50%;
     transform: translateY(-50%);
     height: 4px;
-    background: #1e293b; /* Dark line color */
+    background: #1e293b; 
     width: 100%;
     z-index: 1;
     border-radius: 2px;
@@ -352,11 +352,11 @@ const ActiveLine = styled.div`
     transform: translateY(-50%);
     height: 4px;
     background: ${HIGHLIGHT_BLUE}; 
-    width: 50%; /* Inquiry (0) to Development (4) are 'active' based on the image's highlighting */
+    width: 50%; 
     z-index: 2;
     border-radius: 2px;
     left: 0;
-    max-width: calc(100% - 10px); /* prevent overflow */
+    max-width: calc(100% - 10px); 
 `;
 
 const Step = styled.div`
@@ -438,7 +438,7 @@ const AgileWorkflow = () => {
                 <Line />
                 <ActiveLine /> 
                 {steps.map((step, index) => {
-                    const isActive = index <= 4; // Inquiry (0) to Development (4) are 'active'
+                    const isActive = index <= 4; 
                     return (
                         <Step key={step}>
                             <Circle active={isActive} />
@@ -456,7 +456,7 @@ const AgileWorkflow = () => {
     );
 };
 
-/* ---------------- CAREERS / FOOTER SECTION STYLES (Retained from previous step) ---------------- */
+/* ---------------- CAREERS / FOOTER SECTION STYLES ---------------- */
 
 const FooterContainer = styled.footer`
     width: 100%;
@@ -611,7 +611,7 @@ const BarColumn = styled.div`
 
 const Bar = styled.div`
     width: 25px;
-    background-color: #475569; /* Darker gray bar */
+    background-color: #475569; 
     height: ${({ height }) => height};
     position: relative;
     border-radius: 3px 3px 0 0;
@@ -622,7 +622,7 @@ const Bar = styled.div`
         position: absolute;
         bottom: 0;
         width: 100%;
-        background-color: ${NEON_COLOR}; /* Neon blue/green highlight bar */
+        background-color: ${NEON_COLOR}; 
         height: ${({ highlight }) => highlight};
         border-radius: 3px 3px 0 0;
     }
@@ -743,7 +743,6 @@ const CareersBarChart = () => (
         </BarColumn>
         <ChartWrapper>
             <BarColumn>
-                {/* Heights are proportional to the image. Using relative heights for visual accuracy. */}
                 <Bar height="90%" highlight="60%" />
                 <BarLabel>Designers</BarLabel>
             </BarColumn>
@@ -772,7 +771,7 @@ const CareersBarChart = () => (
         <InternshipDetail style={{ borderBottom: 'none' }}>
             <h4>Certification?</h4>
             <p>Yes, verified by MSME startup.</p>
-        </InternshipDetail> {/* CORRECTED CLOSING TAG */}
+        </InternshipDetail> 
     </BarChartContainer>
 );
 
@@ -791,7 +790,8 @@ const FullFooter = ({ onNavigate }) => (
                         <li><FontAwesomeIcon icon={faCalendarCheck} /> Official Certification</li>
                         <li><FontAwesomeIcon icon={faCalendarCheck} /> Networking Opportunities</li>
                     </ul>
-                    <ApplyButton onClick={() => onNavigate('apply')}>Apply Now</ApplyButton>
+                    {/* UPDATED APPLY BUTTON */}
+                    <ApplyButton onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSflR-eG2DJXiHOThlXgeToIivo95GKEyZa0dhJDJFD2WbrWlA/viewform', '_blank')}>Apply Now</ApplyButton>
                 </CareersTextGroup>
 
                 <CareersBarChart />
@@ -884,8 +884,6 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
 
                         <span onClick={() => onNavigate('contact')}>Contact</span>
                         
-                        {/* SCHEDULE MEETING BAR REMOVED */}
-                        
                     </NavGroup>
                 </Header>
 
@@ -915,7 +913,7 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <li> Fast execution & modern workflows</li>
                                         <li>Innovation-focused team</li>
                                         <li>Quality-first development → High performance, scalability</li>
-                                        <li>Clear brand identity → “Meaningful technology”</li>
+                                        <li>Clear brand identity → “Meaningful technology”</li>
                                     </BulletList>
                                 </StrengthBox>
 
@@ -931,7 +929,7 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <li>Limited portfolio compared to big agencies</li>
                                         <li>Small team size → higher workload during multiple projects</li>
                                         <li>Scaling challenges when project volume increases</li>
-                                        <li>Depends on digital marketing consistency</li>
+                                        <li>Depends on digital marketing consistency</li>
                                     </BulletList>
                                 </WeaknessBox>
 
@@ -948,7 +946,7 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <li>AI automation & tech integration opportunities</li>
                                         <li>Cloud technology demand increasing</li>
                                         <li>Social media presence can boost brand visibility</li>
-                                        <li> Corporate branding, design, consulting areas expandable</li>
+                                        <li> Corporate branding, design, consulting areas expandable</li>
                                     </BulletList>
                                 </OpportunityBox>
 
@@ -964,7 +962,7 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                                         <li>Price competition from freelancers & low-cost agencies</li>
                                         <li> Fast-changing technologies → continuous skill upgrade needed</li>
                                         <li>Client expectations increasing day by day</li>
-                                        <li>Economic slowdowns affecting project budgets</li>
+                                        <li>Economic slowdowns affecting project budgets</li>
                                     </BulletList>
                                 </ThreatBox>
                             </Grid>
