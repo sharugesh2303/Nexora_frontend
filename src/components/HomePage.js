@@ -33,6 +33,7 @@ import axios from 'axios';
 const TECH_LOGOS = {
   'React Native': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg',
   'Flutter': 'https://www.vectorlogo.zone/logos/flutterio/flutterio-icon.svg',
+  'Swift': 'https://cdn.iconscout.com/icon/free/png-256/swift-15-283844.png', 
   'Kotlin': 'https://www.vectorlogo.zone/logos/kotlinlang/kotlinlang-icon.svg',
   'Node.js': 'https://www.vectorlogo.zone/logos/nodejs/nodejs-icon.svg',
   'MongoDB': 'https://www.vectorlogo.zone/logos/mongodb/mongodb-icon.svg',
@@ -44,7 +45,8 @@ const TECH_LOGOS = {
   'Python': 'https://www.vectorlogo.zone/logos/python/python-icon.svg',
   'Figma': 'https://www.vectorlogo.zone/logos/figma/figma-icon.svg',
   'Canva': 'https://www.vectorlogo.zone/logos/canva/canva-icon.svg',
-  'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg',
+  'Adobe Suite': 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg', 
+  'Spline': 'https://raw.githubusercontent.com/SplineTool/spline-tool-logo/main/logo.png', 
 };
 
 // ====================================================================
@@ -1013,7 +1015,8 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   const [clientStories, setClientStories] = useState([]);
   const [partners, setPartners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeStackTab, setActiveStackTab] = useState('design'); 
+  // UPDATED: Default state changed from 'design' to 'web'
+  const [activeStackTab, setActiveStackTab] = useState('web'); 
 
   const [milestonesRef, isMilestonesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -100px 0px' });
   const [storiesRef, isStoriesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
@@ -1502,4 +1505,4 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   );
 };
 
-export default HomePage; 
+export default HomePage;
