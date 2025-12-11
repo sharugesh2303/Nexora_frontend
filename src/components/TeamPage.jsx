@@ -53,9 +53,7 @@ const MobileToggle = styled.button`display:none;border:0;background:transparent;
 
 const fadeUp = keyframes`from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}`;
 
-/* --- LAYOUT FIX: Full Width Alignment --- */
-// I removed "max-width: 1200px" and "margin: 0 auto" 
-// so it aligns strictly with the Header padding (40px).
+/* --- LAYOUT: Full Width Alignment --- */
 const Main = styled.main`
   flex: 1;
   width: 100%;
@@ -63,7 +61,6 @@ const Main = styled.main`
   @media(max-width:768px){ padding:28px 16px 50px; }
 `;
 
-// Align Intro to the LEFT to match the border edge
 const Intro = styled.div`text-align:left;margin-bottom:36px;animation:${fadeUp} .6s ease both;`;
 const IntroHeading = styled.h1`margin:0 0 8px 0;font-size:clamp(1.8rem,2.6vw,2.4rem);letter-spacing:.04em;color:${NAVY};`;
 const IntroSub = styled.p`margin:0;color:${MUTED};font-size:.96rem;`;
@@ -121,47 +118,39 @@ const parseNumeric = (v) => {
   return Number.isFinite(n) ? n : null;
 };
 
-/* --- LOGIC: Grouping & Sorting --- */
+/* --- LOGIC: STRICT DB GROUPING (No Hardcoded Names) --- */
 function groupByDbFields(teamData = [], fixedRoles = []) {
   const groupsObj = {};
 
-  const priorityMap = {
-    // Roles
-    "founder": 1,
-    "founder & ceo": 1,
-    "ceo": 1,
-    "co ceo": 2,
-    "co-ceo": 2,
-    // Names
-    "tharsan": 1,
-    "surendar": 2
-  };
-
   teamData.forEach(member => {
+    // 1. Get Group ID directly from Data
     let gId = parseNumeric(member.group);
     let sId = parseNumeric(member.subgroup);
 
-    // Override logic
-    const roleKey = (member.role || "").toLowerCase().trim();
-    const nameKey = (member.name || "").toLowerCase().trim();
-
-    Object.keys(priorityMap).forEach(key => {
-        if (nameKey.includes(key)) gId = priorityMap[key];
-    });
-
-    if (!gId || gId === 999) {
-        Object.keys(priorityMap).forEach(key => {
-            if (roleKey.includes(key)) gId = priorityMap[key];
-        });
+    // 2. Optional Fallback: Check fixedRoles only if DB is empty
+    if (gId === null) {
+      const foundRole = fixedRoles.find(fr => fr.name === member.role);
+      if (foundRole) {
+        gId = parseNumeric(foundRole.group);
+        sId = parseNumeric(foundRole.subGroup ?? foundRole.subgroup);
+      }
     }
 
+    // 3. Default to "Group 999" (Team Members) if still missing
     if (gId === null) gId = 999; 
     if (sId === null) sId = 0;
 
+    // 4. Create Group Bucket
     if (!groupsObj[gId]) {
+      
       let calculatedLabel = "";
-      if (gId === 999) calculatedLabel = "TEAM MEMBERS";
-      else calculatedLabel = member.role ? member.role.toUpperCase() : "GROUP " + gId;
+
+      if (gId === 999) {
+          calculatedLabel = "TEAM MEMBERS";
+      } else {
+          // USE ROLE NAME AS GROUP TITLE
+          calculatedLabel = member.role ? member.role.toUpperCase() : "GROUP " + gId;
+      }
 
       groupsObj[gId] = {
         id: gId,
@@ -171,6 +160,7 @@ function groupByDbFields(teamData = [], fixedRoles = []) {
       };
     }
 
+    // 5. Add Member to Main or Subgroup
     if (sId === 0) {
       groupsObj[gId].mainMembers.push(member);
     } else {
@@ -185,6 +175,7 @@ function groupByDbFields(teamData = [], fixedRoles = []) {
     }
   });
 
+  // 6. Sort Groups Ascending (1, 2, 3...)
   return Object.values(groupsObj)
     .sort((a, b) => a.id - b.id)
     .map(g => ({
@@ -245,7 +236,7 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [] }) => 
                 <SectionTitle>{group.label}</SectionTitle>
               </SectionHeaderRow>
 
-              {/* Members Grid - Starts flush left with the Header padding */}
+              {/* Members Grid */}
               {group.mainMembers && group.mainMembers.length > 0 && (
                 <MembersRow>
                   {group.mainMembers.map((m, i) => (
