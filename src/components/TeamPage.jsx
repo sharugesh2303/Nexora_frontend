@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled, { createGlobalStyle, keyframes } from "styled-components";
+import styled, { createGlobalStyle, keyframes, css } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faBars, 
@@ -36,13 +36,23 @@ const rollIn = keyframes`
    GLOBAL STYLES
    ========================================= */
 const GlobalStyle = createGlobalStyle`
-    html, body, #root { height: 100%; }
-
-    body {
+    html, body {
         margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
         font-family: 'Poppins', sans-serif;
-        background: #ffffff; /* Pure White Background */
+        
+        /* THE GLOW EFFECT BACKGROUND */
+        background: 
+            radial-gradient(circle at 0% 0%, #fff9e8 0, #ffffff 35%, transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, #f5f7fb 40%, #e5edf7 100%);
+            
         color: ${TEXT_LIGHT};
+    }
+
+    #root {
+        width: 100%;
         overflow-x: hidden;
     }
 
@@ -61,14 +71,14 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 /* =========================================
-   STAR CANVAS BACKGROUND
+   STAR CANVAS BACKGROUND (The Particles)
    ========================================= */
 const StarCanvas = styled.canvas`
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0; 
     pointer-events: none;
 `;
 
@@ -79,24 +89,28 @@ const PageWrapper = styled.div`
     position: relative;
     z-index: 1;
     min-height: 100vh;
-    background: #ffffff;
+    width: 100%;
+    max-width: 100vw;
+    background: transparent; /* Transparent so Glow/Stars show through */
+    overflow-x: hidden;
 `;
 
 const Header = styled.header`
     display: flex;
     align-items: center;
-    gap: 40px;
+    justify-content: space-between;
     padding: 14px 48px;
     position: sticky;
     top: 0;
     width: 100%;
-    background: rgba(255,255,255,0.98);
+    background: rgba(255,255,255,0.95); /* Slight glass effect */
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid ${BORDER_LIGHT};
     z-index: 100;
+    box-sizing: border-box;
 
-    @media (max-width: 780px) {
+    @media (max-width: 768px) {
         padding: 12px 20px;
-        gap: 18px;
     }
 `;
 
@@ -106,7 +120,12 @@ const Logo = styled.h1`
     font-weight: 800;
     cursor: pointer;
     letter-spacing: 1px;
-    text-shadow: 0 0 8px rgba(18,49,101,0.1);
+    margin: 0;
+    white-space: nowrap;
+
+    @media (max-width: 480px) {
+        font-size: 1.4rem;
+    }
 `;
 
 const NavGroup = styled.div`
@@ -114,6 +133,7 @@ const NavGroup = styled.div`
     gap: 22px;
     align-items: center;
     margin-right: auto;
+    margin-left: 40px;
 
     @media (max-width: 1024px) {
         display: none;
@@ -157,7 +177,6 @@ const MobileMenuButton = styled.button`
         color: ${NEON_COLOR};
         font-size: 1.5rem;
         cursor: pointer;
-        margin-left: auto;
     }
 `;
 
@@ -208,10 +227,11 @@ const HeroTeam = styled.section`
     max-width: 1200px;
     margin: 0 auto;
     text-align: left;
+    box-sizing: border-box;
 
     @media (max-width: 780px) {
-        padding: 120px 20px 30px;
-        text-align: center;
+        padding: 80px 20px 30px;
+        text-align: left;
     }
 `;
 
@@ -219,9 +239,7 @@ const HeroTitle = styled.h1`
     font-size: 3.6rem;
     font-weight: 800;
     margin-bottom: 16px;
-    line-height: 1.05;
-    
-    /* Simple solid color, no glow/shadow */
+    line-height: 1.1;
     color: ${NEON_COLOR}; 
 
     span {
@@ -229,7 +247,7 @@ const HeroTitle = styled.h1`
     }
 
     @media (max-width: 780px) {
-        font-size: 2.6rem;
+        font-size: 2.2rem;
     }
 `;
 
@@ -240,9 +258,8 @@ const HeroParagraph = styled.p`
     line-height: 1.7;
 
     @media (max-width: 780px) {
-        margin-left: auto;
-        margin-right: auto;
         font-size: 1rem;
+        max-width: 100%;
     }
 `;
 
@@ -253,8 +270,10 @@ const TeamContainer = styled.div`
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px 36px 80px;
+    box-sizing: border-box;
+
     @media (max-width: 780px) {
-        padding: 20px 20px 60px;
+        padding: 10px 20px 60px;
     }
 `;
 
@@ -265,6 +284,11 @@ const SectionHeaderRow = styled.div`
     margin-top: 60px;
     margin-bottom: 30px;
     animation: ${rollIn} 0.6s ease forwards;
+
+    @media (max-width: 480px) {
+        margin-top: 40px;
+        margin-bottom: 20px;
+    }
 `;
 
 const SectionBar = styled.div`
@@ -280,18 +304,28 @@ const SectionTitle = styled.h2`
     letter-spacing: .02em;
     color: ${NEON_COLOR}; 
     font-weight: 800;
+
+    @media (max-width: 480px) {
+        font-size: 1.5rem;
+    }
 `;
 
 const MembersGrid = styled.div`
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start; /* Strict Left Alignment */
+    justify-content: flex-start;
     gap: 30px;
+
+    @media (max-width: 600px) {
+        justify-content: center;
+        gap: 20px;
+    }
 `;
 
 const MemberCard = styled.div`
-    width: 260px; /* Fixed width */
-    background: #ffffff;
+    width: 260px;
+    background: rgba(255, 255, 255, 0.85); /* Slightly transparent to show glow */
+    backdrop-filter: blur(12px);
     border-radius: 18px;
     padding: 20px;
     border: 1px solid ${BORDER_LIGHT};
@@ -303,12 +337,17 @@ const MemberCard = styled.div`
     flex-direction: column;
     align-items: center;
     text-align: center;
+    box-sizing: border-box;
 
-    /* Subtle hover lift */
+    @media (max-width: 600px) {
+        width: 100%; 
+        max-width: 340px;
+    }
+
     &:hover {
         transform: translateY(-8px);
         border-color: ${GOLD_ACCENT};
-        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        box-shadow: 0 20px 40px rgba(212, 169, 55, 0.15); /* Gold glow on hover */
     }
 `;
 
@@ -341,12 +380,21 @@ const MemberName = styled.h3`
     font-weight: 700;
     color: ${TEXT_LIGHT};
     margin: 0;
+
+    @media (max-width: 480px) {
+        font-size: 1.15rem;
+    }
 `;
 
 const SubgroupBlock = styled.div`
     margin-top: 20px;
     padding-left: 20px;
     border-left: 2px solid ${BORDER_LIGHT};
+
+    @media (max-width: 480px) {
+        padding-left: 10px;
+        border-left-width: 3px;
+    }
 `;
 
 const SubgroupHeader = styled.h4`
@@ -371,10 +419,11 @@ const SubgroupHeader = styled.h4`
    FOOTER STYLES
    ========================================= */
 const FullFooter = styled.footer`
-    background: #ffffff;
+    background: rgba(255,255,255,0.9); /* Slight transparency */
     padding: 60px 50px 20px;
     color: ${TEXT_MUTED};
     border-top: 1px solid ${BORDER_LIGHT};
+    box-sizing: border-box;
 
     @media (max-width: 768px) {
         padding: 40px 20px 20px;
@@ -388,19 +437,28 @@ const FooterGrid = styled.div`
     justify-content: space-between;
     gap: 30px;
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 600px) {
         flex-direction: column;
         align-items: flex-start;
-        gap: 20px;
+        gap: 30px;
     }
 `;
 
 const FooterColumn = styled.div`
     min-width: 200px;
+    
     @media (max-width: 768px) {
         min-width: unset;
+        flex: 1; 
+    }
+    
+    @media (max-width: 600px) {
         width: 100%;
-        margin-bottom: 10px;
+        flex: none;
     }
 
     h4 {
@@ -736,7 +794,7 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
                 </TeamContainer>
 
                 {/* JOIN US CTA */}
-                <div style={{ background: '#ffffff', padding: '60px 20px', textAlign: 'center', marginTop: '40px', borderTop: `1px solid ${BORDER_LIGHT}` }}>
+                <div style={{ background: 'rgba(255,255,255,0.7)', padding: '60px 20px', textAlign: 'center', marginTop: '40px', borderTop: `1px solid ${BORDER_LIGHT}` }}>
                     <h2 style={{ color: NEON_COLOR, fontSize: '2rem', marginBottom: '10px', fontWeight: 800 }}>
                         Want to <span style={{ color: GOLD_ACCENT }}>Join Us?</span>
                     </h2>
