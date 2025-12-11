@@ -863,10 +863,7 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
                         <FooterColumn>
                             <h4>Services</h4>
                             <ul>
-                                {[
-                                    'Web Development', 'AI Solutions', 'SEO & Growth', 
-                                    'Branding & Design', 'Server Architecture'
-                                ].map((l, i) => (
+                                {['Web Development', 'Poster designing & logo making' , 'Content creation' , 'Digital marketing &SEO' , 'AI and automation' , 'Hosting & Support' , 'Printing &Branding solutions' , 'Enterprise networking &server architecture' , 'Bold branding&Immersive visual design' , 'Next gen web & mobile experience'].map((l, i) => (
                                     <li key={i}>
                                         <a onClick={() => handleNavigation('services')}>{l}</a>
                                     </li>
