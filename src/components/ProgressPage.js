@@ -1,5 +1,5 @@
 // src/components/ProgressPage.jsx
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -51,50 +51,14 @@ const GlobalStyle = createGlobalStyle`
     }
 `;
 
-/* ---------------- FALLING PARTICLES (BACKGROUND EFFECT) ---------------- */
-/* We'll render a lightweight DOM-based falling effect (small circles/rects)
-   - pointer-events: none so it doesn't interfere
-   - uses transform for performant animations
-   - number of particles is reduced on small screens for performance
-*/
-
-const fall = keyframes`
-  0% { transform: translateY(-120%) rotate(0deg); opacity: 0; }
-  10% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { transform: translateY(120vh) rotate(360deg); opacity: 0.6; }
-`;
-
-const Background = styled.div`
-  position: fixed;
-  inset: 0;
-  z-index: 0; /* behind everything */
-  pointer-events: none;
-  overflow: hidden;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-`;
-
-/* each particle is a simple span; styles vary via inline styles for performance */
-const Particle = styled.span`
-  position: absolute;
-  top: -10vh;
-  display: block;
-  border-radius: 50%;
-  opacity: 0;
-  transform: translateY(-120%) rotate(0deg);
-  animation-name: ${fall};
-  animation-timing-function: linear;
-  will-change: transform, opacity;
-`;
-
-/* small helper to create different blurred glows when needed */
-const Glow = styled.div`
-  position: absolute;
-  inset: auto;
-  z-index: -1;
-  pointer-events: none;
-  filter: blur(20px);
-  opacity: 0.06;
+/* ---------------- STAR CANVAS BACKGROUND ---------------- */
+const StarCanvas = styled.canvas`
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
 `;
 
 /* ---------------- ANIMATIONS ---------------- */
@@ -182,7 +146,7 @@ const PageWrapper = styled.div`
     display: flex;
     flex-direction: column;
     background: #ffffff; /* explicit white background to avoid visible black gutters */
-    z-index: 1; /* ensure content sits above Background */
+    z-index: 1; /* ensure content sits above canvas */
 `;
 
 const MainContentArea = styled.div`
@@ -891,61 +855,87 @@ const FullFooter = ({ onNavigate }) => (
     </FooterContainer>
 );
 
-
 /* ---------------- COMPONENT ---------------- */
 const ProgressPage = ({ onNavigate = () => {} }) => {
-    /* Create a simple particle config. Keep count lower for mobile.
-       We don't change textual content — only render decorative spans behind.
-    */
+    // canvas ref for background animation
+    const canvasRef = useRef(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        const DPR = window.devicePixelRatio || 1;
+
+        function resize() {
+            canvas.width = window.innerWidth * DPR;
+            canvas.height = window.innerHeight * DPR;
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        }
+        resize();
+
+        // star/particle data — scale count by screen size for performance
+        const baseCount = Math.max(Math.floor((window.innerWidth * window.innerHeight) / 12000), 60);
+        const isSmall = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        const count = isSmall ? Math.max(40, Math.floor(baseCount * 0.5)) : baseCount;
+
+        const stars = Array.from({ length: count }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: 0.8 + Math.random() * 2.2,
+            dx: (Math.random() - 0.5) * 0.3,
+            dy: 0.05 + Math.random() * 0.5,
+            alpha: 0.12 + Math.random() * 0.5,
+            hue: Math.random() > 0.8 ? 'gold' : 'navy' // mostly gold with occasional navy tints
+        }));
+
+        let rafId;
+        const draw = () => {
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            // subtle gradient background (keeps white UI look)
+            // optional — commented out to preserve page's white background
+            // const g = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+            // g.addColorStop(0, 'rgba(255,255,255,0.0)');
+            // g.addColorStop(1, 'rgba(250,250,252,0.0)');
+            // ctx.fillStyle = g;
+            // ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            stars.forEach((s) => {
+                s.x += s.dx;
+                s.y += s.dy;
+
+                if (s.y > window.innerHeight + 10) s.y = -10;
+                if (s.x > window.innerWidth + 10) s.x = -10;
+                if (s.x < -10) s.x = window.innerWidth + 10;
+
+                // choose color based on hue flag
+                if (s.hue === 'gold') ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
+                else ctx.fillStyle = `rgba(8,48,71,${s.alpha * 0.9})`;
+
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            rafId = requestAnimationFrame(draw);
+        };
+
+        draw();
+        window.addEventListener('resize', resize);
+        return () => { cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); };
+    }, []);
+
+    // Create a simple particle config only for fallback/no-canvas cases (not visible)
     const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-    const particleCount = isMobile ? 14 : 30;
-
-    // Helper to randomize particle properties
-    const makeParticles = (count) => {
-        const arr = new Array(count).fill(0).map((_, i) => {
-            const size = Math.round(6 + Math.random() * 18); // 6-24px
-            const left = Math.round(Math.random() * 100); // vw
-            const delay = (Math.random() * 8).toFixed(2); // seconds
-            const duration = (8 + Math.random() * 12).toFixed(2); // 8-20s
-            const opacity = (0.2 + Math.random() * 0.7).toFixed(2);
-            const borderRadius = Math.random() > 0.7 ? '3px' : '50%'; // mix of circles and soft squares
-            // alternate colors subtly: mostly pale gold / navy tint
-            const colorChoice = Math.random();
-            const background = colorChoice > 0.75 ? 'rgba(8,48,71,0.06)' : 'rgba(212,175,55,0.12)';
-
-            return { key: `p-${i}`, size, left, delay, duration, opacity, borderRadius, background };
-        });
-        return arr;
-    };
-
-    const particles = makeParticles(particleCount);
 
     return (
         <>
             <GlobalStyle />
-            {/* Background falling effect */}
-            <Background aria-hidden>
-                {/* optional subtle glows */}
-                <Glow style={{ left: '4%', top: '8%', width: 240, height: 240, background: GOLD }} />
-                <Glow style={{ right: '2%', top: '18%', width: 200, height: 200, background: NAVY }} />
-                {/* render particles */}
-                {particles.map(p => (
-                    <Particle
-                        key={p.key}
-                        style={{
-                            left: `${p.left}vw`,
-                            width: p.size,
-                            height: p.size,
-                            background: p.background,
-                            borderRadius: p.borderRadius,
-                            opacity: p.opacity,
-                            animationDuration: `${p.duration}s`,
-                            animationDelay: `${p.delay}s`,
-                        }}
-                    />
-                ))}
-            </Background>
-
+            <StarCanvas ref={canvasRef} aria-hidden />
             <PageWrapper>
                 {/* NAVBAR */}
                 <Header>
@@ -959,7 +949,6 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                         <span onClick={() => onNavigate('team')}>Team</span>
                         <span onClick={() => onNavigate('progress')}>Progress</span>
                         <span onClick={() => onNavigate('contact')}>Contact</span>
-                        
 
                         {/* ACTIVE ITEM FOR THIS PAGE */}
                         <span
@@ -970,7 +959,6 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                         </span>
 
                         <span onClick={() => onNavigate('contact')}>Contact</span>
-                        
                     </NavGroup>
                 </Header>
 
@@ -1059,7 +1047,6 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
 
                 {/* CAREERS/FOOTER SECTION */}
                 <FullFooter onNavigate={onNavigate} />
-
             </PageWrapper>
         </>
     );
