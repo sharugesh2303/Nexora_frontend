@@ -1040,7 +1040,6 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
       mobile: [
         { name: 'React Native', logoUrl: TECH_LOGOS['React Native'] },
         { name: 'Flutter', logoUrl: TECH_LOGOS['Flutter'] },
-        { name: 'Swift (iOS)', logoUrl: TECH_LOGOS['Swift'] },
         { name: 'Kotlin (Android)', logoUrl: TECH_LOGOS['Kotlin'] },
       ],
       blockchain: [
