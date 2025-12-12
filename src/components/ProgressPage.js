@@ -1,5 +1,5 @@
 // src/components/ProgressPage.jsx
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -20,31 +20,52 @@ import {
     faLocationDot
 } from '@fortawesome/free-solid-svg-icons';
 
-/* ---------------- THEME ---------------- */
-const NEON_COLOR = '#00e0b3';
-const TEXT_LIGHT = '#E6F0F2';
-const TEXT_MUTED = '#9AA8B8';
-const DARK_BLUE = '#050817'; 
-const HIGHLIGHT_BLUE = '#526ed5'; 
+/* ---------------- THEME (white UI — navy & gold accents) ---------------- */
+const GOLD = '#D4AF37';            // specification / highlight color
+const NAVY = '#083047';            // primary navy color for text/background elements
+const TEXT_DARK = '#052635';       // main text color
+const TEXT_MUTED = '#6b7280';      // muted text (gray)
+const SHELL_BG = '#ffffff';        // white surface for cards
+const SURFACE_BORDER = 'rgba(8,48,71,0.06)';
 
 /* ---------------- GLOBAL STYLE ---------------- */
 const GlobalStyle = createGlobalStyle`
-    html, body, #root { height: 100%; }
+    /* ensure the entire page background is white so no black bars appear */
+    html, body, #root { height: 100%; background: #ffffff; }
 
     body {
         margin: 0;
         font-family: 'Poppins', sans-serif;
-        background: radial-gradient(circle at 20% 10%, #0a132f 0%, #050817 40%, #01030a 100%);
-        color: ${TEXT_LIGHT};
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        background: #ffffff;
+        color: ${TEXT_DARK};
         overflow-x: hidden;
     }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+      }
+    }
+`;
+
+/* ---------------- STAR CANVAS BACKGROUND ---------------- */
+const StarCanvas = styled.canvas`
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
 `;
 
 /* ---------------- ANIMATIONS ---------------- */
 const glowPulse = keyframes`
-  0% { box-shadow: 0 0 0px rgba(34,197,94,0.0); }
-  50% { box-shadow: 0 0 28px rgba(34,197,94,0.35); }
-  100% { box-shadow: 0 0 0px rgba(34,197,94,0.0); }
+  0% { box-shadow: 0 0 0px rgba(212,175,55,0.0); }
+  50% { box-shadow: 0 0 18px rgba(212,175,55,0.12); }
+  100% { box-shadow: 0 0 0px rgba(212,175,55,0.0); }
 `;
 
 /* ---------------- HEADER ---------------- */
@@ -56,9 +77,9 @@ const Header = styled.header`
     position: sticky;
     top: 0;
     width: 100%;
-    background: rgba(7,16,38,0.65);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid ${SURFACE_BORDER};
     z-index: 10;
 
     @media (max-width: 780px) {
@@ -68,12 +89,19 @@ const Header = styled.header`
 `;
 
 const Logo = styled.h1`
-    color: ${NEON_COLOR};
+    color: ${NAVY};
     font-size: 1.8rem;
     font-weight: 800;
     cursor: pointer;
     letter-spacing: 1px;
-    text-shadow: 0 0 12px ${NEON_COLOR};
+    display: inline-flex;
+    align-items: center;
+
+    span {
+        color: ${GOLD};
+        margin-left: 6px;
+        font-weight: 900;
+    }
 `;
 
 const NavGroup = styled.div`
@@ -85,24 +113,24 @@ const NavGroup = styled.div`
     span {
         color: ${TEXT_MUTED};
         cursor: pointer;
-        font-weight: 500;
+        font-weight: 600;
         position: relative;
-        transition: 0.3s ease;
+        transition: 0.25s ease;
         padding: 6px 4px;
+        font-size: 0.95rem;
 
         &:hover {
-            color: ${NEON_COLOR};
-            text-shadow: 0 0 10px ${NEON_COLOR};
+            color: ${NAVY};
         }
 
         &:after {
             content: '';
             position: absolute;
-            left: 0; bottom: -2px;
+            left: 0; bottom: -6px;
             width: 0;
-            height: 2px;
-            background: ${NEON_COLOR};
-            transition: 0.3s;
+            height: 3px;
+            background: ${GOLD};
+            transition: 0.22s;
             border-radius: 4px;
         }
         &:hover:after {
@@ -116,7 +144,9 @@ const PageWrapper = styled.div`
     position: relative;
     min-height: 100vh;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
+    background: #ffffff; /* explicit white background to avoid visible black gutters */
+    z-index: 1; /* ensure content sits above canvas */
 `;
 
 const MainContentArea = styled.div`
@@ -134,42 +164,40 @@ const ContentWrapper = styled.div`
 `;
 
 const Shell = styled.div`
-    border-radius: 32px;
+    border-radius: 16px;
     padding: 48px 40px 56px;
-    background: radial-gradient(circle at top left, #020617, #020617 55%, #020617 100%);
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(24px);
+    background: ${SHELL_BG};
+    border: 1px solid ${SURFACE_BORDER};
+    box-shadow: 0 10px 30px rgba(8,48,71,0.06);
 
     @media (max-width: 768px) {
-        padding: 32px 20px 40px;
-        border-radius: 24px;
+        padding: 28px 16px 36px;
+        border-radius: 12px;
     }
 `;
 
 const Title = styled.h1`
     text-align: center;
-    font-size: 34px;
-    letter-spacing: 0.16em;
+    font-size: 32px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    margin: 0 0 40px;
-    color: #e5e7eb;
+    margin: 0 0 28px;
+    color: ${NAVY};
 
     span {
-        color: #facc15;
+        color: ${GOLD};
     }
 
     @media (max-width: 640px) {
-        font-size: 26px;
-        letter-spacing: 0.12em;
+        font-size: 24px;
     }
 `;
 
 const Grid = styled.div`
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28px;
-    margin-top: 40px; 
+    gap: 24px;
+    margin-top: 32px; 
 
     @media (max-width: 900px) {
         grid-template-columns: 1fr;
@@ -177,57 +205,44 @@ const Grid = styled.div`
 `;
 
 const BaseBox = styled.div`
-    border-radius: 28px;
-    padding: 26px 30px;
-    background: radial-gradient(circle at top left, #020617, #020617 55%, #020617 100%);
-    border: 1px solid rgba(15, 23, 42, 1);
+    border-radius: 12px;
+    padding: 22px 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border: 1px solid ${SURFACE_BORDER};
     position: relative;
     overflow: hidden;
-    transition: transform 0.16s ease-out, border-color 0.16s ease-out;
-
-    &:before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        background: radial-gradient(circle at top left, rgba(248, 250, 252, 0.05), transparent 60%);
-        opacity: 0;
-        transition: opacity 0.22s ease-out;
-    }
-
-    &:hover:before {
-        opacity: 1;
-    }
+    transition: transform 0.12s ease-out, border-color 0.12s ease-out;
 
     &:hover {
         transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(8,48,71,0.06);
     }
 `;
 
 const StrengthBox = styled(BaseBox)`
-    border-left: 3px solid #22c55e;
+    border-left: 3px solid ${GOLD};
     animation: ${glowPulse} 4s ease-in-out infinite;
 `;
 const WeaknessBox = styled(BaseBox)`
     border-left: 3px solid #ef4444;
 `;
 const OpportunityBox = styled(BaseBox)`
-    border-left: 3px solid #3b82f6;
+    border-left: 3px solid ${NAVY};
 `;
 const ThreatBox = styled(BaseBox)`
-    border-left: 3px solid #eab308;
+    border-left: 3px solid #9ca3af;
 `;
 
 const HeaderRow = styled.div`
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 10px;
 `;
 
 const IconCircle = styled.div`
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 999px;
     display: flex;
     align-items: center;
@@ -237,37 +252,37 @@ const IconCircle = styled.div`
     ${({ variant }) =>
         variant === "strength" &&
         css`
-          border: 1px solid rgba(34, 197, 94, 0.4);
-          background: radial-gradient(circle, rgba(34, 197, 94, 0.08), transparent);
-          color: #4ade80;
+          border: 1px solid rgba(212,175,55,0.18);
+          background: linear-gradient(180deg, rgba(212,175,55,0.06), transparent);
+          color: ${GOLD};
         `}
     ${({ variant }) =>
         variant === "weakness" &&
         css`
-          border: 1px solid rgba(248, 113, 113, 0.5);
-          background: radial-gradient(circle, rgba(248, 113, 113, 0.08), transparent);
-          color: #f97373;
+          border: 1px solid rgba(239,68,68,0.12);
+          background: linear-gradient(180deg, rgba(239,68,68,0.04), transparent);
+          color: #ef4444;
         `}
     ${({ variant }) =>
         variant === "opportunity" &&
         css`
-          border: 1px solid rgba(59, 130, 246, 0.5);
-          background: radial-gradient(circle, rgba(59, 130, 246, 0.08), transparent);
-          color: #60a5fa;
+          border: 1px solid rgba(8,48,71,0.12);
+          background: linear-gradient(180deg, rgba(8,48,71,0.04), transparent);
+          color: ${NAVY};
         `}
     ${({ variant }) =>
         variant === "threat" &&
         css`
-          border: 1px solid rgba(234, 179, 8, 0.5);
-          background: radial-gradient(circle, rgba(234, 179, 8, 0.08), transparent);
-          color: #facc15;
+          border: 1px solid rgba(156,163,175,0.12);
+          background: linear-gradient(180deg, rgba(156,163,175,0.02), transparent);
+          color: #9ca3af;
         `}
 `;
 
 const BoxTitle = styled.h2`
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
-    color: #f9fafb;
+    color: ${TEXT_DARK};
     margin: 0;
 `;
 
@@ -278,10 +293,10 @@ const BulletList = styled.ul`
 
     li {
         font-size: 14px;
-        color: #cbd5f5;
-        margin-bottom: 6px;
+        color: ${TEXT_DARK};
+        margin-bottom: 8px;
         position: relative;
-        padding-left: 16px;
+        padding-left: 18px;
     }
 
     li:before {
@@ -289,7 +304,7 @@ const BulletList = styled.ul`
         position: absolute;
         left: 0;
         top: -1px;
-        color: #64748b;
+        color: ${TEXT_MUTED};
     }
 `;
 
@@ -297,32 +312,28 @@ const BulletList = styled.ul`
 
 const WorkflowContainer = styled.div`
     text-align: center;
-    margin-bottom: 60px;
-    padding: 30px 20px;
-    background: rgba(0,0,0,0.2); 
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-
-    @media (max-width: 768px) {
-        padding: 20px 10px;
-    }
+    margin-bottom: 48px;
+    padding: 26px 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border-radius: 10px;
+    border: 1px solid ${SURFACE_BORDER};
 `;
 
 const WorkflowTitle = styled.h2`
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 800;
-    margin-bottom: 8px;
-    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
 
     span {
-        color: ${HIGHLIGHT_BLUE};
+        color: ${GOLD};
     }
 `;
 
 const WorkflowSubtitle = styled.p`
     color: ${TEXT_MUTED};
-    font-size: 1rem;
-    margin-bottom: 40px;
+    font-size: 0.95rem;
+    margin-bottom: 22px;
 `;
 
 const ProcessBar = styled.div`
@@ -331,7 +342,7 @@ const ProcessBar = styled.div`
     align-items: center;
     position: relative;
     max-width: 900px;
-    margin: 0 auto 30px;
+    margin: 0 auto 20px;
     padding: 0 10px;
 `;
 
@@ -340,7 +351,7 @@ const Line = styled.div`
     top: 50%;
     transform: translateY(-50%);
     height: 4px;
-    background: #1e293b; 
+    background: rgba(8,48,71,0.08);
     width: 100%;
     z-index: 1;
     border-radius: 2px;
@@ -351,12 +362,12 @@ const ActiveLine = styled.div`
     top: 50%;
     transform: translateY(-50%);
     height: 4px;
-    background: ${HIGHLIGHT_BLUE}; 
-    width: 50%; 
+    background: ${GOLD};
+    width: 40%;
     z-index: 2;
     border-radius: 2px;
     left: 0;
-    max-width: calc(100% - 10px); 
+    max-width: calc(100% - 10px);
 `;
 
 const Step = styled.div`
@@ -368,53 +379,44 @@ const Step = styled.div`
     cursor: default;
     z-index: 3;
     transition: transform 0.2s ease;
-    
-    @media (max-width: 768px) {
-        width: 80px;
-    }
-    @media (max-width: 500px) {
-        width: 60px;
-    }
 `;
 
 const Circle = styled.div`
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     margin-bottom: 10px;
-    border: 2px solid ${({ active }) => (active ? HIGHLIGHT_BLUE : '#475569')};
-    background: ${({ active }) => (active ? DARK_BLUE : 'transparent')};
+    border: 2px solid ${({ active }) => (active ? GOLD : 'rgba(8,48,71,0.18)')};
+    background: ${({ active }) => (active ? NAVY : 'transparent')};
     transition: all 0.3s ease;
 `;
 
 const StepLabel = styled.span`
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    color: ${({ active }) => (active ? TEXT_LIGHT : TEXT_MUTED)};
+    color: ${({ active }) => (active ? TEXT_DARK : TEXT_MUTED)};
     text-align: center;
     transition: color 0.3s ease;
 `;
 
 const ProcessButton = styled.button`
-    background-color: #1e293b;
-    color: ${TEXT_LIGHT};
-    border: 1px solid #475569;
-    padding: 10px 25px;
+    background-color: ${NAVY};
+    color: #ffffff;
+    border: none;
+    padding: 10px 22px;
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    margin-top: 20px;
+    transition: all 0.18s ease-in-out;
+    margin-top: 12px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 0px;
 
     &:hover {
-        background-color: #273449;
-        border-color: ${HIGHLIGHT_BLUE};
-        color: ${HIGHLIGHT_BLUE};
-        box-shadow: 0 0 10px rgba(82, 110, 213, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(8,48,71,0.08);
     }
 `;
 
@@ -461,8 +463,8 @@ const AgileWorkflow = () => {
 const FooterContainer = styled.footer`
     width: 100%;
     padding: 60px 48px;
-    background-color: ${DARK_BLUE}; 
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background-color: #ffffff;
+    border-top: 1px solid ${SURFACE_BORDER};
 
     @media (max-width: 780px) {
         padding: 40px 20px;
@@ -474,7 +476,7 @@ const FooterContentWrapper = styled.div`
     margin: 0 auto;
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1.5fr; 
-    gap: 40px;
+    gap: 28px;
 
     @media (max-width: 1024px) {
         grid-template-columns: 1fr 1fr;
@@ -490,41 +492,40 @@ const FooterSection = styled.div`
 `;
 
 const SectionTitle = styled.h3`
-    font-size: 1.1rem;
-    color: ${TEXT_LIGHT};
-    margin-bottom: 20px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-size: 1.05rem;
+    color: ${TEXT_DARK};
+    margin-bottom: 16px;
+    font-weight: 700;
 `;
 
 const CareersSection = styled.div`
     grid-column: 1 / -1; 
     display: grid;
     grid-template-columns: 1.5fr 3fr;
-    gap: 40px;
-    margin-bottom: 40px;
-    padding-bottom: 40px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    gap: 28px;
+    margin-bottom: 36px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid ${SURFACE_BORDER};
 
     @media (max-width: 1024px) {
         grid-template-columns: 1fr;
-        gap: 30px;
-        padding-bottom: 30px;
+        gap: 20px;
+        padding-bottom: 24px;
     }
 `;
 
 const CareersTextGroup = styled.div`
     h2 {
-        font-size: 2.2rem;
+        font-size: 1.9rem;
         font-weight: 800;
         margin-top: 0;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         span {
-            color: ${NEON_COLOR};
+            color: ${GOLD};
         }
 
         @media (max-width: 640px) {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
     }
 
@@ -532,24 +533,24 @@ const CareersTextGroup = styled.div`
         color: ${TEXT_MUTED};
         font-size: 0.95rem;
         line-height: 1.6;
-        margin-bottom: 25px;
+        margin-bottom: 18px;
     }
 
     ul {
         list-style: none;
         padding: 0;
-        margin-bottom: 30px;
+        margin-bottom: 22px;
 
         li {
             display: flex;
             align-items: center;
-            color: ${TEXT_LIGHT};
-            font-weight: 500;
-            margin-bottom: 10px;
+            color: ${TEXT_DARK};
+            font-weight: 600;
+            margin-bottom: 8px;
             font-size: 0.95rem;
 
             svg {
-                color: ${NEON_COLOR};
+                color: ${GOLD};
                 margin-right: 12px;
                 font-size: 1.1rem;
             }
@@ -558,20 +559,18 @@ const CareersTextGroup = styled.div`
 `;
 
 const ApplyButton = styled.button`
-    background-color: ${NEON_COLOR};
-    color: ${DARK_BLUE};
+    background-color: ${GOLD};
+    color: #042027;
     border: none;
-    padding: 12px 30px;
+    padding: 12px 28px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 4px 15px rgba(0, 224, 179, 0.3);
+    transition: all 0.18s ease-in-out;
+    box-shadow: 0 6px 18px rgba(212,175,55,0.12);
 
     &:hover {
-        background-color: #00ffc7;
-        box-shadow: 0 6px 20px rgba(0, 224, 179, 0.5);
         transform: translateY(-2px);
     }
 `;
@@ -579,26 +578,20 @@ const ApplyButton = styled.button`
 const BarChartContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    background: #020617;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-
-    @media (max-width: 1024px) {
-        max-width: 500px;
-        margin: 0 auto;
-    }
+    gap: 16px;
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid ${SURFACE_BORDER};
 `;
 
-// Styles for the bar chart from the image
 const ChartWrapper = styled.div`
-    height: 160px;
+    height: 140px;
     display: flex;
     align-items: flex-end;
-    gap: 15px;
-    margin-bottom: 10px;
-    padding: 0 10px;
+    gap: 12px;
+    margin-bottom: 6px;
+    padding: 0 6px;
     border-bottom: 1px solid ${TEXT_MUTED};
 `;
 
@@ -610,11 +603,11 @@ const BarColumn = styled.div`
 `;
 
 const Bar = styled.div`
-    width: 25px;
-    background-color: #475569; 
+    width: 24px;
+    background-color: #e6eef6; 
     height: ${({ height }) => height};
     position: relative;
-    border-radius: 3px 3px 0 0;
+    border-radius: 4px 4px 0 0;
     transition: height 0.3s ease-out;
 
     &::after {
@@ -622,32 +615,32 @@ const Bar = styled.div`
         position: absolute;
         bottom: 0;
         width: 100%;
-        background-color: ${NEON_COLOR}; 
+        background-color: ${GOLD}; 
         height: ${({ highlight }) => highlight};
-        border-radius: 3px 3px 0 0;
+        border-radius: 4px 4px 0 0;
     }
 `;
 
 const BarLabel = styled.span`
     color: ${TEXT_MUTED};
     font-size: 0.8rem;
-    margin-top: 5px;
+    margin-top: 6px;
     text-align: center;
     white-space: nowrap;
 `;
 
 const InternshipDetail = styled.div`
-    padding: 15px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(8,48,71,0.04);
 
     &:first-child {
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-top: 1px solid rgba(8,48,71,0.02);
     }
 
     h4 {
-        color: ${TEXT_LIGHT};
+        color: ${TEXT_DARK};
         font-size: 0.95rem;
-        font-weight: 600;
+        font-weight: 700;
         margin: 0 0 4px 0;
     }
     p {
@@ -662,12 +655,12 @@ const FooterQuickLinks = styled.div`
         display: block;
         color: ${TEXT_MUTED};
         text-decoration: none;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         font-size: 0.9rem;
-        transition: color 0.2s ease;
+        transition: color 0.18s ease;
 
         &:hover {
-            color: ${NEON_COLOR};
+            color: ${NAVY};
         }
     }
 `;
@@ -676,7 +669,7 @@ const FooterServices = styled.div`
     span {
         display: block;
         color: ${TEXT_MUTED};
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         font-size: 0.9rem;
     }
 `;
@@ -690,20 +683,19 @@ const FooterContactInfo = styled.div`
         font-size: 0.9rem;
 
         svg {
-            color: ${NEON_COLOR};
+            color: ${GOLD};
             margin-right: 12px;
             margin-top: 2px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             flex-shrink: 0;
         }
 
         a {
             color: ${TEXT_MUTED};
             text-decoration: none;
-            transition: color 0.2s ease;
 
             &:hover {
-                color: ${NEON_COLOR};
+                color: ${NAVY};
             }
         }
     }
@@ -711,26 +703,26 @@ const FooterContactInfo = styled.div`
 
 const FooterLogoGroup = styled.div`
     p {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: ${TEXT_MUTED};
         line-height: 1.5;
-        margin-top: 15px;
-        margin-bottom: 20px;
+        margin-top: 8px;
+        margin-bottom: 16px;
     }
 `;
 
 const SocialIcons = styled.div`
     display: flex;
-    gap: 15px;
+    gap: 12px;
 
     a {
         color: ${TEXT_MUTED};
-        font-size: 1.2rem;
-        transition: color 0.2s ease;
+        font-size: 1.1rem;
+        transition: color 0.18s ease;
         text-decoration: none;
 
         &:hover {
-            color: ${NEON_COLOR};
+            color: ${NAVY};
         }
     }
 `;
@@ -738,20 +730,20 @@ const SocialIcons = styled.div`
 // Helper component for the Careers Bar Chart
 const CareersBarChart = () => (
     <BarChartContainer>
-        <BarColumn style={{ marginBottom: '10px' }}>
-            <BarLabel style={{ color: TEXT_LIGHT, fontSize: '0.9rem', fontWeight: '600' }}>Selection Ratio (2025)</BarLabel>
+        <BarColumn style={{ marginBottom: '6px' }}>
+            <BarLabel style={{ color: TEXT_DARK, fontSize: '0.9rem', fontWeight: '700' }}>Selection Ratio (2025)</BarLabel>
         </BarColumn>
         <ChartWrapper>
             <BarColumn>
-                <Bar height="90%" highlight="60%" />
+                <Bar height="70%" highlight="40%" />
                 <BarLabel>Designers</BarLabel>
             </BarColumn>
             <BarColumn>
-                <Bar height="100%" highlight="75%" />
+                <Bar height="90%" highlight="60%" />
                 <BarLabel>Developers</BarLabel>
             </BarColumn>
             <BarColumn>
-                <Bar height="50%" highlight="30%" />
+                <Bar height="50%" highlight="22%" />
                 <BarLabel>Writers</BarLabel>
             </BarColumn>
         </ChartWrapper>
@@ -783,7 +775,7 @@ const FullFooter = ({ onNavigate }) => (
             <CareersSection>
                 <CareersTextGroup>
                     <h2>CAREERS @ <span>NEXORACREW</span></h2>
-                    <p>We don't just offer internships; we offer a launchpad for your career. Work on live projects, handle real clients, and ship code that matters.</p>
+                    <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where Ideas Meet Innovation.</p>
                     <ul>
                         <li><FontAwesomeIcon icon={faCalendarCheck} /> Real-world experience</li>
                         <li><FontAwesomeIcon icon={faCalendarCheck} /> Mentorship from Seniors</li>
@@ -800,7 +792,7 @@ const FullFooter = ({ onNavigate }) => (
             {/* Bottom Footer - NEXORACREW & Socials (Col 1) */}
             <FooterSection>
                 <FooterLogoGroup>
-                    <Logo>NEXORACREW</Logo>
+                    <Logo style={{ color: NAVY }}>NEXORA<span>CREW</span></Logo>
                     <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where Ideas Meet Innovation.</p>
                 </FooterLogoGroup>
                 <SocialIcons>
@@ -815,9 +807,12 @@ const FullFooter = ({ onNavigate }) => (
                 <SectionTitle>Quick Links</SectionTitle>
                 <FooterQuickLinks>
                     <a href="#" onClick={() => onNavigate('home')}>Home</a>
-                    <a href="#" onClick={() => onNavigate('about')}>About Us</a>
+                    <a href="#" onClick={() => onNavigate('about')}>About</a>
                     <a href="#" onClick={() => onNavigate('services')}>Services</a>
-                    <a href="#" onClick={() => onNavigate('progress')}>Careers & Process</a>
+                    <a href="#" onClick={() => onNavigate('projects')}>Projects</a>
+                    <a href="#" onClick={() => onNavigate('blog')}>Blog</a>
+                    <a href="#" onClick={() => onNavigate('team')}>Team</a>
+                    <a href="#" onClick={() => onNavigate('progress')}>Progress</a>
                     <a href="#" onClick={() => onNavigate('contact')}>Contact</a>
                 </FooterQuickLinks>
             </FooterSection>
@@ -827,10 +822,14 @@ const FullFooter = ({ onNavigate }) => (
                 <SectionTitle>Services</SectionTitle>
                 <FooterServices>
                     <span>Web Development</span>
-                    <span>AI Solutions</span>
-                    <span>SEO & Growth</span>
-                    <span>Branding & Design</span>
-                    <span>Server Architecture</span>
+                    <span>Poster designing & logo making</span>
+                    <span>Digital marketing &SEO</span>
+                    <span>AI and automation</span>
+                    <span>Hosting & Support</span>
+                    <span>Printing &Branding solutions</span>
+                    <span>Enterprise networking &server architecture</span>
+                    <span>Bold branding&Immersive visual design</span>
+                    <span>Next gen web & mobile experience</span>
                 </FooterServices>
             </FooterSection>
 
@@ -856,16 +855,91 @@ const FullFooter = ({ onNavigate }) => (
     </FooterContainer>
 );
 
-
 /* ---------------- COMPONENT ---------------- */
 const ProgressPage = ({ onNavigate = () => {} }) => {
+    // canvas ref for background animation
+    const canvasRef = useRef(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        const DPR = window.devicePixelRatio || 1;
+
+        function resize() {
+            canvas.width = window.innerWidth * DPR;
+            canvas.height = window.innerHeight * DPR;
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        }
+        resize();
+
+        // star/particle data — scale count by screen size for performance
+        const baseCount = Math.max(Math.floor((window.innerWidth * window.innerHeight) / 12000), 60);
+        const isSmall = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        const count = isSmall ? Math.max(40, Math.floor(baseCount * 0.5)) : baseCount;
+
+        const stars = Array.from({ length: count }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: 0.8 + Math.random() * 2.2,
+            dx: (Math.random() - 0.5) * 0.3,
+            dy: 0.05 + Math.random() * 0.5,
+            alpha: 0.12 + Math.random() * 0.5,
+            hue: Math.random() > 0.8 ? 'gold' : 'navy' // mostly gold with occasional navy tints
+        }));
+
+        let rafId;
+        const draw = () => {
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            // subtle gradient background (keeps white UI look)
+            // optional — commented out to preserve page's white background
+            // const g = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+            // g.addColorStop(0, 'rgba(255,255,255,0.0)');
+            // g.addColorStop(1, 'rgba(250,250,252,0.0)');
+            // ctx.fillStyle = g;
+            // ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            stars.forEach((s) => {
+                s.x += s.dx;
+                s.y += s.dy;
+
+                if (s.y > window.innerHeight + 10) s.y = -10;
+                if (s.x > window.innerWidth + 10) s.x = -10;
+                if (s.x < -10) s.x = window.innerWidth + 10;
+
+                // choose color based on hue flag
+                if (s.hue === 'gold') ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
+                else ctx.fillStyle = `rgba(8,48,71,${s.alpha * 0.9})`;
+
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            rafId = requestAnimationFrame(draw);
+        };
+
+        draw();
+        window.addEventListener('resize', resize);
+        return () => { cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); };
+    }, []);
+
+    // Create a simple particle config only for fallback/no-canvas cases (not visible)
+    const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+
     return (
         <>
             <GlobalStyle />
+            <StarCanvas ref={canvasRef} aria-hidden />
             <PageWrapper>
                 {/* NAVBAR */}
                 <Header>
-                    <Logo onClick={() => onNavigate('home')}>NEXORA</Logo>
+                    <Logo onClick={() => onNavigate('home')}>NEXORA<span>CREW</span></Logo>
                     <NavGroup>
                         <span onClick={() => onNavigate('home')}>Home</span>
                         <span onClick={() => onNavigate('about')}>About</span>
@@ -873,17 +947,18 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                         <span onClick={() => onNavigate('projects')}>Projects</span>
                         <span onClick={() => onNavigate('blog')}>Blog</span>
                         <span onClick={() => onNavigate('team')}>Team</span>
+                        <span onClick={() => onNavigate('progress')}>Progress</span>
+                        <span onClick={() => onNavigate('contact')}>Contact</span>
 
                         {/* ACTIVE ITEM FOR THIS PAGE */}
                         <span
                             onClick={() => onNavigate('progress')}
-                            style={{ color: NEON_COLOR }}
+                            style={{ color: NAVY, fontWeight: 700 }}
                         >
                             Progress
                         </span>
 
                         <span onClick={() => onNavigate('contact')}>Contact</span>
-                        
                     </NavGroup>
                 </Header>
 
@@ -972,7 +1047,6 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
 
                 {/* CAREERS/FOOTER SECTION */}
                 <FullFooter onNavigate={onNavigate} />
-
             </PageWrapper>
         </>
     );
