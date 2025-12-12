@@ -143,7 +143,7 @@ const PageLayer = styled.div`
   background: transparent;
 `;
 
-/* HEADER - UPDATED TO MATCH ABOUT/TEAM PAGE */
+/* HEADER */
 const Header = styled.header`
   display: flex;
   align-items: center;
@@ -243,8 +243,10 @@ const MobileMenuButton = styled.button`
 
 const MobileNavMenu = styled.div`
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: #FFFFFF;
   z-index: 1100;
   display: flex;
@@ -281,6 +283,9 @@ const AnimatedSection = styled.div.attrs(props => ({
   opacity: 0;
   transform: translateY(30px) scale(0.95);
   will-change: opacity, transform;
+  
+  /* Ensure wrapper takes full height for grid alignment */
+  height: 100%;
 
   ${({ $isVisible, $delay }) =>
     $isVisible &&
@@ -420,26 +425,37 @@ const MilestonesGrid = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  /* Use a consistent minimum width so all cards are equal */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 30px;
-  justify-items: center;
+  
+  /* Stretch items so they all have equal height */
+  justify-items: stretch;
+  align-items: stretch; 
+  
   @media (max-width: 600px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr; /* Stack vertically on small screens */
     gap: 20px;
   }
-  @media (max-width: 400px) { grid-template-columns: 1fr; }
 `;
 
 const MilestoneCard = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 22px 20px;
+  justify-content: center;
+  padding: 30px 20px; /* Uniform padding */
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(15,23,42,0.08);
   border: 1px solid ${BORDER_LIGHT};
+  
+  /* Force fixed sizing behavior */
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  box-sizing: border-box;
 `;
 
 const MilestoneIcon = styled.div`
@@ -831,7 +847,7 @@ const CtaContainer = styled.div`
   }
 `;
 
-/* FOOTER - UPDATED TO MATCH ABOUT/TEAM PAGE */
+/* FOOTER */
 const FullFooter = styled.footer`
   background: rgba(255,255,255,0.9);
   padding: 60px 50px 20px;
