@@ -464,7 +464,8 @@ const StepLabel = styled.span`
     transition: color 0.3s ease;
 `;
 
-const ProcessButton = styled.button`
+// CHANGED TO "A" TAG FOR DOWNLOADING
+const ProcessButton = styled.a`
     background-color: ${NEON_COLOR};
     color: #ffffff;
     border: none;
@@ -478,6 +479,7 @@ const ProcessButton = styled.button`
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    text-decoration: none;
 
     &:hover {
         transform: translateY(-2px);
@@ -754,7 +756,9 @@ const AgileWorkflow = () => {
                     );
                 })}
             </ProcessBar>
-            <ProcessButton onClick={() => alert('Downloading Process PDF...')}>
+            
+            {/* UPDATED: Download button pointing to public/AGILE_WORKFLOW.pdf */}
+            <ProcessButton href="/AGILE_WORKFLOW.pdf" download="NEXORACREW_Agile_Workflow.pdf" target="_blank">
                 <FontAwesomeIcon icon={faDownload} /> Download Process PDF
             </ProcessButton>
         </WorkflowContainer>
@@ -857,7 +861,16 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
             alpha: 0.15 + Math.random() * 0.35, // Visibility
         }));
 
-        let rafId;
+        function onWindowResize() {
+            resize();
+            for (let s of stars) {
+                s.x = Math.random() * width;
+                s.y = Math.random() * height;
+            }
+        }
+        window.addEventListener('resize', onWindowResize);
+
+        let raf;
         const draw = () => {
             ctx.clearRect(0, 0, width, height);
             stars.forEach((s) => {
@@ -873,11 +886,11 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                 ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                 ctx.fill();
             });
-            rafId = requestAnimationFrame(draw);
+            raf = requestAnimationFrame(draw);
         };
         draw();
         window.addEventListener('resize', resize);
-        return () => { cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); };
+        return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
     }, []);
 
     const handleNavigation = (route) => {
