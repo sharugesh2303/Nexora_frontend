@@ -67,7 +67,6 @@ const NEON_COLOR = '#123165';
 const LIGHT_TEXT = '#111827';
 const MUTED_TEXT = '#6B7280';
 const CARD_BG = '#FFFFFF';
-const FOOTER_BG = '#FFFFFF';
 const BORDER_LIGHT = '#e2e8f0';
 const GOLD_ACCENT = '#D4A937';
 
@@ -144,7 +143,7 @@ const PageLayer = styled.div`
   background: transparent;
 `;
 
-/* HEADER */
+/* HEADER - UPDATED TO MATCH ABOUT/TEAM PAGE */
 const Header = styled.header`
   display: flex;
   align-items: center;
@@ -153,9 +152,12 @@ const Header = styled.header`
   position: sticky;
   top: 0;
   width: 100%;
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid ${BORDER_LIGHT};
   z-index: 1000;
+  box-sizing: border-box;
+
   @media (max-width: 768px) {
     padding: 14px 20px;
     gap: 20px;
@@ -164,58 +166,79 @@ const Header = styled.header`
 `;
 
 const Logo = styled.h1`
-  color: ${NEON_COLOR};
-  font-size: 1.8rem;
+  margin: 0;
   font-weight: 800;
+  font-size: 1.8rem;
   cursor: pointer;
   letter-spacing: 1px;
-  text-shadow: 0 0 8px rgba(18,49,101,0.1);
-  margin: 0;
-  @media (max-width: 480px) { font-size: 1.5rem; }
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+
+  span {
+    display: inline-block;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  color: ${NEON_COLOR};
+  span.gold {
+    color: ${GOLD_ACCENT};
+    margin-left: 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.4rem;
+  }
 `;
 
-const NavGroup = styled.div`
+const NavGroup = styled.nav`
   display: flex;
   gap: 22px;
   align-items: center;
   margin-right: auto;
-  @media (max-width: 1024px) { display: none; }
 
   span {
     color: ${MUTED_TEXT};
-    cursor: pointer;
     font-weight: 500;
+    cursor: pointer;
     position: relative;
-    transition: 0.3s ease;
     padding: 6px 4px;
-
-    &:hover {
-      color: ${NEON_COLOR};
-    }
-
-    &:after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -2px;
-      width: 0;
-      height: 2px;
-      background: ${GOLD_ACCENT};
-      transition: 0.3s;
-      border-radius: 4px;
-    }
-    &:hover:after { width: 100%; }
+    transition: 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
+  span:hover { color: ${NEON_COLOR}; }
+  span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background: ${GOLD_ACCENT};
+    transition: 0.3s;
+    border-radius: 4px;
+  }
+  span:hover::after { width: 100%; }
+  
+  @media (max-width: 1024px) { display: none; }
 `;
 
 const MobileMenuButton = styled.button`
   display: none;
-  background: none;
-  border: none;
-  color: ${NEON_COLOR};
-  font-size: 1.5rem;
-  cursor: pointer;
-  @media (max-width: 1024px) { display: block; }
+  @media (max-width: 1024px) {
+    display: block;
+    background: none;
+    border: none;
+    color: ${NEON_COLOR};
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
 `;
 
 const MobileNavMenu = styled.div`
@@ -475,7 +498,7 @@ const MilestoneDescription = styled.p`
   @media (max-width: 480px) { font-size: 0.8rem; }
 `;
 
-/* PARTNERS: use MarqueeContainer & MarqueeTrack (no inline animation) */
+/* PARTNERS */
 const PartnersSection = styled.section`
   padding: 60px 0;
   text-align: center;
@@ -808,13 +831,17 @@ const CtaContainer = styled.div`
   }
 `;
 
-/* FOOTER */
+/* FOOTER - UPDATED TO MATCH ABOUT/TEAM PAGE */
 const FullFooter = styled.footer`
-  background: ${FOOTER_BG};
+  background: rgba(255,255,255,0.9);
   padding: 60px 50px 20px;
   color: ${MUTED_TEXT};
   border-top: 1px solid ${BORDER_LIGHT};
-  @media (max-width: 768px) { padding: 40px 20px 20px; }
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 40px 20px 20px;
+  }
 `;
 
 const FooterGrid = styled.div`
@@ -823,16 +850,22 @@ const FooterGrid = styled.div`
   display: flex;
   justify-content: space-between;
   gap: 30px;
-  @media (max-width: 768px) {
+
+  @media (max-width: 900px) {
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 30px;
   }
 `;
 
 const FooterColumn = styled.div`
   min-width: 200px;
-  @media (max-width: 768px) { min-width: unset; width: 100%; margin-bottom: 10px; }
+  @media (max-width: 768px) { min-width: unset; flex: 1; }
+  @media (max-width: 600px) { width: 100%; flex: none; }
 
   h4 {
     color: ${LIGHT_TEXT};
@@ -850,11 +883,7 @@ const FooterColumn = styled.div`
       background: ${GOLD_ACCENT};
     }
   }
-  p {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin: 0 0 10px 0;
-  }
+  p { font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px 0; }
   ul { list-style: none; padding: 0; margin: 0; }
   li { margin-bottom: 10px; }
   a, span {
@@ -873,28 +902,34 @@ const FooterColumn = styled.div`
 const FooterLogo = styled(Logo)`
   font-size: 1.5rem;
   margin-bottom: 10px;
+  gap: 0;
+  span { font-size: 1em; }
 `;
 
+/* GOLDEN SOCIAL ICONS */
 const SocialIcons = styled.div`
   display: flex;
   gap: 15px;
   margin-top: 15px;
   a {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 999px;
-    background: #ffffff;
-    border: 1px solid ${BORDER_LIGHT};
+    /* Soft Gold Background */
+    background: rgba(212,169,55,0.15); 
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${NEON_COLOR};
-    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    /* Gold Icon */
+    color: ${GOLD_ACCENT}; 
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+    
     &:hover {
-      background: linear-gradient(135deg, ${NEON_COLOR}, ${GOLD_ACCENT});
+      /* Solid Gold on Hover */
+      background: ${GOLD_ACCENT};
       color: #ffffff;
-      box-shadow: 0 6px 18px rgba(15,23,42,0.3);
-      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(212,169,55,0.3);
+      transform: translateY(-3px);
     }
   }
 `;
@@ -1245,7 +1280,9 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
       <PageLayer>
         {/* HEADER */}
         <Header>
-          <Logo onClick={() => handleNavigation('home')}>NEXORACREW</Logo>
+          <Logo onClick={() => handleNavigation('home')}>
+            NEXORA<span className="gold">CREW</span>
+          </Logo>
           <NavGroup>
             {navItems.map((item) => (
               <span
@@ -1427,7 +1464,9 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
         <FullFooter>
           <FooterGrid>
             <FooterColumn style={{ minWidth: '300px' }}>
-              <FooterLogo onClick={() => handleNavigation('home')}>NEXORACREW</FooterLogo>
+              <FooterLogo onClick={() => handleNavigation('home')}>
+                NEXORA<span className="gold">CREW</span>
+              </FooterLogo>
               <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI.</p>
               <SocialIcons>
                 <a href="https://www.instagram.com/nexoracrew?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noreferrer">
@@ -1472,17 +1511,17 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
               <ul>
                 <li>
                   <a href="#map">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} /> {safeGeneralData.location}
+                    <FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}
                   </a>
                 </li>
                 <li>
                   <a href={`mailto:${safeGeneralData.email}`}>
-                    <FontAwesomeIcon icon={faEnvelope} /> {safeGeneralData.email}
+                    <FontAwesomeIcon icon={faEnvelope} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.email}
                   </a>
                 </li>
                 <li>
                   <a href={`tel:${safeGeneralData.phone}`}>
-                    <FontAwesomeIcon icon={faPhone} /> {safeGeneralData.phone}
+                    <FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}
                   </a>
                 </li>
               </ul>

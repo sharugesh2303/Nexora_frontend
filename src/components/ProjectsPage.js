@@ -1,6 +1,6 @@
 // src/components/ProjectsPage.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styled, { createGlobalStyle, keyframes, css } from "styled-components";
+import styled, { createGlobalStyle, keyframes } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,7 +19,7 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 
 /* =========================================
-   THEME CONSTANTS (kept same as TeamPage)
+   THEME CONSTANTS
    ========================================= */
 const NEON_COLOR = '#123165';          // primary navy
 const TEXT_LIGHT = '#111827';
@@ -36,7 +36,7 @@ const rollIn = keyframes`
 `;
 
 /* =========================================
-   GLOBAL STYLES (same base as TeamPage)
+   GLOBAL STYLES
    ========================================= */
 const GlobalStyle = createGlobalStyle`
     html, body {
@@ -63,7 +63,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 /* =========================================
-   STAR CANVAS BACKGROUND (copied from TeamPage)
+   STAR CANVAS BACKGROUND
    ========================================= */
 const StarCanvas = styled.canvas`
     position: fixed;
@@ -75,7 +75,7 @@ const StarCanvas = styled.canvas`
 `;
 
 /* =========================================
-   LAYOUT & SHARED COMPONENTS (from TeamPage)
+   LAYOUT & SHARED COMPONENTS
    ========================================= */
 const PageWrapper = styled.div`
     position: relative;
@@ -87,95 +87,139 @@ const PageWrapper = styled.div`
     overflow-x: hidden;
 `;
 
+/* HEADER - MATCHING OTHER PAGES */
 const Header = styled.header`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 48px;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid ${BORDER_LIGHT};
-    z-index: 100;
-    box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 14px 48px;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid ${BORDER_LIGHT};
+  z-index: 100;
+  box-sizing: border-box;
 
-    @media (max-width: 768px) { padding: 12px 20px; }
+  @media (max-width: 768px) {
+    padding: 14px 20px;
+    gap: 20px;
+    justify-content: space-between;
+  }
 `;
 
 const Logo = styled.h1`
-    color: ${NEON_COLOR};
-    font-size: 1.8rem;
-    font-weight: 800;
-    cursor: pointer;
-    letter-spacing: 1px;
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.8rem;
+  cursor: pointer;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+
+  span {
+    display: inline-block;
+    line-height: 1;
     margin: 0;
-    white-space: nowrap;
-    @media (max-width: 480px) { font-size: 1.4rem; }
+    padding: 0;
+    font-size: inherit;
+  }
+
+  color: ${NEON_COLOR};
+  span.gold {
+    color: ${GOLD_ACCENT};
+    margin-left: 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.4rem;
+  }
 `;
 
-const NavGroup = styled.div`
-    display: flex;
-    gap: 22px;
-    align-items: center;
-    margin-right: auto;
-    margin-left: 40px;
-    @media (max-width: 1024px) { display: none; }
+const NavGroup = styled.nav`
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  margin-right: auto;
 
-    span {
-        color: ${TEXT_MUTED};
-        cursor: pointer;
-        font-weight: 500;
-        position: relative;
-        transition: 0.3s ease;
-        padding: 6px 4px;
-        &:hover { color: ${NEON_COLOR}; }
-        &:after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -2px;
-            width: 0;
-            height: 2px;
-            background: ${GOLD_ACCENT};
-            transition: 0.3s;
-            border-radius: 4px;
-        }
-        &:hover:after { width: 100%; }
-    }
+  span {
+    color: ${TEXT_MUTED};
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    padding: 6px 4px;
+    transition: 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  span:hover { color: ${NEON_COLOR}; }
+  span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background: ${GOLD_ACCENT};
+    transition: 0.3s;
+    border-radius: 4px;
+  }
+  span:hover::after { width: 100%; }
+  
+  @media (max-width: 1024px) { display: none; }
 `;
 
 const MobileMenuButton = styled.button`
-    display: none;
-    @media (max-width: 1024px) {
-        display: block;
-        background: none;
-        border: none;
-        color: ${NEON_COLOR};
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
+  display: none;
+  @media (max-width: 1024px) {
+    display: block;
+    background: none;
+    border: none;
+    color: ${NEON_COLOR};
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
 `;
 
 const MobileNavMenu = styled.div`
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #ffffff;
-    z-index: 1000;
-    display: flex; flex-direction: column; align-items: center; padding-top: 80px;
-    transform: translateX(${props => (props.isOpen ? '0' : '100%')});
-    transition: transform 0.3s ease-in-out;
-    box-shadow: -4px 0 20px rgba(15,23,42,0.15);
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #ffffff;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  transform: translateX(${props => (props.isOpen ? '0' : '100%')});
+  transition: transform 0.3s ease-in-out;
+  box-shadow: -4px 0 20px rgba(15,23,42,0.15);
 
-    .close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: ${TEXT_LIGHT}; font-size: 2rem; cursor: pointer; }
+  .close-btn {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: none;
+    border: none;
+    color: ${TEXT_LIGHT};
+    font-size: 2rem;
+    cursor: pointer;
+  }
 
-    span { font-size: 1.3rem; margin: 15px 0; cursor: pointer; color: ${TEXT_MUTED}; &:hover { color: ${NEON_COLOR}; } }
+  span {
+    font-size: 1.3rem;
+    margin: 15px 0;
+    cursor: pointer;
+    color: ${TEXT_MUTED};
+    &:hover { color: ${NEON_COLOR}; }
+  }
 `;
 
 /* =========================================
-   INTRO AREA (projects page hero)
+   INTRO AREA
    ========================================= */
 const Intro = styled.section`
     padding: 120px 20px 36px;
@@ -224,7 +268,7 @@ const FilterButton = styled.button`
 `;
 
 /* =========================================
-   PROJECT GRID (kept from your previous ProjectsPage)
+   PROJECT GRID
    ========================================= */
 const ProjectGrid = styled(motion.div)`
   width: 100%;
@@ -300,55 +344,116 @@ const Tag = styled.span`
 `;
 
 /* =========================================
-   FOOTER (copied from TeamPage)
+   FOOTER - MATCHING OTHER PAGES
    ========================================= */
 const FullFooter = styled.footer`
-    background: rgba(255,255,255,0.9);
-    padding: 60px 50px 20px;
-    color: ${TEXT_MUTED};
-    border-top: 1px solid ${BORDER_LIGHT};
-    box-sizing: border-box;
-    @media (max-width: 768px) { padding: 40px 20px 20px; }
+  background: rgba(255,255,255,0.9);
+  padding: 60px 50px 20px;
+  color: ${TEXT_MUTED};
+  border-top: 1px solid ${BORDER_LIGHT};
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 40px 20px 20px;
+  }
 `;
 
 const FooterGrid = styled.div`
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+
+  @media (max-width: 900px) {
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 30px;
-    @media (max-width: 900px) { flex-wrap: wrap; }
-    @media (max-width: 600px) { flex-direction: column; align-items: flex-start; gap: 30px; }
+  }
 `;
 
 const FooterColumn = styled.div`
-    min-width: 200px;
-    @media (max-width: 768px) { min-width: unset; flex:1; }
-    @media (max-width: 600px) { width:100%; flex:none; }
-    h4 { color: ${TEXT_LIGHT}; font-size:1.1rem; margin-bottom:20px; font-weight:700; position:relative;
-        &:after { content:''; position:absolute; left:0; bottom:-5px; width:30px; height:2px; background: ${GOLD_ACCENT}; }
+  min-width: 200px;
+  @media (max-width: 768px) { min-width: unset; flex: 1; }
+  @media (max-width: 600px) { width: 100%; flex: none; }
+
+  h4 {
+    color: ${TEXT_LIGHT};
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    position: relative;
+    &:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 30px;
+      height: 2px;
+      background: ${GOLD_ACCENT};
     }
-    p { font-size:0.9rem; line-height:1.6; margin:0 0 10px 0; }
-    ul { list-style:none; padding:0; margin:0; }
-    li { margin-bottom:10px; }
-    a, span { color:${TEXT_MUTED}; text-decoration:none; font-size:0.9rem; transition: color .3s; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-        &:hover { color: ${NEON_COLOR}; }
-    }
+  }
+  p { font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px 0; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { margin-bottom: 10px; }
+  a, span {
+    color: ${TEXT_MUTED};
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    &:hover { color: ${NEON_COLOR}; }
+  }
 `;
 
-const FooterLogo = styled(Logo)` font-size:1.5rem; margin-bottom:10px; `;
-const SocialIcons = styled.div` display:flex; gap:15px; margin-top:15px;
-    a { width:32px; height:32px; border-radius:999px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:${NEON_COLOR};
-        transition: background .3s, color .3s, box-shadow .3s;
-        &:hover{ background: linear-gradient(135deg, ${NEON_COLOR}, ${GOLD_ACCENT}); color:#fff; box-shadow:0 8px 20px rgba(15,23,42,0.2); }
-    }
+const FooterLogo = styled(Logo)`
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  gap: 0;
+  span { font-size: 1em; }
 `;
+
+/* GOLDEN SOCIAL ICONS */
+const SocialIcons = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+  a {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    /* Soft Gold Background */
+    background: rgba(212,169,55,0.15); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Gold Icon */
+    color: ${GOLD_ACCENT}; 
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+    
+    &:hover {
+      /* Solid Gold on Hover */
+      background: ${GOLD_ACCENT};
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(212,169,55,0.3);
+      transform: translateY(-3px);
+    }
+  }
+`;
+
 const Copyright = styled.div`
     text-align:center; font-size:0.8rem; padding-top:30px; border-top:1px solid ${BORDER_LIGHT}; margin-top:50px;
 `;
 
 /* =========================================
-   STAR CANVAS HOOK (same behavior as TeamPage's effect)
+   STAR CANVAS HOOK
    ========================================= */
 const useStarCanvas = (canvasRef) => {
   useEffect(() => {
@@ -501,9 +606,11 @@ const ProjectsPage = ({ onNavigate }) => {
       <GlobalStyle />
       <StarCanvas ref={canvasRef} />
       <PageWrapper>
-        {/* HEADER (same as TeamPage) */}
+        {/* HEADER */}
         <Header>
-          <Logo onClick={() => handleNavigation('home')}>NEXORACREW</Logo>
+          <Logo onClick={() => handleNavigation('home')}>
+            NEXORA<span className="gold">CREW</span>
+          </Logo>
 
           <NavGroup>
             {navItems.map((item) => (
@@ -593,11 +700,13 @@ const ProjectsPage = ({ onNavigate }) => {
           </div>
         )}
 
-        {/* FOOTER (same as TeamPage) */}
+        {/* FOOTER */}
         <FullFooter>
           <FooterGrid>
             <FooterColumn style={{ minWidth: '300px' }}>
-              <FooterLogo onClick={() => handleNavigation('home')}>NEXORACREW</FooterLogo>
+              <FooterLogo onClick={() => handleNavigation('home')}>
+                NEXORA<span className="gold">CREW</span>
+              </FooterLogo>
               <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where ideas meet innovation.</p>
               <SocialIcons>
                 <a href="https://www.instagram.com/nexoracrew?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faInstagram} /></a>
@@ -621,9 +730,9 @@ const ProjectsPage = ({ onNavigate }) => {
             <FooterColumn>
               <h4>Contact Info</h4>
               <ul>
-                <li><a href="#map"><FontAwesomeIcon icon={faMapMarkerAlt} /> {safeGeneralData.location}</a></li>
-                <li><a href={`mailto:${safeGeneralData.email}`}><FontAwesomeIcon icon={faEnvelope} /> {safeGeneralData.email}</a></li>
-                <li><a href={`tel:${safeGeneralData.phone}`}><FontAwesomeIcon icon={faPhone} /> {safeGeneralData.phone}</a></li>
+                <li><a href="#map"><FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}</a></li>
+                <li><a href={`mailto:${safeGeneralData.email}`}><FontAwesomeIcon icon={faEnvelope} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.email}</a></li>
+                <li><a href={`tel:${safeGeneralData.phone}`}><FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}</a></li>
               </ul>
             </FooterColumn>
           </FooterGrid>

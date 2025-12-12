@@ -10,165 +10,223 @@ import {
     faCalendarCheck,
     faEnvelope,
     faPhone,
-    faDownload
+    faDownload,
+    faBars,
+    faTimes,
+    faMapMarkerAlt
 } from '@fortawesome/free-solid-svg-icons';
 import {
     faInstagram,
     faLinkedinIn,
+    faWhatsapp,
+    faYoutube,
 } from '@fortawesome/free-brands-svg-icons';
-import {
-    faLocationDot
-} from '@fortawesome/free-solid-svg-icons';
 
-/* ---------------- THEME (white UI — navy & gold accents) ---------------- */
-const GOLD = '#D4AF37';            // specification / highlight color
-const NAVY = '#083047';            // primary navy color for text/background elements
-const TEXT_DARK = '#052635';       // main text color
-const TEXT_MUTED = '#6b7280';      // muted text (gray)
-const SHELL_BG = '#ffffff';        // white surface for cards
+/* ---------------- THEME CONSTANTS ---------------- */
+const NEON_COLOR = '#123165';          // primary navy
+const TEXT_LIGHT = '#111827';          // Dark text for white bg
+const TEXT_MUTED = '#6B7280';
+const BORDER_LIGHT = 'rgba(15,23,42,0.08)';
+const GOLD_ACCENT = '#D4A937';
 const SURFACE_BORDER = 'rgba(8,48,71,0.06)';
 
-/* ---------------- GLOBAL STYLE ---------------- */
-const GlobalStyle = createGlobalStyle`
-    /* ensure the entire page background is white so no black bars appear */
-    html, body, #root { height: 100%; background: #ffffff; }
-
-    body {
-        margin: 0;
-        font-family: 'Poppins', sans-serif;
-        -webkit-font-smoothing:antialiased;
-        -moz-osx-font-smoothing:grayscale;
-        background: #ffffff;
-        color: ${TEXT_DARK};
-        overflow-x: hidden;
-    }
-
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation: none !important;
-      }
-    }
+/* ---------------- KEYFRAMES ---------------- */
+const rollIn = keyframes`
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 `;
 
-/* ---------------- STAR CANVAS BACKGROUND ---------------- */
-const StarCanvas = styled.canvas`
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-`;
-
-/* ---------------- ANIMATIONS ---------------- */
 const glowPulse = keyframes`
   0% { box-shadow: 0 0 0px rgba(212,175,55,0.0); }
   50% { box-shadow: 0 0 18px rgba(212,175,55,0.12); }
   100% { box-shadow: 0 0 0px rgba(212,175,55,0.0); }
 `;
 
-/* ---------------- HEADER ---------------- */
-const Header = styled.header`
-    display: flex;
-    align-items: center;
-    gap: 40px;
-    padding: 14px 48px;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    background: rgba(255,255,255,0.98);
-    backdrop-filter: blur(6px);
-    border-bottom: 1px solid ${SURFACE_BORDER};
-    z-index: 10;
-
-    @media (max-width: 780px) {
-        padding: 12px 20px;
-        gap: 18px;
+/* ---------------- GLOBAL STYLES ---------------- */
+const GlobalStyle = createGlobalStyle`
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
+        font-family: 'Poppins', sans-serif;
+        background: 
+            radial-gradient(circle at 0% 0%, #fff9e8 0, #ffffff 35%, transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, #f5f7fb 40%, #e5edf7 100%);
+        color: ${TEXT_LIGHT};
     }
+    #root { width: 100%; overflow-x: hidden; }
+    .animate-in { opacity: 0; transform: translateY(20px); animation: fadeSlide 0.8s ease forwards; }
+    @keyframes fadeSlide { to { opacity: 1; transform: translateY(0); } }
+`;
+
+/* ---------------- STAR CANVAS ---------------- */
+const StarCanvas = styled.canvas`
+    position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none;
+`;
+
+/* ---------------- HEADER COMPONENTS ---------------- */
+const Header = styled.header`
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 14px 48px;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid ${BORDER_LIGHT};
+  z-index: 1100;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 14px 20px;
+    gap: 20px;
+    justify-content: space-between;
+  }
 `;
 
 const Logo = styled.h1`
-    color: ${NAVY};
-    font-size: 1.8rem;
-    font-weight: 800;
-    cursor: pointer;
-    letter-spacing: 1px;
-    display: inline-flex;
-    align-items: center;
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.8rem;
+  cursor: pointer;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
 
-    span {
-        color: ${GOLD};
-        margin-left: 6px;
-        font-weight: 900;
-    }
+  span {
+    display: inline-block;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  color: ${NEON_COLOR};
+  span.gold {
+    color: ${GOLD_ACCENT};
+    margin-left: 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.4rem;
+  }
 `;
 
-const NavGroup = styled.div`
-    display: flex;
-    gap: 22px;
+const NavGroup = styled.nav`
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  margin-right: auto;
+
+  span {
+    color: ${TEXT_MUTED};
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    padding: 6px 4px;
+    transition: 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
     align-items: center;
-    margin-right: auto;
+    gap: 8px;
+  }
+  span:hover { color: ${NEON_COLOR}; }
+  span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background: ${GOLD_ACCENT};
+    transition: 0.3s;
+    border-radius: 4px;
+  }
+  span:hover::after { width: 100%; }
+  
+  @media (max-width: 1024px) { display: none; }
+`;
 
-    span {
-        color: ${TEXT_MUTED};
-        cursor: pointer;
-        font-weight: 600;
-        position: relative;
-        transition: 0.25s ease;
-        padding: 6px 4px;
-        font-size: 0.95rem;
+const MobileMenuButton = styled.button`
+  display: none;
+  @media (max-width: 1024px) {
+    display: block;
+    background: none;
+    border: none;
+    color: ${NEON_COLOR};
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+`;
 
-        &:hover {
-            color: ${NAVY};
-        }
+const MobileNavMenu = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  transform: translateX(${(p) => (p.isOpen ? "0" : "100%")});
+  transition: transform 0.28s ease-in-out;
+  box-shadow: -4px 0 20px rgba(15, 23, 42, 0.12);
 
-        &:after {
-            content: '';
-            position: absolute;
-            left: 0; bottom: -6px;
-            width: 0;
-            height: 3px;
-            background: ${GOLD};
-            transition: 0.22s;
-            border-radius: 4px;
-        }
-        &:hover:after {
-            width: 100%;
-        }
-    }
+  .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: ${TEXT_LIGHT};
+  }
+  span {
+    font-size: 1.3rem;
+    margin: 14px 0;
+    color: ${TEXT_MUTED};
+    cursor: pointer;
+  }
 `;
 
 /* ---------------- PAGE LAYOUT ---------------- */
 const PageWrapper = styled.div`
     position: relative;
+    z-index: 1;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #ffffff; /* explicit white background to avoid visible black gutters */
-    z-index: 1; /* ensure content sits above canvas */
-`;
-
-const MainContentArea = styled.div`
-    flex-grow: 1; 
+    background: transparent;
 `;
 
 const ContentWrapper = styled.div`
     max-width: 1180px;
     margin: 0 auto;
-    padding: 140px 24px 80px;
+    padding: 120px 24px 80px;
+    width: 100%;
+    box-sizing: border-box;
 
     @media (max-width: 780px) {
-        padding: 120px 20px 60px;
+        padding: 100px 20px 60px;
     }
 `;
 
 const Shell = styled.div`
     border-radius: 16px;
     padding: 48px 40px 56px;
-    background: ${SHELL_BG};
+    background: #ffffff;
     border: 1px solid ${SURFACE_BORDER};
     box-shadow: 0 10px 30px rgba(8,48,71,0.06);
+    width: 100%;
+    box-sizing: border-box;
 
     @media (max-width: 768px) {
         padding: 28px 16px 36px;
@@ -182,10 +240,10 @@ const Title = styled.h1`
     letter-spacing: 0.06em;
     text-transform: uppercase;
     margin: 0 0 28px;
-    color: ${NAVY};
+    color: ${NEON_COLOR};
 
     span {
-        color: ${GOLD};
+        color: ${GOLD_ACCENT};
     }
 
     @media (max-width: 640px) {
@@ -193,6 +251,7 @@ const Title = styled.h1`
     }
 `;
 
+/* SWOT GRID - Responsive */
 const Grid = styled.div`
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -220,14 +279,14 @@ const BaseBox = styled.div`
 `;
 
 const StrengthBox = styled(BaseBox)`
-    border-left: 3px solid ${GOLD};
+    border-left: 3px solid ${GOLD_ACCENT};
     animation: ${glowPulse} 4s ease-in-out infinite;
 `;
 const WeaknessBox = styled(BaseBox)`
     border-left: 3px solid #ef4444;
 `;
 const OpportunityBox = styled(BaseBox)`
-    border-left: 3px solid ${NAVY};
+    border-left: 3px solid ${NEON_COLOR};
 `;
 const ThreatBox = styled(BaseBox)`
     border-left: 3px solid #9ca3af;
@@ -248,41 +307,34 @@ const IconCircle = styled.div`
     align-items: center;
     justify-content: center;
     font-size: 15px;
+    flex-shrink: 0;
 
-    ${({ variant }) =>
-        variant === "strength" &&
-        css`
-          border: 1px solid rgba(212,175,55,0.18);
-          background: linear-gradient(180deg, rgba(212,175,55,0.06), transparent);
-          color: ${GOLD};
-        `}
-    ${({ variant }) =>
-        variant === "weakness" &&
-        css`
-          border: 1px solid rgba(239,68,68,0.12);
-          background: linear-gradient(180deg, rgba(239,68,68,0.04), transparent);
-          color: #ef4444;
-        `}
-    ${({ variant }) =>
-        variant === "opportunity" &&
-        css`
-          border: 1px solid rgba(8,48,71,0.12);
-          background: linear-gradient(180deg, rgba(8,48,71,0.04), transparent);
-          color: ${NAVY};
-        `}
-    ${({ variant }) =>
-        variant === "threat" &&
-        css`
-          border: 1px solid rgba(156,163,175,0.12);
-          background: linear-gradient(180deg, rgba(156,163,175,0.02), transparent);
-          color: #9ca3af;
-        `}
+    ${({ variant }) => variant === "strength" && css`
+        border: 1px solid rgba(212,175,55,0.18);
+        background: linear-gradient(180deg, rgba(212,175,55,0.06), transparent);
+        color: ${GOLD_ACCENT};
+    `}
+    ${({ variant }) => variant === "weakness" && css`
+        border: 1px solid rgba(239,68,68,0.12);
+        background: linear-gradient(180deg, rgba(239,68,68,0.04), transparent);
+        color: #ef4444;
+    `}
+    ${({ variant }) => variant === "opportunity" && css`
+        border: 1px solid rgba(18,49,101,0.12);
+        background: linear-gradient(180deg, rgba(18,49,101,0.04), transparent);
+        color: ${NEON_COLOR};
+    `}
+    ${({ variant }) => variant === "threat" && css`
+        border: 1px solid rgba(156,163,175,0.12);
+        background: linear-gradient(180deg, rgba(156,163,175,0.02), transparent);
+        color: #9ca3af;
+    `}
 `;
 
 const BoxTitle = styled.h2`
     font-size: 16px;
     font-weight: 700;
-    color: ${TEXT_DARK};
+    color: ${TEXT_LIGHT};
     margin: 0;
 `;
 
@@ -293,7 +345,7 @@ const BulletList = styled.ul`
 
     li {
         font-size: 14px;
-        color: ${TEXT_DARK};
+        color: ${TEXT_LIGHT};
         margin-bottom: 8px;
         position: relative;
         padding-left: 18px;
@@ -309,7 +361,6 @@ const BulletList = styled.ul`
 `;
 
 /* ---------------- AGILE WORKFLOW STYLES ---------------- */
-
 const WorkflowContainer = styled.div`
     text-align: center;
     margin-bottom: 48px;
@@ -324,10 +375,9 @@ const WorkflowTitle = styled.h2`
     font-weight: 800;
     margin-bottom: 6px;
     letter-spacing: 0.02em;
-
-    span {
-        color: ${GOLD};
-    }
+    color: ${NEON_COLOR};
+    span { color: ${GOLD_ACCENT}; }
+    @media (max-width: 600px) { font-size: 1.6rem; }
 `;
 
 const WorkflowSubtitle = styled.p`
@@ -344,8 +394,17 @@ const ProcessBar = styled.div`
     max-width: 900px;
     margin: 0 auto 20px;
     padding: 0 10px;
+
+    /* Mobile: Stack items in a grid instead of a long horizontal line */
+    @media (max-width: 768px) {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        justify-items: center;
+    }
 `;
 
+/* Line is hidden on mobile to avoid breaking layout */
 const Line = styled.div`
     position: absolute;
     top: 50%;
@@ -355,6 +414,7 @@ const Line = styled.div`
     width: 100%;
     z-index: 1;
     border-radius: 2px;
+    @media (max-width: 768px) { display: none; }
 `;
 
 const ActiveLine = styled.div`
@@ -362,12 +422,13 @@ const ActiveLine = styled.div`
     top: 50%;
     transform: translateY(-50%);
     height: 4px;
-    background: ${GOLD};
+    background: ${GOLD_ACCENT};
     width: 40%;
     z-index: 2;
     border-radius: 2px;
     left: 0;
     max-width: calc(100% - 10px);
+    @media (max-width: 768px) { display: none; }
 `;
 
 const Step = styled.div`
@@ -379,6 +440,10 @@ const Step = styled.div`
     cursor: default;
     z-index: 3;
     transition: transform 0.2s ease;
+    
+    @media (max-width: 768px) {
+        width: auto;
+    }
 `;
 
 const Circle = styled.div`
@@ -386,21 +451,21 @@ const Circle = styled.div`
     height: 18px;
     border-radius: 50%;
     margin-bottom: 10px;
-    border: 2px solid ${({ active }) => (active ? GOLD : 'rgba(8,48,71,0.18)')};
-    background: ${({ active }) => (active ? NAVY : 'transparent')};
+    border: 2px solid ${({ active }) => (active ? GOLD_ACCENT : 'rgba(8,48,71,0.18)')};
+    background: ${({ active }) => (active ? NEON_COLOR : 'transparent')};
     transition: all 0.3s ease;
 `;
 
 const StepLabel = styled.span`
     font-size: 0.82rem;
     font-weight: 600;
-    color: ${({ active }) => (active ? TEXT_DARK : TEXT_MUTED)};
+    color: ${({ active }) => (active ? TEXT_LIGHT : TEXT_MUTED)};
     text-align: center;
     transition: color 0.3s ease;
 `;
 
 const ProcessButton = styled.button`
-    background-color: ${NAVY};
+    background-color: ${NEON_COLOR};
     color: #ffffff;
     border: none;
     padding: 10px 22px;
@@ -412,7 +477,7 @@ const ProcessButton = styled.button`
     margin-top: 12px;
     display: inline-flex;
     align-items: center;
-    gap: 0px;
+    gap: 10px;
 
     &:hover {
         transform: translateY(-2px);
@@ -420,97 +485,21 @@ const ProcessButton = styled.button`
     }
 `;
 
-// Helper Component for the Agile Workflow
-const AgileWorkflow = () => {
-    const steps = [
-        "Inquiry", "Analysis", "Proposal", "Team Alloc",
-        "Development", "Review", "Feedback", "Delivery"
-    ];
-    
-    return (
-        <WorkflowContainer>
-            <WorkflowTitle>
-                AGILE <span>WORKFLOW</span>
-            </WorkflowTitle>
-            <WorkflowSubtitle>
-                A streamlined, transparent process designed for speed and quality.
-            </WorkflowSubtitle>
-
-            <ProcessBar>
-                <Line />
-                <ActiveLine /> 
-                {steps.map((step, index) => {
-                    const isActive = index <= 4; 
-                    return (
-                        <Step key={step}>
-                            <Circle active={isActive} />
-                            <StepLabel active={isActive}>{step}</StepLabel>
-                        </Step>
-                    );
-                })}
-            </ProcessBar>
-
-            <ProcessButton onClick={() => alert('Downloading Process PDF...')}>
-                <FontAwesomeIcon icon={faDownload} />
-                Download Process PDF
-            </ProcessButton>
-        </WorkflowContainer>
-    );
-};
-
-/* ---------------- CAREERS / FOOTER SECTION STYLES ---------------- */
-
-const FooterContainer = styled.footer`
-    width: 100%;
-    padding: 60px 48px;
-    background-color: #ffffff;
-    border-top: 1px solid ${SURFACE_BORDER};
-
-    @media (max-width: 780px) {
-        padding: 40px 20px;
-    }
-`;
-
-const FooterContentWrapper = styled.div`
+/* ---------------- CAREERS SECTION STYLES ---------------- */
+const CareersWrapper = styled.section`
     max-width: 1180px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1.5fr; 
-    gap: 28px;
-
-    @media (max-width: 1024px) {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    @media (max-width: 640px) {
-        grid-template-columns: 1fr;
-    }
-`;
-
-const FooterSection = styled.div`
-    padding-right: 20px; 
-`;
-
-const SectionTitle = styled.h3`
-    font-size: 1.05rem;
-    color: ${TEXT_DARK};
-    margin-bottom: 16px;
-    font-weight: 700;
-`;
-
-const CareersSection = styled.div`
-    grid-column: 1 / -1; 
+    margin: 40px auto 80px;
+    padding: 0 24px;
     display: grid;
     grid-template-columns: 1.5fr 3fr;
     gap: 28px;
-    margin-bottom: 36px;
-    padding-bottom: 36px;
-    border-bottom: 1px solid ${SURFACE_BORDER};
+    width: 100%;
+    box-sizing: border-box;
 
     @media (max-width: 1024px) {
         grid-template-columns: 1fr;
-        gap: 20px;
-        padding-bottom: 24px;
+        gap: 30px;
+        padding: 0 20px;
     }
 `;
 
@@ -520,13 +509,9 @@ const CareersTextGroup = styled.div`
         font-weight: 800;
         margin-top: 0;
         margin-bottom: 12px;
-        span {
-            color: ${GOLD};
-        }
-
-        @media (max-width: 640px) {
-            font-size: 1.5rem;
-        }
+        color: ${NEON_COLOR};
+        span { color: ${GOLD_ACCENT}; }
+        @media (max-width: 640px) { font-size: 1.5rem; }
     }
 
     p {
@@ -544,13 +529,13 @@ const CareersTextGroup = styled.div`
         li {
             display: flex;
             align-items: center;
-            color: ${TEXT_DARK};
+            color: ${TEXT_LIGHT};
             font-weight: 600;
             margin-bottom: 8px;
             font-size: 0.95rem;
 
             svg {
-                color: ${GOLD};
+                color: ${GOLD_ACCENT};
                 margin-right: 12px;
                 font-size: 1.1rem;
             }
@@ -559,7 +544,7 @@ const CareersTextGroup = styled.div`
 `;
 
 const ApplyButton = styled.button`
-    background-color: ${GOLD};
+    background-color: ${GOLD_ACCENT};
     color: #042027;
     border: none;
     padding: 12px 28px;
@@ -570,9 +555,7 @@ const ApplyButton = styled.button`
     transition: all 0.18s ease-in-out;
     box-shadow: 0 6px 18px rgba(212,175,55,0.12);
 
-    &:hover {
-        transform: translateY(-2px);
-    }
+    &:hover { transform: translateY(-2px); }
 `;
 
 const BarChartContainer = styled.div`
@@ -580,9 +563,12 @@ const BarChartContainer = styled.div`
     flex-direction: column;
     gap: 16px;
     background: #ffffff;
-    padding: 16px;
-    border-radius: 8px;
+    padding: 24px;
+    border-radius: 12px;
     border: 1px solid ${SURFACE_BORDER};
+    box-shadow: 0 10px 30px rgba(8,48,71,0.06);
+    width: 100%;
+    box-sizing: border-box;
 `;
 
 const ChartWrapper = styled.div`
@@ -615,7 +601,7 @@ const Bar = styled.div`
         position: absolute;
         bottom: 0;
         width: 100%;
-        background-color: ${GOLD}; 
+        background-color: ${GOLD_ACCENT}; 
         height: ${({ highlight }) => highlight};
         border-radius: 4px 4px 0 0;
     }
@@ -633,420 +619,427 @@ const InternshipDetail = styled.div`
     padding: 12px 0;
     border-bottom: 1px solid rgba(8,48,71,0.04);
 
-    &:first-child {
-        border-top: 1px solid rgba(8,48,71,0.02);
-    }
-
-    h4 {
-        color: ${TEXT_DARK};
-        font-size: 0.95rem;
-        font-weight: 700;
-        margin: 0 0 4px 0;
-    }
-    p {
-        color: ${TEXT_MUTED};
-        font-size: 0.85rem;
-        margin: 0;
-    }
+    &:first-child { border-top: 1px solid rgba(8,48,71,0.02); }
+    h4 { color: ${TEXT_LIGHT}; font-size: 0.95rem; font-weight: 700; margin: 0 0 4px 0; }
+    p { color: ${TEXT_MUTED}; font-size: 0.85rem; margin: 0; }
 `;
 
-const FooterQuickLinks = styled.div`
-    a {
-        display: block;
-        color: ${TEXT_MUTED};
-        text-decoration: none;
-        margin-bottom: 10px;
-        font-size: 0.9rem;
-        transition: color 0.18s ease;
+/* ---------------- FOOTER COMPONENT ---------------- */
+const FullFooter = styled.footer`
+  background: rgba(255,255,255,0.9);
+  padding: 60px 50px 20px;
+  color: ${TEXT_MUTED};
+  border-top: 1px solid ${BORDER_LIGHT};
+  box-sizing: border-box;
 
-        &:hover {
-            color: ${NAVY};
-        }
-    }
+  @media (max-width: 768px) {
+    padding: 40px 20px 20px;
+  }
 `;
 
-const FooterServices = styled.div`
-    span {
-        display: block;
-        color: ${TEXT_MUTED};
-        margin-bottom: 10px;
-        font-size: 0.9rem;
-    }
+const FooterGrid = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+
+  @media (max-width: 900px) {
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 30px;
+  }
 `;
 
-const FooterContactInfo = styled.div`
-    div {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 12px;
-        color: ${TEXT_MUTED};
-        font-size: 0.9rem;
+const FooterColumn = styled.div`
+  min-width: 200px;
+  @media (max-width: 768px) { min-width: unset; flex: 1; }
+  @media (max-width: 600px) { width: 100%; flex: none; }
 
-        svg {
-            color: ${GOLD};
-            margin-right: 12px;
-            margin-top: 2px;
-            font-size: 0.95rem;
-            flex-shrink: 0;
-        }
-
-        a {
-            color: ${TEXT_MUTED};
-            text-decoration: none;
-
-            &:hover {
-                color: ${NAVY};
-            }
-        }
+  h4 {
+    color: ${TEXT_LIGHT};
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    position: relative;
+    &:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 30px;
+      height: 2px;
+      background: ${GOLD_ACCENT};
     }
+  }
+  p { font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px 0; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { margin-bottom: 10px; }
+  a, span {
+    color: ${TEXT_MUTED};
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    &:hover { color: ${NEON_COLOR}; }
+  }
 `;
 
-const FooterLogoGroup = styled.div`
-    p {
-        font-size: 0.9rem;
-        color: ${TEXT_MUTED};
-        line-height: 1.5;
-        margin-top: 8px;
-        margin-bottom: 16px;
-    }
+const FooterLogo = styled(Logo)`
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  gap: 0;
+  span { font-size: 1em; }
 `;
 
 const SocialIcons = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+  a {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    /* Soft Gold Background */
+    background: rgba(212,169,55,0.15); 
     display: flex;
-    gap: 12px;
-
-    a {
-        color: ${TEXT_MUTED};
-        font-size: 1.1rem;
-        transition: color 0.18s ease;
-        text-decoration: none;
-
-        &:hover {
-            color: ${NAVY};
-        }
+    align-items: center;
+    justify-content: center;
+    /* Gold Icon */
+    color: ${GOLD_ACCENT}; 
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+    
+    &:hover {
+      /* Solid Gold on Hover */
+      background: ${GOLD_ACCENT};
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(212,169,55,0.3);
+      transform: translateY(-3px);
     }
+  }
 `;
 
-// Helper component for the Careers Bar Chart
-const CareersBarChart = () => (
-    <BarChartContainer>
-        <BarColumn style={{ marginBottom: '6px' }}>
-            <BarLabel style={{ color: TEXT_DARK, fontSize: '0.9rem', fontWeight: '700' }}>Selection Ratio (2025)</BarLabel>
-        </BarColumn>
-        <ChartWrapper>
-            <BarColumn>
-                <Bar height="70%" highlight="40%" />
-                <BarLabel>Designers</BarLabel>
-            </BarColumn>
-            <BarColumn>
-                <Bar height="90%" highlight="60%" />
-                <BarLabel>Developers</BarLabel>
-            </BarColumn>
-            <BarColumn>
-                <Bar height="50%" highlight="22%" />
-                <BarLabel>Writers</BarLabel>
-            </BarColumn>
-        </ChartWrapper>
+const Copyright = styled.div`
+  text-align: center;
+  font-size: 0.8rem;
+  padding-top: 30px;
+  border-top: 1px solid ${BORDER_LIGHT};
+  margin-top: 50px;
+`;
 
-        <InternshipDetail>
-            <h4>How long is the internship?</h4>
-            <p>3 to 6 months, project-dependent.</p>
-        </InternshipDetail>
-        <InternshipDetail>
-            <h4>Is it paid?</h4>
-            <p>Performance-based stipends for commercial projects.</p>
-        </InternshipDetail>
-        <InternshipDetail>
-            <h4>Remote allowed?</h4>
-            <p>Yes, hybrid-model supported.</p>
-        </InternshipDetail>
-        <InternshipDetail style={{ borderBottom: 'none' }}>
-            <h4>Certification?</h4>
-            <p>Yes, verified by MSME startup.</p>
-        </InternshipDetail> 
-    </BarChartContainer>
+/* ---------------- HELPER COMPONENTS ---------------- */
+const AgileWorkflow = () => {
+    const steps = ["Inquiry", "Analysis", "Proposal", "Team Alloc", "Development", "Review", "Feedback", "Delivery"];
+    return (
+        <WorkflowContainer>
+            <WorkflowTitle>AGILE <span>WORKFLOW</span></WorkflowTitle>
+            <WorkflowSubtitle>A streamlined, transparent process designed for speed and quality.</WorkflowSubtitle>
+            <ProcessBar>
+                <Line />
+                <ActiveLine /> 
+                {steps.map((step, index) => {
+                    const isActive = index <= 4; 
+                    return (
+                        <Step key={step}>
+                            <Circle active={isActive} />
+                            <StepLabel active={isActive}>{step}</StepLabel>
+                        </Step>
+                    );
+                })}
+            </ProcessBar>
+            <ProcessButton onClick={() => alert('Downloading Process PDF...')}>
+                <FontAwesomeIcon icon={faDownload} /> Download Process PDF
+            </ProcessButton>
+        </WorkflowContainer>
+    );
+};
+
+const CareersSection = () => (
+    <CareersWrapper>
+        <CareersTextGroup>
+            <h2>CAREERS @ <span>NEXORACREW</span></h2>
+            <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where Ideas Meet Innovation.</p>
+            <ul>
+                <li><FontAwesomeIcon icon={faCalendarCheck} /> Real-world experience</li>
+                <li><FontAwesomeIcon icon={faCalendarCheck} /> Mentorship from Seniors</li>
+                <li><FontAwesomeIcon icon={faCalendarCheck} /> Official Certification</li>
+                <li><FontAwesomeIcon icon={faCalendarCheck} /> Networking Opportunities</li>
+            </ul>
+            <ApplyButton onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSflR-eG2DJXiHOThlXgeToIivo95GKEyZa0dhJDJFD2WbrWlA/viewform', '_blank')}>Apply Now</ApplyButton>
+        </CareersTextGroup>
+
+        <BarChartContainer>
+            <BarColumn style={{ marginBottom: '6px' }}>
+                <BarLabel style={{ color: TEXT_LIGHT, fontSize: '0.9rem', fontWeight: '700' }}>Selection Ratio (2025)</BarLabel>
+            </BarColumn>
+            <ChartWrapper>
+                <BarColumn>
+                    <Bar height="70%" highlight="40%" />
+                    <BarLabel>Designers</BarLabel>
+                </BarColumn>
+                <BarColumn>
+                    <Bar height="90%" highlight="60%" />
+                    <BarLabel>Developers</BarLabel>
+                </BarColumn>
+                <BarColumn>
+                    <Bar height="50%" highlight="22%" />
+                    <BarLabel>Writers</BarLabel>
+                </BarColumn>
+            </ChartWrapper>
+            <InternshipDetail>
+                <h4>How long is the internship?</h4>
+                <p>3 to 6 months, project-dependent.</p>
+            </InternshipDetail>
+            <InternshipDetail>
+                <h4>Is it paid?</h4>
+                <p>Performance-based stipends for commercial projects.</p>
+            </InternshipDetail>
+            <InternshipDetail>
+                <h4>Remote allowed?</h4>
+                <p>Yes, hybrid-model supported.</p>
+            </InternshipDetail>
+            <InternshipDetail style={{ borderBottom: 'none' }}>
+                <h4>Certification?</h4>
+                <p>Yes, verified by MSME startup.</p>
+            </InternshipDetail> 
+        </BarChartContainer>
+    </CareersWrapper>
 );
 
-// Helper component for the entire new section
-const FullFooter = ({ onNavigate }) => (
-    <FooterContainer>
-        <FooterContentWrapper>
-            {/* Top Careers Section (Spans across) */}
-            <CareersSection>
-                <CareersTextGroup>
-                    <h2>CAREERS @ <span>NEXORACREW</span></h2>
-                    <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where Ideas Meet Innovation.</p>
-                    <ul>
-                        <li><FontAwesomeIcon icon={faCalendarCheck} /> Real-world experience</li>
-                        <li><FontAwesomeIcon icon={faCalendarCheck} /> Mentorship from Seniors</li>
-                        <li><FontAwesomeIcon icon={faCalendarCheck} /> Official Certification</li>
-                        <li><FontAwesomeIcon icon={faCalendarCheck} /> Networking Opportunities</li>
-                    </ul>
-                    {/* UPDATED APPLY BUTTON */}
-                    <ApplyButton onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSflR-eG2DJXiHOThlXgeToIivo95GKEyZa0dhJDJFD2WbrWlA/viewform', '_blank')}>Apply Now</ApplyButton>
-                </CareersTextGroup>
-
-                <CareersBarChart />
-            </CareersSection>
-
-            {/* Bottom Footer - NEXORACREW & Socials (Col 1) */}
-            <FooterSection>
-                <FooterLogoGroup>
-                    <Logo style={{ color: NAVY }}>NEXORA<span>CREW</span></Logo>
-                    <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where Ideas Meet Innovation.</p>
-                </FooterLogoGroup>
-                <SocialIcons>
-                    <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer"><FontAwesomeIcon icon={faInstagram} /></a>
-                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer"><FontAwesomeIcon icon={faLinkedinIn} /></a>
-                    <a href="mailto:nexora.crew@gmail.com"><FontAwesomeIcon icon={faEnvelope} /></a>
-                </SocialIcons>
-            </FooterSection>
-
-            {/* Bottom Footer - Quick Links (Col 2) */}
-            <FooterSection>
-                <SectionTitle>Quick Links</SectionTitle>
-                <FooterQuickLinks>
-                    <a href="#" onClick={() => onNavigate('home')}>Home</a>
-                    <a href="#" onClick={() => onNavigate('about')}>About</a>
-                    <a href="#" onClick={() => onNavigate('services')}>Services</a>
-                    <a href="#" onClick={() => onNavigate('projects')}>Projects</a>
-                    <a href="#" onClick={() => onNavigate('blog')}>Blog</a>
-                    <a href="#" onClick={() => onNavigate('team')}>Team</a>
-                    <a href="#" onClick={() => onNavigate('progress')}>Progress</a>
-                    <a href="#" onClick={() => onNavigate('contact')}>Contact</a>
-                </FooterQuickLinks>
-            </FooterSection>
-
-            {/* Bottom Footer - Services (Col 3) */}
-            <FooterSection>
-                <SectionTitle>Services</SectionTitle>
-                <FooterServices>
-                    <span>Web Development</span>
-                    <span>Poster designing & logo making</span>
-                    <span>Digital marketing &SEO</span>
-                    <span>AI and automation</span>
-                    <span>Hosting & Support</span>
-                    <span>Printing &Branding solutions</span>
-                    <span>Enterprise networking &server architecture</span>
-                    <span>Bold branding&Immersive visual design</span>
-                    <span>Next gen web & mobile experience</span>
-                </FooterServices>
-            </FooterSection>
-
-            {/* Bottom Footer - Contact Info (Col 4) */}
-            <FooterSection>
-                <SectionTitle>Contact Info</SectionTitle>
-                <FooterContactInfo>
-                    <div>
-                        <FontAwesomeIcon icon={faLocationDot} />
-                        <span>JJ College of Engineering and Technology, Trichy</span>
-                    </div>
-                    <div>
-                        <FontAwesomeIcon icon={faEnvelope} />
-                        <a href="mailto:nexora.crew@gmail.com">nexora.crew@gmail.com</a>
-                    </div>
-                    <div>
-                        <FontAwesomeIcon icon={faPhone} />
-                        <span>+91 95976 48460</span>
-                    </div>
-                </FooterContactInfo>
-            </FooterSection>
-        </FooterContentWrapper>
-    </FooterContainer>
-);
-
-/* ---------------- COMPONENT ---------------- */
+/* ---------------- MAIN COMPONENT ---------------- */
 const ProgressPage = ({ onNavigate = () => {} }) => {
-    // canvas ref for background animation
     const canvasRef = useRef(null);
-    const [mounted, setMounted] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const safeGeneralData = {
+        email: 'nexora.crew@gmail.com',
+        phone: '+91 95976 46460',
+        location: 'JJ College of Engineering, Trichy',
+    };
+
+    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
 
     useEffect(() => {
-        setMounted(true);
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d', { alpha: true });
-        const DPR = window.devicePixelRatio || 1;
+        
+        let DPR = Math.max(1, window.devicePixelRatio || 1);
+        let width = Math.max(1, Math.floor(window.innerWidth));
+        let height = Math.max(1, Math.floor(window.innerHeight));
 
         function resize() {
-            canvas.width = window.innerWidth * DPR;
-            canvas.height = window.innerHeight * DPR;
-            canvas.style.width = `${window.innerWidth}px`;
-            canvas.style.height = `${window.innerHeight}px`;
+            DPR = Math.max(1, window.devicePixelRatio || 1);
+            width = Math.max(1, Math.floor(window.innerWidth));
+            height = Math.max(1, Math.floor(window.innerHeight));
+            canvas.width = Math.floor(width * DPR);
+            canvas.height = Math.floor(height * DPR);
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
             ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
         }
         resize();
 
-        // star/particle data — scale count by screen size for performance
-        const baseCount = Math.max(Math.floor((window.innerWidth * window.innerHeight) / 12000), 60);
-        const isSmall = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-        const count = isSmall ? Math.max(40, Math.floor(baseCount * 0.5)) : baseCount;
-
+        const count = 140;
         const stars = Array.from({ length: count }, () => ({
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            r: 0.8 + Math.random() * 2.2,
-            dx: (Math.random() - 0.5) * 0.3,
-            dy: 0.05 + Math.random() * 0.5,
-            alpha: 0.12 + Math.random() * 0.5,
-            hue: Math.random() > 0.8 ? 'gold' : 'navy' // mostly gold with occasional navy tints
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: 1 + Math.random() * 2.2, // Slightly larger, soft glow
+            dx: (Math.random() - 0.5) * 0.25, // Gentle float
+            dy: 0.08 + Math.random() * 0.35, // Downward drift
+            alpha: 0.15 + Math.random() * 0.35, // Visibility
         }));
 
         let rafId;
         const draw = () => {
-            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-            // subtle gradient background (keeps white UI look)
-            // optional — commented out to preserve page's white background
-            // const g = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
-            // g.addColorStop(0, 'rgba(255,255,255,0.0)');
-            // g.addColorStop(1, 'rgba(250,250,252,0.0)');
-            // ctx.fillStyle = g;
-            // ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-
+            ctx.clearRect(0, 0, width, height);
             stars.forEach((s) => {
-                s.x += s.dx;
-                s.y += s.dy;
+                s.x += s.dx; s.y += s.dy;
+                if (s.y > height + 10) s.y = -10;
+                if (s.x > width + 10) s.x = -10;
+                if (s.x < -10) s.x = width + 10;
 
-                if (s.y > window.innerHeight + 10) s.y = -10;
-                if (s.x > window.innerWidth + 10) s.x = -10;
-                if (s.x < -10) s.x = window.innerWidth + 10;
-
-                // choose color based on hue flag
-                if (s.hue === 'gold') ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
-                else ctx.fillStyle = `rgba(8,48,71,${s.alpha * 0.9})`;
+                // Pure Gold
+                ctx.fillStyle = `rgba(212,169,55,${s.alpha})`; 
 
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                 ctx.fill();
             });
-
             rafId = requestAnimationFrame(draw);
         };
-
         draw();
         window.addEventListener('resize', resize);
         return () => { cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); };
     }, []);
 
-    // Create a simple particle config only for fallback/no-canvas cases (not visible)
-    const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    const handleNavigation = (route) => {
+        if (onNavigate) onNavigate(route);
+        setIsMobileMenuOpen(false);
+    };
 
     return (
         <>
             <GlobalStyle />
             <StarCanvas ref={canvasRef} aria-hidden />
             <PageWrapper>
-                {/* NAVBAR */}
+                {/* HEADER */}
                 <Header>
-                    <Logo onClick={() => onNavigate('home')}>NEXORA<span>CREW</span></Logo>
+                    <Logo onClick={() => handleNavigation('home')}>
+                        NEXORA<span className="gold">CREW</span>
+                    </Logo>
                     <NavGroup>
-                        <span onClick={() => onNavigate('home')}>Home</span>
-                        <span onClick={() => onNavigate('about')}>About</span>
-                        <span onClick={() => onNavigate('services')}>Services</span>
-                        <span onClick={() => onNavigate('projects')}>Projects</span>
-                        <span onClick={() => onNavigate('blog')}>Blog</span>
-                        <span onClick={() => onNavigate('team')}>Team</span>
-                        <span onClick={() => onNavigate('progress')}>Progress</span>
-                        <span onClick={() => onNavigate('contact')}>Contact</span>
-
-                        {/* ACTIVE ITEM FOR THIS PAGE */}
-                        <span
-                            onClick={() => onNavigate('progress')}
-                            style={{ color: NAVY, fontWeight: 700 }}
-                        >
-                            Progress
-                        </span>
-
-                        <span onClick={() => onNavigate('contact')}>Contact</span>
+                        {navItems.map((item) => (
+                            <span 
+                                key={item} 
+                                onClick={() => handleNavigation(item)}
+                                style={item === 'progress' ? { color: NEON_COLOR, fontWeight: 700 } : {}}
+                            >
+                                {item.charAt(0).toUpperCase() + item.slice(1)}
+                            </span>
+                        ))}
                     </NavGroup>
+                    <MobileMenuButton onClick={() => setIsMobileMenuOpen(true)}>
+                        <FontAwesomeIcon icon={faBars} />
+                    </MobileMenuButton>
                 </Header>
 
-                <MainContentArea>
-                    <ContentWrapper>
-                        <Shell>
-                            {/* NEW AGILE WORKFLOW SECTION */}
-                            <AgileWorkflow />
+                <MobileNavMenu isOpen={isMobileMenuOpen}>
+                    <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)}>
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                    {navItems.map((item) => (
+                        <span key={item} onClick={() => handleNavigation(item)} style={item === 'progress' ? { color: NEON_COLOR } : {}}>
+                            {item.charAt(0).toUpperCase() + item.slice(1)}
+                        </span>
+                    ))}
+                </MobileNavMenu>
 
-                            {/* SWOT CONTENT */}
-                            <Title>
-                                STRATEGIC <span>ANALYSIS</span>
-                            </Title>
+                <ContentWrapper>
+                    <Shell>
+                        <AgileWorkflow />
 
-                            <Grid>
-                                <StrengthBox>
-                                    <HeaderRow>
-                                        <IconCircle variant="strength">
-                                            <FontAwesomeIcon icon={faBullseye} />
-                                        </IconCircle>
-                                        <BoxTitle>Strengths</BoxTitle>
-                                    </HeaderRow>
-                                    <BulletList>
-                                        <li>Human-centered design approach — Users-ah focus pannina products</li>
-                                        <li>Strong UI/UX + Development expertise</li>
-                                        <li> Customized digital solutions (web, app, SaaS)</li>
-                                        <li> Fast execution & modern workflows</li>
-                                        <li>Innovation-focused team</li>
-                                        <li>Quality-first development → High performance, scalability</li>
-                                        <li>Clear brand identity → “Meaningful technology”</li>
-                                    </BulletList>
-                                </StrengthBox>
+                        <Title>STRATEGIC <span>ANALYSIS</span></Title>
+                        <Grid>
+                            <StrengthBox>
+                                <HeaderRow>
+                                    <IconCircle variant="strength"><FontAwesomeIcon icon={faBullseye} /></IconCircle>
+                                    <BoxTitle>Strengths</BoxTitle>
+                                </HeaderRow>
+                                <BulletList>
+                                    <li>Human-centered design approach</li>
+                                    <li>Strong UI/UX + Development expertise</li>
+                                    <li>Customized digital solutions (web, app, SaaS)</li>
+                                    <li>Fast execution & modern workflows</li>
+                                    <li>Innovation-focused team</li>
+                                    <li>Quality-first development</li>
+                                    <li>Clear brand identity</li>
+                                </BulletList>
+                            </StrengthBox>
 
-                                <WeaknessBox>
-                                    <HeaderRow>
-                                        <IconCircle variant="weakness">
-                                            <FontAwesomeIcon icon={faTriangleExclamation} />
-                                        </IconCircle>
-                                        <BoxTitle>Weaknesses</BoxTitle>
-                                    </HeaderRow>
-                                    <BulletList>
-                                        <li>Brand awareness still developing </li>
-                                        <li>Limited portfolio compared to big agencies</li>
-                                        <li>Small team size → higher workload during multiple projects</li>
-                                        <li>Scaling challenges when project volume increases</li>
-                                        <li>Depends on digital marketing consistency</li>
-                                    </BulletList>
-                                </WeaknessBox>
+                            <WeaknessBox>
+                                <HeaderRow>
+                                    <IconCircle variant="weakness"><FontAwesomeIcon icon={faTriangleExclamation} /></IconCircle>
+                                    <BoxTitle>Weaknesses</BoxTitle>
+                                </HeaderRow>
+                                <BulletList>
+                                    <li>Brand awareness still developing</li>
+                                    <li>Limited portfolio compared to big agencies</li>
+                                    <li>Small team size</li>
+                                    <li>Scaling challenges</li>
+                                    <li>Depends on digital marketing consistency</li>
+                                </BulletList>
+                            </WeaknessBox>
 
-                                <OpportunityBox>
-                                    <HeaderRow>
-                                        <IconCircle variant="opportunity">
-                                            <FontAwesomeIcon icon={faBolt} />
-                                        </IconCircle>
-                                        <BoxTitle>Opportunities</BoxTitle>
-                                    </HeaderRow>
-                                    <BulletList>
-                                        <li>High demand for websites, mobile apps & SaaS platforms</li>
-                                        <li>Global freelancing & outsourcing market growth</li>
-                                        <li>AI automation & tech integration opportunities</li>
-                                        <li>Cloud technology demand increasing</li>
-                                        <li>Social media presence can boost brand visibility</li>
-                                        <li> Corporate branding, design, consulting areas expandable</li>
-                                    </BulletList>
-                                </OpportunityBox>
+                            <OpportunityBox>
+                                <HeaderRow>
+                                    <IconCircle variant="opportunity"><FontAwesomeIcon icon={faBolt} /></IconCircle>
+                                    <BoxTitle>Opportunities</BoxTitle>
+                                </HeaderRow>
+                                <BulletList>
+                                    <li>High demand for websites, mobile apps & SaaS</li>
+                                    <li>Global freelancing & outsourcing growth</li>
+                                    <li>AI automation & tech integration</li>
+                                    <li>Cloud technology demand increasing</li>
+                                    <li>Social media boost</li>
+                                    <li>Corporate branding expansion</li>
+                                </BulletList>
+                            </OpportunityBox>
 
-                                <ThreatBox>
-                                    <HeaderRow>
-                                        <IconCircle variant="threat">
-                                            <FontAwesomeIcon icon={faUserShield} />
-                                        </IconCircle>
-                                        <BoxTitle>Threats</BoxTitle>
-                                    </HeaderRow>
-                                    <BulletList>
-                                        <li> Heavy competition in tech & IT service industry</li>
-                                        <li>Price competition from freelancers & low-cost agencies</li>
-                                        <li> Fast-changing technologies → continuous skill upgrade needed</li>
-                                        <li>Client expectations increasing day by day</li>
-                                        <li>Economic slowdowns affecting project budgets</li>
-                                    </BulletList>
-                                </ThreatBox>
-                            </Grid>
-                        </Shell>
-                    </ContentWrapper>
-                </MainContentArea>
+                            <ThreatBox>
+                                <HeaderRow>
+                                    <IconCircle variant="threat"><FontAwesomeIcon icon={faUserShield} /></IconCircle>
+                                    <BoxTitle>Threats</BoxTitle>
+                                </HeaderRow>
+                                <BulletList>
+                                    <li>Heavy competition in IT sector</li>
+                                    <li>Price competition from freelancers</li>
+                                    <li>Fast-changing technologies</li>
+                                    <li>Increasing client expectations</li>
+                                    <li>Economic slowdowns</li>
+                                </BulletList>
+                            </ThreatBox>
+                        </Grid>
+                    </Shell>
+                </ContentWrapper>
 
-                {/* CAREERS/FOOTER SECTION */}
-                <FullFooter onNavigate={onNavigate} />
+                {/* Careers Section - Moved out of Footer for standardization */}
+                <CareersSection />
+
+                {/* FOOTER */}
+                <FullFooter>
+                    <FooterGrid>
+                        <FooterColumn style={{ minWidth: '300px' }}>
+                            <FooterLogo onClick={() => handleNavigation('home')}>
+                                NEXORA<span className="gold">CREW</span>
+                            </FooterLogo>
+                            <p>Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where ideas meet innovation.</p>
+                            <SocialIcons>
+                                <a href="https://www.instagram.com/nexoracrew?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faInstagram} /></a>
+                                <a href="https://www.linkedin.com/in/nexoracrew-%E2%80%8C-01842a396/" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faLinkedinIn} /></a>
+                                <a href={`mailto:${safeGeneralData.email}`}><FontAwesomeIcon icon={faEnvelope} /></a>
+                                <a href="https://wa.me/9597646460" target="_blank" rel="noopener noreferrer"><FontAwesomeIcon icon={faWhatsapp} /></a>
+                                <a href="https://www.youtube.com/@Nexora-crew" target="_blank" rel="noopener noreferrer"><FontAwesomeIcon icon={faYoutube} /></a>
+                            </SocialIcons>
+                        </FooterColumn>
+
+                        <FooterColumn>
+                            <h4>Quick Links</h4>
+                            <ul>
+                                {navItems.map((item, i) => (
+                                    <li key={i}><a onClick={() => handleNavigation(item)}>{item.charAt(0).toUpperCase() + item.slice(1)}</a></li>
+                                ))}
+                            </ul>
+                        </FooterColumn>
+
+                        <FooterColumn>
+                            <h4>Services</h4>
+                            <ul>
+                                {['Web Development', 'Poster designing & logo making' , 'Content creation' , 'Digital marketing &SEO' , 'AI and automation' , 'Hosting & Support' , 'Printing &Branding solutions' , 'Enterprise networking &server architecture' , 'Bold branding&Immersive visual design' , 'Next gen web & mobile experience'].map((l, i) => (
+                                    <li key={i}><a onClick={() => handleNavigation('services')}>{l}</a></li>
+                                ))}
+                            </ul>
+                        </FooterColumn>
+
+                        <FooterColumn>
+                            <h4>Contact Info</h4>
+                            <ul>
+                                <li><a href="#map"><FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}</a></li>
+                                <li><a href={`mailto:${safeGeneralData.email}`}><FontAwesomeIcon icon={faEnvelope} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.email}</a></li>
+                                <li><a href={`tel:${safeGeneralData.phone}`}><FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}</a></li>
+                            </ul>
+                        </FooterColumn>
+                    </FooterGrid>
+
+                    <Copyright>© 2025 Nexoracrew. All Rights Reserved.</Copyright>
+                </FullFooter>
             </PageWrapper>
         </>
     );

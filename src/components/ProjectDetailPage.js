@@ -19,7 +19,7 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 
 /* =========================================
-   THEME CONSTANTS (copied from TeamPage)
+   THEME CONSTANTS
    ========================================= */
 const NEON_COLOR = "#123165"; // primary navy
 const TEXT_LIGHT = "#111827";
@@ -30,11 +30,6 @@ const GOLD_ACCENT = "#D4A937";
 /* =========================================
    KEYFRAMES & GLOBAL
    ========================================= */
-const rollIn = keyframes`
-  from { opacity: 0; transform: translateY(30px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-`;
-
 const rotateBorder = keyframes`
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -60,7 +55,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 /* =========================================
-   STAR CANVAS (exact same gold star effect as TeamPage)
+   STAR CANVAS
    ========================================= */
 const StarCanvas = styled.canvas`
   position: fixed;
@@ -71,7 +66,6 @@ const StarCanvas = styled.canvas`
   pointer-events: none;
 `;
 
-/* Use the same star engine as TeamPage */
 function useStarEffect(canvasRef) {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -148,7 +142,7 @@ function useStarEffect(canvasRef) {
 }
 
 /* =========================================
-   SHARED LAYOUT (HEADER / NAV / FOOTER copied from TeamPage)
+   SHARED LAYOUT (HEADER / NAV / FOOTER)
    ========================================= */
 const PageWrapper = styled.div`
   position: relative;
@@ -160,50 +154,139 @@ const PageWrapper = styled.div`
   overflow-x: hidden;
 `;
 
+/* HEADER - MATCHING OTHER PAGES */
 const Header = styled.header`
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 48px; position: sticky; top: 0; width: 100%;
-  background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-  border-bottom: 1px solid ${BORDER_LIGHT}; z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 14px 48px;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid ${BORDER_LIGHT};
+  z-index: 1000;
   box-sizing: border-box;
-  @media (max-width: 768px) { padding: 12px 20px; }
-`;
 
-const Logo = styled.h1`
-  color: ${NEON_COLOR}; font-size: 1.8rem; font-weight: 800; cursor: pointer; letter-spacing:1px; margin:0; white-space:nowrap;
-  @media (max-width:480px){ font-size:1.4rem; }
-`;
-
-const NavGroup = styled.div`
-  display:flex; gap:22px; align-items:center; margin-right:auto; margin-left:40px;
-  @media (max-width:1024px){ display:none; }
-  span { color: ${TEXT_MUTED}; cursor:pointer; font-weight:500; position:relative; padding:6px 4px;
-    transition: 0.3s ease;
-    &:hover { color: ${NEON_COLOR}; }
-    &:after { content:''; position:absolute; left:0; bottom:-2px; width:0; height:2px; background:${GOLD_ACCENT}; transition:0.3s; border-radius:4px; }
-    &:hover:after { width:100%; }
+  @media (max-width: 768px) {
+    padding: 14px 20px;
+    gap: 20px;
+    justify-content: space-between;
   }
 `;
 
+const Logo = styled.h1`
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.8rem;
+  cursor: pointer;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+
+  span {
+    display: inline-block;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  color: ${NEON_COLOR};
+  span.gold {
+    color: ${GOLD_ACCENT};
+    margin-left: 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.4rem;
+  }
+`;
+
+const NavGroup = styled.nav`
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  margin-right: auto;
+
+  span {
+    color: ${TEXT_MUTED};
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    padding: 6px 4px;
+    transition: 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  span:hover { color: ${NEON_COLOR}; }
+  span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background: ${GOLD_ACCENT};
+    transition: 0.3s;
+    border-radius: 4px;
+  }
+  span:hover::after { width: 100%; }
+  
+  @media (max-width: 1024px) { display: none; }
+`;
+
 const MobileMenuButton = styled.button`
-  display:none;
-  @media (max-width:1024px){
-    display:block; background:none; border:none; color:${NEON_COLOR}; font-size:1.5rem; cursor:pointer;
+  display: none;
+  @media (max-width: 1024px) {
+    display: block;
+    background: none;
+    border: none;
+    color: ${NEON_COLOR};
+    font-size: 1.5rem;
+    cursor: pointer;
   }
 `;
 
 const MobileNavMenu = styled.div`
-  position: fixed; top:0; left:0; width:100%; height:100%; background:#ffffff; z-index:1000;
-  display:flex; flex-direction:column; align-items:center; padding-top:80px;
-  transform: translateX(${props => (props.isOpen ? '0' : '100%')});
-  transition: transform 0.3s ease-in-out; box-shadow: -4px 0 20px rgba(15,23,42,0.15);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  transform: translateX(${(p) => (p.isOpen ? "0" : "100%")});
+  transition: transform 0.28s ease-in-out;
+  box-shadow: -4px 0 20px rgba(15, 23, 42, 0.12);
 
-  .close-btn { position:absolute; top:20px; right:20px; background:none; border:none; color:${TEXT_LIGHT}; font-size:2rem; cursor:pointer; }
-
-  span { font-size:1.3rem; margin:15px 0; cursor:pointer; color:${TEXT_MUTED}; &:hover{ color:${NEON_COLOR}; } }
+  .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: ${TEXT_LIGHT};
+  }
+  span {
+    font-size: 1.3rem;
+    margin: 14px 0;
+    color: ${TEXT_MUTED};
+    cursor: pointer;
+  }
 `;
 
-/* Project header image and content (kept simple & clear) */
+/* Project header image and content */
 const Container = styled.div`
   position: relative; z-index: 2; max-width:1100px; margin:0 auto; padding: 120px 20px 60px;
 `;
@@ -265,41 +348,119 @@ const ProjectLink = styled.a`
   &:hover { transform: translateY(-4px); box-shadow:0 16px 40px rgba(18,49,101,0.12); }
 `;
 
-/* Footer copied from TeamPage exactly */
+/* FOOTER - MATCHING OTHER PAGES */
 const FullFooter = styled.footer`
-  background: rgba(255,255,255,0.9); padding:60px 50px 20px; color:${TEXT_MUTED}; border-top:1px solid ${BORDER_LIGHT}; box-sizing:border-box;
-  @media(max-width:768px){ padding:40px 20px 20px; }
+  background: rgba(255,255,255,0.9);
+  padding: 60px 50px 20px;
+  color: ${TEXT_MUTED};
+  border-top: 1px solid ${BORDER_LIGHT};
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 40px 20px 20px;
+  }
 `;
 
 const FooterGrid = styled.div`
-  max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; gap:30px;
-  @media(max-width:900px){ flex-wrap:wrap; } @media(max-width:600px){ flex-direction:column; align-items:flex-start; gap:30px; }
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+
+  @media (max-width: 900px) {
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 30px;
+  }
 `;
 
 const FooterColumn = styled.div`
-  min-width:200px;
-  @media(max-width:768px){ min-width:unset; flex:1; } @media(max-width:600px){ width:100%; flex:none; }
-  h4 { color:${TEXT_LIGHT}; font-size:1.1rem; margin-bottom:20px; font-weight:700; position:relative;
-    &:after { content:''; position:absolute; left:0; bottom:-5px; width:30px; height:2px; background:${GOLD_ACCENT}; }
+  min-width: 200px;
+  @media (max-width: 768px) { min-width: unset; flex: 1; }
+  @media (max-width: 600px) { width: 100%; flex: none; }
+
+  h4 {
+    color: ${TEXT_LIGHT};
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    position: relative;
+    &:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 30px;
+      height: 2px;
+      background: ${GOLD_ACCENT};
+    }
   }
-  p { font-size:0.9rem; line-height:1.6; margin:0 0 10px 0; } ul { list-style:none; padding:0; margin:0; }
-  li { margin-bottom:10px; } a, span { color:${TEXT_MUTED}; text-decoration:none; font-size:0.9rem; transition:color .3s; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-    &:hover{ color:${NEON_COLOR}; }
+  p { font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px 0; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { margin-bottom: 10px; }
+  a, span {
+    color: ${TEXT_MUTED};
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    &:hover { color: ${NEON_COLOR}; }
   }
 `;
 
-const FooterLogo = styled(Logo)` font-size:1.5rem; margin-bottom:10px; `;
+const FooterLogo = styled(Logo)`
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  gap: 0;
+  span { font-size: 1em; }
+`;
+
+/* GOLDEN SOCIAL ICONS */
 const SocialIcons = styled.div`
-  display:flex; gap:15px; margin-top:15px;
-  a { width:32px; height:32px; border-radius:999px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:${NEON_COLOR}; transition: background .3s, color .3s, box-shadow .3s;
-    &:hover { background: linear-gradient(135deg, ${NEON_COLOR}, ${GOLD_ACCENT}); color:#fff; box-shadow:0 8px 20px rgba(15,23,42,0.2); }
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+  a {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    /* Soft Gold Background */
+    background: rgba(212,169,55,0.15); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Gold Icon */
+    color: ${GOLD_ACCENT}; 
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+    
+    &:hover {
+      /* Solid Gold on Hover */
+      background: ${GOLD_ACCENT};
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(212,169,55,0.3);
+      transform: translateY(-3px);
+    }
   }
 `;
-const Copyright = styled.div` text-align:center; font-size:0.8rem; padding-top:30px; border-top:1px solid ${BORDER_LIGHT}; margin-top:50px; `;
+
+const Copyright = styled.div`
+  text-align: center;
+  font-size: 0.8rem;
+  padding-top: 30px;
+  border-top: 1px solid ${BORDER_LIGHT};
+  margin-top: 50px;
+`;
 
 /* =========================================
-   small sanitizer to guard dangerouslySetInnerHTML
-   (keeps simple tags and anchor href)
+   SANITIZER
    ========================================= */
 function sanitizeHtml(str = "") {
   return String(str)
@@ -361,9 +522,11 @@ const ProjectDetailPage = ({ onNavigate, projects }) => {
       <StarCanvas ref={canvasRef} />
 
       <PageWrapper>
-        {/* Header - identical to TeamPage */}
+        {/* HEADER */}
         <Header>
-          <Logo onClick={() => handleNavigation('home')}>NEXORACREW</Logo>
+          <Logo onClick={() => handleNavigation('home')}>
+            NEXORA<span className="gold">CREW</span>
+          </Logo>
 
           <NavGroup>
             {navItems.map((item) => (
@@ -382,7 +545,7 @@ const ProjectDetailPage = ({ onNavigate, projects }) => {
           </MobileMenuButton>
         </Header>
 
-        {/* Mobile Menu - identical prop name 'isOpen' */}
+        {/* MOBILE MENU */}
         <MobileNavMenu isOpen={isMobileMenuOpen}>
           <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)}>
             <FontAwesomeIcon icon={faTimes} />
@@ -398,7 +561,7 @@ const ProjectDetailPage = ({ onNavigate, projects }) => {
           ))}
         </MobileNavMenu>
 
-        {/* Content */}
+        {/* CONTENT */}
         <Container className="animate-in" style={{ animationDelay: '0.05s' }}>
           {project.imageUrl && (
             <HeaderImageWrap>
@@ -431,11 +594,13 @@ const ProjectDetailPage = ({ onNavigate, projects }) => {
           </DescriptionBox>
         </Container>
 
-        {/* Footer - copied from TeamPage */}
+        {/* FOOTER */}
         <FullFooter>
           <FooterGrid>
             <FooterColumn style={{ minWidth: '300px' }}>
-              <FooterLogo onClick={() => handleNavigation('home')}>NEXORACREW</FooterLogo>
+              <FooterLogo onClick={() => handleNavigation('home')}>
+                NEXORA<span className="gold">CREW</span>
+              </FooterLogo>
               <p>
                 Transforming ideas into powerful digital products using modern technology, creativity, and AI. Where ideas meet innovation.
               </p>
@@ -490,9 +655,9 @@ const ProjectDetailPage = ({ onNavigate, projects }) => {
             <FooterColumn>
               <h4>Contact Info</h4>
               <ul>
-                <li><a href="#map"><FontAwesomeIcon icon={faMapMarkerAlt} /> {safeGeneralData.location}</a></li>
-                <li><a href={`mailto:${safeGeneralData.email}`}><FontAwesomeIcon icon={faEnvelope} /> {safeGeneralData.email}</a></li>
-                <li><a href={`tel:${safeGeneralData.phone}`}><FontAwesomeIcon icon={faPhone} /> {safeGeneralData.phone}</a></li>
+                <li><a href="#map"><FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}</a></li>
+                <li><a href={`mailto:${safeGeneralData.email}`}><FontAwesomeIcon icon={faEnvelope} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.email}</a></li>
+                <li><a href={`tel:${safeGeneralData.phone}`}><FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}</a></li>
               </ul>
             </FooterColumn>
           </FooterGrid>
