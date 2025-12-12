@@ -467,7 +467,7 @@ const BlogPage = ({ onNavigate = () => {}, posts, generalData = {} }) => {
               <ul>
                 <li>
                   <a href="#map">
-                    <FAIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}
+                    <FAIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> Palakarai,Trichy.
                   </a>
                 </li>
                 <li>
@@ -477,7 +477,7 @@ const BlogPage = ({ onNavigate = () => {}, posts, generalData = {} }) => {
                 </li>
                 <li>
                   <a href={`tel:${safeGeneralData.phone}`}>
-                    <FAIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}
+                    <FAIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> +91 9597646460
                   </a>
                 </li>
               </ul>

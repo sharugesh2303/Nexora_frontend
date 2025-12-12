@@ -657,7 +657,7 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                             <ul>
                                 <li>
                                     <a href="#map">
-                                        <FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}
+                                        <FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> Palakarai,Trichy.
                                     </a>
                                 </li>
                                 <li>
@@ -667,7 +667,7 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                                 </li>
                                 <li>
                                     <a href={`tel:${safeGeneralData.phone}`}>
-                                        <FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}
+                                        <FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> +91 9597646460
                                     </a>
                                 </li>
                             </ul>

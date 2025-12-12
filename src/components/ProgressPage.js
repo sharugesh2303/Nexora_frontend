@@ -1044,9 +1044,9 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
                         <FooterColumn>
                             <h4>Contact Info</h4>
                             <ul>
-                                <li><a href="#map"><FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}</a></li>
+                                <li><a href="#map"><FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> Palakarai,Trichy.</a></li>
                                 <li><a href={`mailto:${safeGeneralData.email}`}><FontAwesomeIcon icon={faEnvelope} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.email}</a></li>
-                                <li><a href={`tel:${safeGeneralData.phone}`}><FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}</a></li>
+                                <li><a href={`tel:${safeGeneralData.phone}`}><FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> +91 9597646460</a></li>
                             </ul>
                         </FooterColumn>
                     </FooterGrid>

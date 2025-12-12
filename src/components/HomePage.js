@@ -1511,17 +1511,17 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
               <ul>
                 <li>
                   <a href="#map">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.location}
+                    <FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> Palakarai,Trichy.
                   </a>
                 </li>
                 <li>
                   <a href={`mailto:${safeGeneralData.email}`}>
-                    <FontAwesomeIcon icon={faEnvelope} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.email}
+                    <FontAwesomeIcon icon={faEnvelope} style={{ color: GOLD_ACCENT }} /> nexora.crew@gmail.com
                   </a>
                 </li>
                 <li>
                   <a href={`tel:${safeGeneralData.phone}`}>
-                    <FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeGeneralData.phone}
+                    <FontAwesomeIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> +91 9597646460
                   </a>
                 </li>
               </ul>

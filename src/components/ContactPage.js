@@ -638,15 +638,15 @@ const ContactPage = ({ onNavigate, generalData }) => {
                             <h3 style={{ color: NEON_COLOR, margin: 0 }}>Get In Touch</h3>
                             <InfoItem>
                                 <FAIcon icon={faEnvelope} className="icon" />
-                                <div><strong>Email</strong><small>{safeData.email}</small></div>
+                                <div><strong>Email</strong><small>nexora.crew@gmail.com</small></div>
                             </InfoItem>
                             <InfoItem>
                                 <FAIcon icon={faPhone} className="icon" />
-                                <div><strong>Phone</strong><small>{safeData.phone}</small></div>
+                                <div><strong>Phone</strong><small>+91 9597646460</small></div>
                             </InfoItem>
                             <InfoItem>
                                 <FAIcon icon={faMapMarkerAlt} className="icon" />
-                                <div><strong>Location</strong><small>Palakarai, Tiruchirappalli</small></div>
+                                <div><strong>Location</strong><small>Palakarai,Trichy.</small></div>
                             </InfoItem>
                         </Card>
 
@@ -755,7 +755,7 @@ const ContactPage = ({ onNavigate, generalData }) => {
                             <ul>
                                 <li>
                                     <a href="#map">
-                                        <FAIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> {safeData.location}
+                                        <FAIcon icon={faMapMarkerAlt} style={{ color: GOLD_ACCENT }} /> Palakarai,Trichy.
                                     </a>
                                 </li>
                                 <li>
@@ -765,7 +765,7 @@ const ContactPage = ({ onNavigate, generalData }) => {
                                 </li>
                                 <li>
                                     <a href={`tel:${safeData.phone}`}>
-                                        <FAIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> {safeData.phone}
+                                        <FAIcon icon={faPhone} style={{ color: GOLD_ACCENT }} /> +91 9597646460
                                     </a>
                                 </li>
                             </ul>

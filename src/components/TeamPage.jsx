@@ -907,7 +907,7 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
               <ul>
                 <li>
                   <a href="#map">
-                    <FAIcon icon={faMapMarkerAlt} /> {safeGeneralData.location}
+                    <FAIcon icon={faMapMarkerAlt} /> Palakarai,Trichy.
                   </a>
                 </li>
                 <li>
@@ -917,7 +917,7 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
                 </li>
                 <li>
                   <a href={`tel:${safeGeneralData.phone}`}>
-                    <FAIcon icon={faPhone} /> {safeGeneralData.phone}
+                    <FAIcon icon={faPhone} /> +91 9597646460
                   </a>
                 </li>
               </ul>
