@@ -80,7 +80,7 @@ const StarCanvas = styled.canvas`
     position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none;
 `;
 
-/* Styled FA icon (for decorative/gold icons) */
+/* Styled FA icon */
 const FAIcon = styled(FontAwesomeIcon)`
   color: ${GOLD_ACCENT};
   display: inline-block;
@@ -181,14 +181,13 @@ const NavGroup = styled.nav`
   @media (max-width: 1024px) { display: none; }
 `;
 
-/* MOBILE MENU BUTTON - NEON COLOR */
 const MobileMenuButton = styled.button`
   display: none;
   @media (max-width: 1024px) {
     display: block;
     background: none;
     border: none;
-    color: ${NEON_COLOR}; /* Neon Blue for Hamburger */
+    color: ${NEON_COLOR}; 
     font-size: 1.5rem;
     cursor: pointer;
   }
@@ -235,16 +234,19 @@ const ContactSection = styled.section`
     padding: 100px 48px; width: 100%; text-align: left;
     max-width: 1200px; margin: 0 auto;
     @media (max-width: 780px) { padding: 80px 24px; }
+    @media (max-width: 480px) { padding: 60px 20px; }
 `;
 
 const SectionTitle = styled.h2`
     font-size: 3rem; margin-bottom: 10px; color: ${NEON_COLOR}; font-weight: 800;
     span { color: ${GOLD_ACCENT}; }
     @media (max-width: 780px) { font-size: 2.4rem; }
+    @media (max-width: 480px) { font-size: 2rem; }
 `;
 
 const SectionSubtitle = styled.p`
     color: ${TEXT_MUTED}; font-size: 1.15rem; margin-bottom: 50px; max-width: 600px;
+    @media (max-width: 480px) { font-size: 1rem; margin-bottom: 30px; }
 `;
 
 const Grid = styled.div`
@@ -257,6 +259,8 @@ const Card = styled.div`
     border-radius: 20px; padding: 36px; border: 1px solid ${BORDER_LIGHT};
     box-shadow: 0 10px 30px rgba(0,0,0,0.05); animation: ${rollIn} 0.5s ease forwards;
     display: flex; flex-direction: column; gap: 24px;
+
+    @media (max-width: 480px) { padding: 24px 20px; border-radius: 16px; }
 `;
 
 const InfoItem = styled.div`
@@ -264,7 +268,7 @@ const InfoItem = styled.div`
     .icon { color: ${GOLD_ACCENT}; font-size: 1.4rem; margin-top: 3px; }
     div { display: flex; flex-direction: column; }
     strong { color: ${NEON_COLOR}; font-size: 1.1rem; margin-bottom: 4px; }
-    small { color: ${TEXT_MUTED}; font-size: 1rem; }
+    small { color: ${TEXT_MUTED}; font-size: 1rem; word-break: break-all; }
 `;
 
 /* =========================================
@@ -283,10 +287,24 @@ const ModeButton = styled.button`
     transition: all 0.2s ease;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     &:hover { color: ${({ active }) => (active ? "#fff" : NEON_COLOR)}; }
+    
+    @media (max-width: 400px) { font-size: 0.85rem; padding: 8px; }
 `;
 
 const Form = styled.form`
     display: grid; gap: 18px;
+`;
+
+const FormRow = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+
+    /* MOBILE: STACK VERTICALLY TO CREATE LIST VIEW */
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
 `;
 
 const Label = styled.label`
@@ -298,6 +316,11 @@ const InputField = styled.input`
     color: ${TEXT_LIGHT}; padding: 14px 16px; border-radius: 12px; outline: none;
     font-size: 1rem; transition: all 0.2s;
     &:focus { border-color: ${NEON_COLOR}; background: #fff; box-shadow: 0 0 0 4px rgba(18,49,101,0.05); }
+
+    @media (max-width: 480px) {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
 `;
 
 const TextArea = styled.textarea`
@@ -584,7 +607,7 @@ const ContactPage = ({ onNavigate, generalData }) => {
                         ))}
                     </NavGroup>
                     
-                    {/* Updated MobileMenuButton with NEON color */}
+                    {/* MobileMenuButton with NEON color */}
                     <MobileMenuButton onClick={() => setIsMobileMenuOpen(true)}>
                         <FontAwesomeIcon icon={faBars} />
                     </MobileMenuButton>
@@ -641,31 +664,31 @@ const ContactPage = ({ onNavigate, generalData }) => {
                             {mode === "contact" ? (
                                 <Form onSubmit={submitContact}>
                                     <div><Label>Your Name</Label><InputField name="name" placeholder="John Doe" value={contactForm.name} onChange={onContactChange} required /></div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <FormRow>
                                         <div><Label>Email</Label><InputField type="email" name="email" placeholder="you@example.com" value={contactForm.email} onChange={onContactChange} required /></div>
                                         <div>
                                             <Label>Mobile</Label>
                                             <InputField name="mobile" placeholder="+91..." value={contactForm.mobile} onChange={onContactChange} required />
                                         </div>
-                                    </div>
+                                    </FormRow>
                                     <div><Label>Message</Label><TextArea name="message" placeholder="Tell us about your project..." value={contactForm.message} onChange={onContactChange} required /></div>
                                     <SubmitButton type="submit" disabled={sending}>{sending ? "Sending..." : "Send Message"} <FAIcon icon={faPaperPlane} /></SubmitButton>
                                 </Form>
                             ) : (
                                 <Form onSubmit={submitSchedule}>
                                     <div><Label>Your Name *</Label><InputField name="name" value={scheduleForm.name} onChange={onScheduleChange} required /></div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <FormRow>
                                         <div><Label>Company Name *</Label><InputField name="companyName" value={scheduleForm.companyName} onChange={onScheduleChange} required /></div>
                                         <div><Label>Role</Label><InputField name="role" value={scheduleForm.role} onChange={onScheduleChange} /></div>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    </FormRow>
+                                    <FormRow>
                                         <div><Label>Email *</Label><InputField type="email" name="email" value={scheduleForm.email} onChange={onScheduleChange} required /></div>
                                         <div><Label>Mobile</Label><InputField name="mobile" value={scheduleForm.mobile} onChange={onScheduleChange} /></div>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    </FormRow>
+                                    <FormRow>
                                         <div><Label>Date *</Label><InputField type="date" name="meetingDate" min={today} value={scheduleForm.meetingDate} onChange={onScheduleChange} required /></div>
                                         <div><Label>Time *</Label><InputField type="time" name="meetingTime" value={scheduleForm.meetingTime} onChange={onScheduleChange} required /></div>
-                                    </div>
+                                    </FormRow>
                                     <div><Label>Topic</Label><TextArea name="message" placeholder="What would you like to discuss?" value={scheduleForm.message} onChange={onScheduleChange} style={{ minHeight: '80px' }} /></div>
                                     <SubmitButton type="submit" disabled={sending}>{sending ? "Booking..." : "Submit Request"} <FAIcon icon={faCalendarCheck} /></SubmitButton>
                                 </Form>
