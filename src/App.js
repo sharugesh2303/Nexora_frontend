@@ -14,8 +14,9 @@ import ProjectsPage from './components/ProjectsPage';
 import ProjectDetailPage from './components/ProjectDetailPage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsAndConditions from './components/TermsAndConditions';
-import TeamPage from './components/TeamPage'; // ⭐ Team page
-import ProgressPage from './components/ProgressPage'; // ⭐ NEW – Strategic Analysis page
+import TeamPage from './components/TeamPage'; 
+import ProgressPage from './components/ProgressPage'; 
+import CertificateVerificationPage from './components/CertificateVerificationPage'; // 👈 ADDED IMPORT
 
 // --- Global Styles ---
 const GlobalStyle = createGlobalStyle`
@@ -114,7 +115,7 @@ function App() {
 
     const handleNavigate = (path) => {
         if (path === 'home') navigate('/');
-        else navigate(`/${path}`);   // "progress" -> "/progress"
+        else navigate(`/${path}`);   // "certificate" -> "/certificate"
     };
 
     if (loading) {
@@ -236,6 +237,16 @@ function App() {
                         <ProjectDetailPage 
                             onNavigate={handleNavigate} 
                             projects={content.projects}
+                        />
+                    } 
+                />
+
+                {/* 👈 NEW ROUTE: Certificate Verification */}
+                <Route 
+                    path="/certificate" 
+                    element={
+                        <CertificateVerificationPage 
+                            onNavigate={handleNavigate} 
                         />
                     } 
                 />

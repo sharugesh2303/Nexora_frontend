@@ -1113,7 +1113,8 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     location: generalData?.location || 'JJ College of Engineering, Trichy',
   };
 
-  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+  // 👈 ADDED 'certificate' here
+  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
 
   useEffect(() => {
     let cancelled = false;
@@ -1505,7 +1506,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
             <FooterColumn>
               <h4>Quick Links</h4>
               <ul>
-                {['Home', 'About', 'Projects' , 'Team', 'Progress', 'Blog' , 'Contact'].map((l, i) => (
+                {['Home', 'About', 'Projects' , 'Team', 'Progress', 'Blog' , 'Certificate', 'Contact'].map((l, i) => (
                   <li key={i}>
                     <a onClick={() => handleNavigation(l.toLowerCase())}>{l}</a>
                   </li>
