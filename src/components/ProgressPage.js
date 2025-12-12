@@ -780,23 +780,7 @@ const CareersSection = () => (
         </CareersTextGroup>
 
         <BarChartContainer>
-            <BarColumn style={{ marginBottom: '6px' }}>
-                <BarLabel style={{ color: TEXT_LIGHT, fontSize: '0.9rem', fontWeight: '700' }}>Selection Ratio (2025)</BarLabel>
-            </BarColumn>
-            <ChartWrapper>
-                <BarColumn>
-                    <Bar height="70%" highlight="40%" />
-                    <BarLabel>Designers</BarLabel>
-                </BarColumn>
-                <BarColumn>
-                    <Bar height="90%" highlight="60%" />
-                    <BarLabel>Developers</BarLabel>
-                </BarColumn>
-                <BarColumn>
-                    <Bar height="50%" highlight="22%" />
-                    <BarLabel>Writers</BarLabel>
-                </BarColumn>
-            </ChartWrapper>
+            
             <InternshipDetail>
                 <h4>How long is the internship?</h4>
                 <p>3 to 6 months, project-dependent.</p>
