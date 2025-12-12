@@ -83,6 +83,16 @@ const StarCanvas = styled.canvas`
 `;
 
 /* =========================================
+   Make a styled FontAwesomeIcon so every icon is gold
+   ========================================= */
+const FAIcon = styled(FontAwesomeIcon)`
+  color: ${GOLD_ACCENT};
+  /* keep vertical alignment nice */
+  display: inline-block;
+  vertical-align: middle;
+`;
+
+/* =========================================
    LAYOUT COMPONENTS
    ========================================= */
 const PageWrapper = styled.div`
@@ -114,19 +124,25 @@ const Header = styled.header`
     }
 `;
 
+/* ---------- UPDATED LOGO (two-color) ---------- */
 const Logo = styled.h1`
-    color: ${NEON_COLOR};
     font-size: 1.8rem;
     font-weight: 800;
     cursor: pointer;
     letter-spacing: 1px;
     margin: 0;
-    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    .blue { color: ${NEON_COLOR}; }
+    .gold { color: ${GOLD_ACCENT}; }
 
     @media (max-width: 480px) {
         font-size: 1.4rem;
     }
 `;
+/* ----------------------------------------------- */
 
 const NavGroup = styled.div`
     display: flex;
@@ -682,7 +698,10 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
             <PageWrapper>
                 {/* HEADER */}
                 <Header>
-                    <Logo onClick={() => handleNavigation('home')}>NEXORACREW</Logo>
+                    <Logo onClick={() => handleNavigation('home')}>
+                      <span className="blue">NEXORA</span>
+                      <span className="gold">CREW</span>
+                    </Logo>
                     <NavGroup>
                         {navItems.map((item) => (
                             <span
@@ -695,14 +714,14 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
                         ))}
                     </NavGroup>
                     <MobileMenuButton onClick={() => setIsMobileMenuOpen(true)}>
-                        <FontAwesomeIcon icon={faBars} />
+                        <FAIcon icon={faBars} />
                     </MobileMenuButton>
                 </Header>
 
                 {/* MOBILE MENU */}
                 <MobileNavMenu isOpen={isMobileMenuOpen}>
                     <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)}>
-                        <FontAwesomeIcon icon={faTimes} />
+                        <FAIcon icon={faTimes} />
                     </button>
                     {navItems.map((item) => (
                         <span
@@ -824,7 +843,8 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
                     <FooterGrid>
                         <FooterColumn style={{ minWidth: '300px' }}>
                             <FooterLogo onClick={() => handleNavigation('home')}>
-                                NEXORACREW
+                                <span className="blue">NEXORA</span>
+                                <span className="gold">CREW</span>
                             </FooterLogo>
                             <p>
                                 Transforming ideas into powerful digital products using modern
@@ -832,19 +852,19 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
                             </p>
                             <SocialIcons>
                                 <a href="https://www.instagram.com/nexoracrew?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noreferrer">
-                                    <FontAwesomeIcon icon={faInstagram} />
+                                    <FAIcon icon={faInstagram} />
                                 </a>
                                 <a href="https://www.linkedin.com/in/nexoracrew-%E2%80%8C-01842a396/" target="_blank" rel="noreferrer">
-                                    <FontAwesomeIcon icon={faLinkedinIn} />
+                                    <FAIcon icon={faLinkedinIn} />
                                 </a>
                                 <a href={`mailto:${safeGeneralData.email}`}>
-                                    <FontAwesomeIcon icon={faEnvelope} />
+                                    <FAIcon icon={faEnvelope} />
                                 </a>
                                 <a href="https://wa.me/9597646460" target="_blank" rel="noopener noreferrer">
-                                    <FontAwesomeIcon icon={faWhatsapp} />
+                                    <FAIcon icon={faWhatsapp} />
                                 </a>
                                 <a href="https://www.youtube.com/@Nexora-crew" target="_blank" rel="noopener noreferrer">
-                                    <FontAwesomeIcon icon={faYoutube} />
+                                    <FAIcon icon={faYoutube} />
                                 </a>
                             </SocialIcons>
                         </FooterColumn>
@@ -876,17 +896,17 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
                             <ul>
                                 <li>
                                     <a href="#map">
-                                        <FontAwesomeIcon icon={faMapMarkerAlt} /> {safeGeneralData.location}
+                                        <FAIcon icon={faMapMarkerAlt} /> {safeGeneralData.location}
                                     </a>
                                 </li>
                                 <li>
                                     <a href={`mailto:${safeGeneralData.email}`}>
-                                        <FontAwesomeIcon icon={faEnvelope} /> {safeGeneralData.email}
+                                        <FAIcon icon={faEnvelope} /> {safeGeneralData.email}
                                     </a>
                                 </li>
                                 <li>
                                     <a href={`tel:${safeGeneralData.phone}`}>
-                                        <FontAwesomeIcon icon={faPhone} /> {safeGeneralData.phone}
+                                        <FAIcon icon={faPhone} /> {safeGeneralData.phone}
                                     </a>
                                 </li>
                             </ul>
