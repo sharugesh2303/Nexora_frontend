@@ -633,7 +633,8 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
     location: generalData?.location || "JJ College of Engineering, Trichy",
   };
 
-  const navItems = ["home", "about", "services", "projects", "team", "progress", "blog", "contact"];
+  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
+
   const grouped = useMemo(() => groupByDbFields(teamData, fixedRoles), [teamData, fixedRoles]);
 
   /* STAR CANVAS logic */

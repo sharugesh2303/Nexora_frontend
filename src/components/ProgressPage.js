@@ -812,7 +812,8 @@ const ProgressPage = ({ onNavigate = () => {} }) => {
         location: 'JJ College of Engineering, Trichy',
     };
 
-    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
+
 
     useEffect(() => {
         const canvas = canvasRef.current;

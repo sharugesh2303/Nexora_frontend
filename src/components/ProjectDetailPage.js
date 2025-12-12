@@ -487,7 +487,7 @@ const ProjectDetailPage = ({ onNavigate, projects }) => {
 
   useStarEffect(canvasRef);
 
-  const navItems = ['home','about','services','projects','team','progress','blog','contact'];
+  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
   const safeProjects = Array.isArray(projects) ? projects : [];
 
   const handleNavigation = (route) => {

@@ -1,4 +1,3 @@
-// src/components/AboutPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle, keyframes } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -59,13 +58,13 @@ const StarCanvas = styled.canvas`
 `;
 
 /* =========================================
-   LAYOUT COMPONENTS
+   LAYOUT COMPONENTS (MATCHED TO HOMEPAGE)
    ========================================= */
 const PageWrapper = styled.div`
     position: relative; z-index: 1; min-height: 100vh; background: transparent;
 `;
 
-/* HEADER */
+/* HEADER - Matched HomePage exactly */
 const Header = styled.header`
   display: flex;
   align-items: center;
@@ -77,7 +76,7 @@ const Header = styled.header`
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid ${BORDER_LIGHT};
-  z-index: 1100;
+  z-index: 1000;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
@@ -122,7 +121,7 @@ const NavGroup = styled.nav`
   align-items: center;
   margin-right: auto;
 
-  span.navItem {
+  span {
     color: ${TEXT_MUTED};
     font-weight: 500;
     cursor: pointer;
@@ -134,8 +133,8 @@ const NavGroup = styled.nav`
     align-items: center;
     gap: 8px;
   }
-  span.navItem:hover { color: ${NEON_COLOR}; }
-  span.navItem::after {
+  span:hover { color: ${NEON_COLOR}; }
+  span::after {
     content: "";
     position: absolute;
     left: 0;
@@ -146,9 +145,8 @@ const NavGroup = styled.nav`
     transition: 0.3s;
     border-radius: 4px;
   }
-  span.navItem:hover::after { width: 100%; }
-  span.navItem.active { color: ${NEON_COLOR}; }
-
+  span:hover::after { width: 100%; }
+  
   @media (max-width: 1024px) { display: none; }
 `;
 
@@ -170,31 +168,32 @@ const MobileNavMenu = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: #ffffff;
-  z-index: 1200;
+  background: #FFFFFF;
+  z-index: 1100;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 80px;
-  transform: translateX(${(p) => (p.isOpen ? "0" : "100%")});
-  transition: transform 0.28s ease-in-out;
-  box-shadow: -4px 0 20px rgba(15, 23, 42, 0.12);
+  transform: translateX(${props => (props.isOpen ? '0' : '100%')});
+  transition: transform 0.3s ease-in-out;
+  box-shadow: -4px 0 20px rgba(15,23,42,0.15);
 
   .close-btn {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 20px; right: 20px;
     background: none;
     border: none;
+    color: ${TEXT_LIGHT};
     font-size: 2rem;
     cursor: pointer;
-    color: ${TEXT_LIGHT};
   }
+
   span {
     font-size: 1.3rem;
-    margin: 14px 0;
-    color: ${TEXT_MUTED};
+    margin: 15px 0;
     cursor: pointer;
+    color: ${TEXT_MUTED};
+    &:hover { color: ${NEON_COLOR}; }
   }
 `;
 
@@ -310,7 +309,7 @@ const CtaButton = styled.button`
 `;
 
 /* =========================================
-   FOOTER
+   FOOTER (MATCHED TO HOMEPAGE)
    ========================================= */
 const FullFooter = styled.footer`
     background: rgba(255,255,255,0.9);
@@ -479,6 +478,13 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
         let raf;
         const draw = () => {
             ctx.clearRect(0, 0, width, height);
+            
+            // Re-draw white background over canvas for consistent theme
+            ctx.save();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            ctx.restore();
+
             for (let s of stars) {
                 s.x += s.dx; s.y += s.dy;
                 if (s.y > height + 10) s.y = -10;
@@ -515,7 +521,8 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
         { icon: faUsers, label: 'Interns', value: '30+' },
     ];
 
-    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+    // UPDATED NAV ITEMS - Including 'certificate'
+    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
     const safeGeneralData = { email: 'nexora.crew@gmail.com', phone: '+91 95976 46460', location: 'JJ College of Engineering, Trichy' };
 
     return (
@@ -523,6 +530,7 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
             <GlobalStyle />
             <StarCanvas ref={canvasRef} />
             <PageWrapper>
+                {/* HEADER */}
                 <Header>
                     <Logo onClick={() => handleNavigation('home')}>
                         NEXORA<span className="gold">CREW</span>
@@ -531,8 +539,8 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                         {navItems.map((item) => (
                             <span
                                 key={item}
-                                className={`navItem ${item === "about" ? "active" : ""}`}
                                 onClick={() => handleNavigation(item)}
+                                style={item === 'about' ? { color: NEON_COLOR } : {}}
                             >
                                 {item.charAt(0).toUpperCase() + item.slice(1)}
                             </span>
@@ -548,12 +556,17 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                         <FontAwesomeIcon icon={faTimes} />
                     </button>
                     {navItems.map((item) => (
-                        <span key={item} onClick={() => handleNavigation(item)} style={item === 'about' ? { color: NEON_COLOR } : {}}>
+                        <span 
+                            key={item} 
+                            onClick={() => handleNavigation(item)} 
+                            style={item === 'about' ? { color: NEON_COLOR } : {}}
+                        >
                             {item.charAt(0).toUpperCase() + item.slice(1)}
                         </span>
                     ))}
                 </MobileNavMenu>
 
+                {/* CONTENT */}
                 <HeroAbout>
                     <div className="animate-in">
                         <HeroTitle>Who We <span>Are</span></HeroTitle>
@@ -601,6 +614,7 @@ const AboutPage = ({ onNavigate = () => {}, aboutData = {} }) => {
                     <CtaButton onClick={() => handleNavigation('contact')}>Let’s Collaborate</CtaButton>
                 </CtaSection>
 
+                {/* FOOTER */}
                 <FullFooter>
                     <FooterGrid>
                         <FooterColumn style={{ minWidth: '300px' }}>

@@ -623,7 +623,7 @@ const ServicesPage = ({ onNavigate = () => {}, servicesData }) => {
     };
 
     const safeServicesData = getServiceData();
-    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
     
     const safeGeneralData = {
         email: 'nexora.crew@gmail.com',

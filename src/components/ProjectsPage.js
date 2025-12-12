@@ -528,7 +528,7 @@ const ProjectsPage = ({ onNavigate }) => {
   const canvasRef = useRef(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
   useStarCanvas(canvasRef);
 
   useEffect(() => {

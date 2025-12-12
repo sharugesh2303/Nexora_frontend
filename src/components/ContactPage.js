@@ -478,7 +478,8 @@ const ContactPage = ({ onNavigate, generalData }) => {
     const safeData = generalData || { 
         email: 'nexora.crew@gmail.com', phone: '+91 95976 46460', location: 'JJ College of Engineering, Trichy' 
     };
-    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'contact'];
+    const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
+
     const today = new Date().toISOString().split("T")[0];
 
     // --- GOLD PARTICLE ANIMATION ---
