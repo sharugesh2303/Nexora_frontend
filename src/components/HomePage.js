@@ -113,9 +113,9 @@ const flagWave = keyframes`
 `;
 
 const glowPulse = keyframes`
-  0% { text-shadow: 0 0 8px ${GOLD_ACCENT}, 0 0 18px rgba(212,169,55,0.4); }
-  50% { text-shadow: 0 0 18px ${GOLD_ACCENT}, 0 0 30px rgba(212,169,55,0.8); }
-  100% { text-shadow: 0 0 8px ${GOLD_ACCENT}, 0 0 18px rgba(212,169,55,0.4); }
+  0% { text-shadow: 0 0 8px ${GOLD_ACCENT}, 0 0 0px rgba(212,169,55,0.4); }
+  50% { text-shadow: 0 0 18px ${GOLD_ACCENT}, 0 0 0px rgba(212,169,55,0.8); }
+  100% { text-shadow: 0 0 8px ${GOLD_ACCENT}, 0 0 0px rgba(212,169,55,0.4); }
 `;
 
 const scrollX = keyframes`
