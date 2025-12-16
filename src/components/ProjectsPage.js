@@ -1,4 +1,3 @@
-// src/components/ProjectsPage.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled, { createGlobalStyle, keyframes } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,18 +20,23 @@ import {
 /* =========================================
    THEME CONSTANTS
    ========================================= */
-const NEON_COLOR = '#123165';          // primary navy
+const NEON_COLOR = '#123165';
 const TEXT_LIGHT = '#111827';
 const TEXT_MUTED = '#6B7280';
 const BORDER_LIGHT = 'rgba(15,23,42,0.08)';
 const GOLD_ACCENT = '#D4A937';
 
 /* =========================================
-   KEYFRAMES & ANIMATIONS
+   KEYFRAMES
    ========================================= */
 const rollIn = keyframes`
     from { opacity: 0; transform: translateY(30px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
+`;
+
+const shimmer = keyframes`
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
 `;
 
 /* =========================================
@@ -50,7 +54,6 @@ const GlobalStyle = createGlobalStyle`
             linear-gradient(180deg, #ffffff 0%, #f5f7fb 40%, #e5edf7 100%);
         color: ${TEXT_LIGHT};
     }
-
     #root { width: 100%; overflow-x: hidden; }
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -63,7 +66,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 /* =========================================
-   STAR CANVAS BACKGROUND
+   STYLED COMPONENTS
    ========================================= */
 const StarCanvas = styled.canvas`
     position: fixed;
@@ -74,9 +77,6 @@ const StarCanvas = styled.canvas`
     pointer-events: none;
 `;
 
-/* =========================================
-   LAYOUT & SHARED COMPONENTS
-   ========================================= */
 const PageWrapper = styled.div`
     position: relative;
     z-index: 1;
@@ -87,7 +87,7 @@ const PageWrapper = styled.div`
     overflow-x: hidden;
 `;
 
-/* HEADER - MATCHING OTHER PAGES */
+/* HEADER */
 const Header = styled.header`
   display: flex;
   align-items: center;
@@ -218,9 +218,7 @@ const MobileNavMenu = styled.div`
   }
 `;
 
-/* =========================================
-   INTRO AREA
-   ========================================= */
+/* INTRO AREA */
 const Intro = styled.section`
     padding: 120px 20px 36px;
     width: 100%;
@@ -242,9 +240,8 @@ const IntroTitle = styled.h2`
 
 const IntroSubtitle = styled.p`
     color: ${TEXT_MUTED};
-    margin: 6px 0 0;
+    margin: 6px auto 0;
     max-width: 820px;
-    margin-left: auto; margin-right: auto;
     font-size: 1rem; line-height: 1.6;
     @media (max-width: 480px) { font-size: 0.95rem; }
 `;
@@ -267,9 +264,7 @@ const FilterButton = styled.button`
   @media (max-width: 480px) { padding: 6px 12px; font-size: 0.85rem; }
 `;
 
-/* =========================================
-   PROJECT GRID
-   ========================================= */
+/* PROJECT GRID */
 const ProjectGrid = styled(motion.div)`
   width: 100%;
   max-width: 1200px;
@@ -343,9 +338,17 @@ const Tag = styled.span`
   border: 1px solid rgba(18,49,101,0.1);
 `;
 
-/* =========================================
-   FOOTER - MATCHING OTHER PAGES
-   ========================================= */
+/* SKELETON LOADER FOR INSTANT FEEL */
+const SkeletonCard = styled.div`
+  height: 380px; width: 100%; background: #f6f7f8; border-radius: 20px;
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-repeat: no-repeat;
+  background-size: 1200px 380px; 
+  animation: ${shimmer} 1.5s linear infinite forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+`;
+
+/* FOOTER */
 const FullFooter = styled.footer`
   background: rgba(255,255,255,0.9);
   padding: 60px 50px 20px;
@@ -420,7 +423,6 @@ const FooterLogo = styled(Logo)`
   span { font-size: 1em; }
 `;
 
-/* GOLDEN SOCIAL ICONS */
 const SocialIcons = styled.div`
   display: flex;
   gap: 15px;
@@ -429,17 +431,14 @@ const SocialIcons = styled.div`
     width: 36px;
     height: 36px;
     border-radius: 999px;
-    /* Soft Gold Background */
     background: rgba(212,169,55,0.15); 
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Gold Icon */
     color: ${GOLD_ACCENT}; 
     transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
     
     &:hover {
-      /* Solid Gold on Hover */
       background: ${GOLD_ACCENT};
       color: #ffffff;
       box-shadow: 0 8px 20px rgba(212,169,55,0.3);
@@ -449,32 +448,38 @@ const SocialIcons = styled.div`
 `;
 
 const Copyright = styled.div`
-    text-align:center; font-size:0.8rem; padding-top:30px; border-top:1px solid ${BORDER_LIGHT}; margin-top:50px;
+    text-align: center;
+    font-size: 0.8rem;
+    padding-top: 30px;
+    border-top: 1px solid ${BORDER_LIGHT};
+    margin-top: 50px;
 `;
 
 /* =========================================
-   STAR CANVAS HOOK
+   HOOKS
    ========================================= */
 const useStarCanvas = (canvasRef) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d', { alpha: true });
-    const DPR = window.devicePixelRatio || 1;
+    let width, height;
 
-    function resize() {
-      canvas.width = window.innerWidth * DPR;
-      canvas.height = window.innerHeight * DPR;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    }
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
     resize();
 
     const stars = Array.from({ length: 140 }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
+      x: Math.random() * width,
+      y: Math.random() * height,
       r: 1 + Math.random() * 2.2,
       dx: (Math.random() - 0.5) * 0.25,
       dy: 0.08 + Math.random() * 0.35,
@@ -483,39 +488,32 @@ const useStarCanvas = (canvasRef) => {
 
     let raf;
     const draw = () => {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
+      ctx.clearRect(0, 0, width, height);
       stars.forEach((s) => {
         s.x += s.dx;
         s.y += s.dy;
-
-        if (s.y > window.innerHeight + 10) s.y = -10;
-        if (s.x > window.innerWidth + 10) s.x = -10;
-        if (s.x < -10) s.x = window.innerWidth + 10;
+        if (s.y > height + 10) s.y = -10;
+        if (s.x > width + 10) s.x = -10;
+        if (s.x < -10) s.x = width + 10;
 
         ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fill();
       });
-
       raf = requestAnimationFrame(draw);
     };
 
     draw();
     window.addEventListener('resize', resize);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', resize);
-    };
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
   }, [canvasRef]);
 };
 
 /* =========================================
-   MAIN ProjectsPage COMPONENT
+   MAIN COMPONENT
    ========================================= */
-const API_BASE = process.env.REACT_APP_API_BASE ?? "";
+const API_BASE = process.env.REACT_APP_API_BASE ? process.env.REACT_APP_API_BASE.replace(/\/$/, "") : ""; 
 const PROJECTS_API = `${API_BASE}/api/projects`;
 const TAGS_API = `${API_BASE}/api/tags`;
 
@@ -528,41 +526,61 @@ const ProjectsPage = ({ onNavigate }) => {
   const canvasRef = useRef(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
   useStarCanvas(canvasRef);
 
   useEffect(() => {
     let mounted = true;
-    async function load() {
-      setLoading(true); setError("");
+
+    // 1. INSTANT LOAD from Cache (LocalStorage)
+    // This allows the page to render IMMEDIATELY for returning users
+    try {
+        const cachedProj = localStorage.getItem("nexora_projects");
+        const cachedTags = localStorage.getItem("nexora_tags");
+        if (cachedProj && cachedTags) {
+            setProjects(JSON.parse(cachedProj));
+            setTags(JSON.parse(cachedTags));
+            setLoading(false); // Content ready!
+        }
+    } catch (e) { console.warn("Cache parse error", e); }
+
+    // 2. FETCH Fresh Data in Background
+    async function fetchFreshData() {
       try {
+        // We use Promise.all to fetch both endpoints in parallel
         const [projRes, tagRes] = await Promise.all([
           axios.get(PROJECTS_API).catch(() => ({ data: [] })),
           axios.get(TAGS_API).catch(() => ({ data: [] }))
         ]);
-        const projData = projRes.data;
-        const tagData = Array.isArray(tagRes.data) ? tagRes.data : [];
 
-        const projectsList = Array.isArray(projData) ? projData : (projData.items || []);
+        if (!mounted) return;
 
-        const normalizedProjects = (projectsList || []).map((p) => ({
-          ...p,
-          tags: Array.isArray(p.tags)
-            ? p.tags.map(t => (typeof t === "object" && t !== null ? (t.name || t._id || String(t)) : String(t))).filter(Boolean)
-            : []
+        const pData = Array.isArray(projRes.data) ? projRes.data : (projRes.data.items || []);
+        const tData = Array.isArray(tagRes.data) ? tagRes.data : [];
+
+        // Normalize Data
+        const cleanProjects = pData.map(p => ({
+            ...p,
+            tags: Array.isArray(p.tags) ? p.tags.map(t => (typeof t === 'object' ? (t.name || t._id) : t)) : []
         }));
 
-        if (mounted) {
-          setTags(tagData.map(t => ({ _id: t._id, name: String(t.name || t._id) })));
-          setProjects(normalizedProjects);
-          setLoading(false);
-        }
+        const cleanTags = tData.map(t => ({ _id: t._id, name: String(t.name || t._id) }));
+
+        setProjects(cleanProjects);
+        setTags(cleanTags);
+        setLoading(false);
+
+        // Update Cache
+        localStorage.setItem("nexora_projects", JSON.stringify(cleanProjects));
+        localStorage.setItem("nexora_tags", JSON.stringify(cleanTags));
+
       } catch (err) {
-        console.error("Failed to load projects/tags:", err);
-        if (mounted) { setError("Failed to load projects. Check backend or network."); setLoading(false); }
+        console.error("Bg fetch error:", err);
+        // Only show error if we have no cached data to show
+        if (mounted && projects.length === 0) setError("Failed to load projects. Check connection.");
       }
     }
-    load();
+
+    fetchFreshData();
     return () => { mounted = false; };
   }, []);
 
@@ -582,24 +600,13 @@ const ProjectsPage = ({ onNavigate }) => {
   }, [projects, activeFilter]);
 
   const handleNavigation = (route) => { if (onNavigate) onNavigate(route); setIsMobileMenuOpen(false); };
-
+  
+  const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
   const safeGeneralData = {
     email: 'nexora.crew@gmail.com',
     phone: '+91 95976 46460',
     location: 'JJ College of Engineering, Trichy'
   };
-
-  if (loading) {
-    return (
-      <>
-        <GlobalStyle />
-        <StarCanvas ref={canvasRef} />
-        <div style={{ textAlign: "center", paddingTop: 160, position: 'relative', zIndex: 3 }}>
-          <div style={{ fontSize: 20, color: NEON_COLOR }}>Loading projects…</div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -611,7 +618,6 @@ const ProjectsPage = ({ onNavigate }) => {
           <Logo onClick={() => handleNavigation('home')}>
             NEXORA<span className="gold">CREW</span>
           </Logo>
-
           <NavGroup>
             {navItems.map((item) => (
               <span key={item} onClick={() => handleNavigation(item)} style={item === 'projects' ? { color: NEON_COLOR } : {}}>
@@ -619,13 +625,11 @@ const ProjectsPage = ({ onNavigate }) => {
               </span>
             ))}
           </NavGroup>
-
           <MobileMenuButton onClick={() => setIsMobileMenuOpen(true)}>
             <FontAwesomeIcon icon={faBars} />
           </MobileMenuButton>
         </Header>
 
-        {/* MOBILE MENU */}
         <MobileNavMenu isOpen={isMobileMenuOpen}>
           <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)}>
             <FontAwesomeIcon icon={faTimes} />
@@ -651,45 +655,61 @@ const ProjectsPage = ({ onNavigate }) => {
 
         {/* PROJECT GRID */}
         <ProjectGrid layout>
-          <AnimatePresence>
-            {filteredProjects.map(project => (
-              <ProjectCard
-                key={project._id || project.id || project.title}
-                onClick={() => handleNavigation(`projects/${project._id || project.id}`)}
-                layout initial={{ y: 18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 18, opacity: 0 }} transition={{ duration: 0.36 }}
-              >
-                <CardInterior>
-                  <CardImage>
-                    <img src={project.imageUrl || "https://via.placeholder.com/1200x700/efe7d3/aaa?text=Project+Image"} alt={project.title || "Project"} />
-                  </CardImage>
+            {loading && projects.length === 0 ? (
+                /* INSTANT SKELETON UI */
+                <>
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </>
+            ) : (
+                <AnimatePresence>
+                    {filteredProjects.map(project => (
+                    <ProjectCard
+                        key={project._id || project.id || project.title}
+                        onClick={() => handleNavigation(`projects/${project._id || project.id}`)}
+                        layout initial={{ y: 18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 18, opacity: 0 }} transition={{ duration: 0.36 }}
+                    >
+                        <CardInterior>
+                        <CardImage>
+                            <img 
+                                src={project.imageUrl || "https://via.placeholder.com/1200x700/efe7d3/aaa?text=Project+Image"} 
+                                alt={project.title || "Project"} 
+                                loading="lazy" 
+                            />
+                        </CardImage>
 
-                  <CardContent>
-                    <CardTitle>{project.title || "Untitled Project"}</CardTitle>
-                    <CardDescription>
-                      {project.description
-                        ? project.description.length > 140
-                          ? `${project.description.substring(0, 140)}...`
-                          : project.description
-                        : ""}
-                    </CardDescription>
+                        <CardContent>
+                            <CardTitle>{project.title || "Untitled Project"}</CardTitle>
+                            <CardDescription>
+                            {project.description
+                                ? project.description.length > 140
+                                ? `${project.description.substring(0, 140)}...`
+                                : project.description
+                                : ""}
+                            </CardDescription>
 
-                    <TagContainer>
-                      {(project.tags || []).map(t => <Tag key={`${project._id || project.id}-${t}`}>{t}</Tag>)}
-                    </TagContainer>
-                  </CardContent>
-                </CardInterior>
-              </ProjectCard>
-            ))}
-          </AnimatePresence>
+                            <TagContainer>
+                            {(project.tags || []).map(t => <Tag key={`${project._id || project.id}-${t}`}>{t}</Tag>)}
+                            </TagContainer>
+                        </CardContent>
+                        </CardInterior>
+                    </ProjectCard>
+                    ))}
+                </AnimatePresence>
+            )}
         </ProjectGrid>
 
-        {filteredProjects.length === 0 && (
+        {filteredProjects.length === 0 && !loading && projects.length > 0 && (
           <div style={{ textAlign: "center", color: TEXT_MUTED, marginTop: 20 }}>
             No projects found for this filter.
           </div>
         )}
 
-        {error && (
+        {error && projects.length === 0 && (
           <div style={{ textAlign: "center", color: "#ff8b8b", marginTop: 8 }}>
             {error}
             <div style={{ marginTop: 8 }}>
@@ -719,12 +739,24 @@ const ProjectsPage = ({ onNavigate }) => {
 
             <FooterColumn>
               <h4>Quick Links</h4>
-              <ul>{navItems.map((item, i) => <li key={i}><a onClick={() => handleNavigation(item)}>{item.charAt(0).toUpperCase() + item.slice(1)}</a></li>)}</ul>
+              <ul>
+                {navItems.map((item, i) => (
+                  <li key={i}>
+                    <a onClick={() => handleNavigation(item)}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
+                  </li>
+                ))}
+              </ul>
             </FooterColumn>
 
             <FooterColumn>
               <h4>Services</h4>
-              <ul>{['Web Development', 'Poster designing & logo making' , 'Content creation' , 'Digital marketing &SEO' , 'AI and automation' , 'Hosting & Support' , 'Printing &Branding solutions' , 'Enterprise networking &server architecture' , 'Bold branding&Immersive visual design' , 'Next gen web & mobile experience'].map((l, i) => <li key={i}><a onClick={() => handleNavigation('services')}>{l}</a></li>)}</ul>
+              <ul>
+                {['Web Development', 'Poster designing & logo making' , 'Content creation' , 'Digital marketing &SEO' , 'AI and automation' , 'Hosting & Support' , 'Printing &Branding solutions' , 'Enterprise networking &server architecture' , 'Bold branding&Immersive visual design' , 'Next gen web & mobile experience'].map((l, i) => (
+                  <li key={i}>
+                    <a onClick={() => handleNavigation('services')}>{l}</a>
+                  </li>
+                ))}
+              </ul>
             </FooterColumn>
 
             <FooterColumn>
