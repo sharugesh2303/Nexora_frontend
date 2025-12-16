@@ -1,3 +1,4 @@
+// src/pages/HomePage.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle, keyframes, css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -70,14 +71,14 @@ const BORDER_LIGHT = '#e2e8f0';
 const GOLD_ACCENT = '#D4A937';
 
 // ====================================================================
-// ========== GLOBAL STYLES ==========
+// ========== GLOBAL STYLES (PURE WHITE BACKGROUND) ==========
 // ====================================================================
 const GlobalStyle = createGlobalStyle`
   html, body, #root { height: 100%; }
   body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background: #FFFFFF;
+    background: #FFFFFF; /* FULL WHITE BACKGROUND */
     color: ${LIGHT_TEXT};
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
@@ -134,6 +135,7 @@ const StarCanvas = styled.canvas`
   display: block;
 `;
 
+/* PageLayer sits above the canvas */
 const PageLayer = styled.div`
   position: relative;
   z-index: 2;
@@ -281,6 +283,8 @@ const AnimatedSection = styled.div.attrs(props => ({
   opacity: 0;
   transform: translateY(30px) scale(0.95);
   will-change: opacity, transform;
+  
+  /* Ensure wrapper takes full height for grid alignment */
   height: 100%;
 
   ${({ $isVisible, $delay }) =>
@@ -421,12 +425,16 @@ const MilestonesGrid = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
+  /* Use a consistent minimum width so all cards are equal */
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 30px;
+  
+  /* Stretch items so they all have equal height */
   justify-items: stretch;
   align-items: stretch; 
+  
   @media (max-width: 600px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Stack vertically on small screens */
     gap: 20px;
   }
 `;
@@ -436,12 +444,14 @@ const MilestoneCard = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px 20px;
+  padding: 30px 20px; /* Uniform padding */
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(15,23,42,0.08);
   border: 1px solid ${BORDER_LIGHT};
+  
+  /* Force fixed sizing behavior */
   width: 100%;
   height: 100%;
   min-height: 220px;
@@ -528,8 +538,21 @@ const MarqueeContainer = styled.div`
   margin: 0 auto;
   position: relative;
   overflow: hidden;
-  mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
+
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
 `;
 
 const MarqueeTrack = styled.div`
@@ -908,14 +931,17 @@ const SocialIcons = styled.div`
     width: 36px;
     height: 36px;
     border-radius: 999px;
+    /* Soft Gold Background */
     background: rgba(212,169,55,0.15); 
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Gold Icon */
     color: ${GOLD_ACCENT}; 
     transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
     
     &:hover {
+      /* Solid Gold on Hover */
       background: ${GOLD_ACCENT};
       color: #ffffff;
       box-shadow: 0 8px 20px rgba(212,169,55,0.3);
@@ -940,7 +966,6 @@ const ICON_MAP = {
   hours: faClock,
 };
 
-// Optimization: Added loading="lazy" and decoding="async"
 const TechCard = ({ tech, name, delay, isVisible }) => (
   <TechCardWrapper $isVisible={isVisible} $delay={delay}>
     <TechCardInner>
@@ -949,8 +974,6 @@ const TechCard = ({ tech, name, delay, isVisible }) => (
           <img
             src={tech.logoUrl}
             alt={name}
-            loading="lazy"
-            decoding="async"
             style={{
               width: name === 'Gemini' ? '120%' : '100%',
               height: name === 'Gemini' ? 'auto' : '100%',
@@ -1032,10 +1055,10 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeStackTab, setActiveStackTab] = useState('web');
 
-  const [milestonesRef, isMilestonesVisible] = useIntersectionObserver({ threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-  const [storiesRef, isStoriesVisible] = useIntersectionObserver({ threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-  const [stackRef, isStackVisible] = useIntersectionObserver({ threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-  const [ctaRef] = useIntersectionObserver({ threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  const [milestonesRef, isMilestonesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -100px 0px' });
+  const [storiesRef, isStoriesVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
+  const [stackRef, isStackVisible] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -100px 0px' });
+  const [ctaRef] = useIntersectionObserver({ threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
 
   const stackData = {
     tabs: [
@@ -1090,9 +1113,9 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
     location: generalData?.location || 'JJ College of Engineering, Trichy',
   };
 
+  // 👈 ADDED 'certificate' here
   const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
 
-  // OPTIMIZATION: Delayed Fetching & Removed Polling
   useEffect(() => {
     let cancelled = false;
 
@@ -1147,90 +1170,81 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
       }
     };
 
-    // Delay network requests to prioritize UI rendering
-    const loadDataTimeout = setTimeout(() => {
+    const poll = () => {
+      if (!document.hidden) {
         fetchMilestones();
-        fetchStories();
         fetchPartners();
-    }, 800);
+      }
+    };
+
+    fetchMilestones();
+    fetchStories();
+    fetchPartners();
+
+    const intervalId = setInterval(poll, 5000);
 
     return () => {
       cancelled = true;
-      clearTimeout(loadDataTimeout);
+      clearInterval(intervalId);
     };
   }, []);
 
-  // OPTIMIZATION: Delayed Canvas Start
+  // CANVAS: GOLD STARS + FULL WHITE FILL
   useEffect(() => {
-    // Disable heavy stars on mobile, or wait longer
-    const isMobile = window.innerWidth < 768;
-    
-    const startCanvas = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d', { alpha: true });
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { alpha: true });
 
-        const DPR = window.devicePixelRatio || 1;
-        function resize() {
-          canvas.width = Math.max(1, window.innerWidth * DPR);
-          canvas.height = Math.max(1, window.innerHeight * DPR);
-          canvas.style.width = `${window.innerWidth}px`;
-          canvas.style.height = `${window.innerHeight}px`;
-          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-        }
-        resize();
+    const DPR = window.devicePixelRatio || 1;
+    function resize() {
+      canvas.width = Math.max(1, window.innerWidth * DPR);
+      canvas.height = Math.max(1, window.innerHeight * DPR);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resize();
 
-        // Reduce particle count on mobile
-        const particleCount = isMobile ? 60 : 140;
+    const stars = Array.from({ length: 140 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: 1 + Math.random() * 2.2,
+      dx: (Math.random() - 0.5) * 0.25,
+      dy: 0.08 + Math.random() * 0.35,
+      alpha: 0.15 + Math.random() * 0.35,
+    }));
 
-        const stars = Array.from({ length: particleCount }, () => ({
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          r: 1 + Math.random() * 2.2,
-          dx: (Math.random() - 0.5) * 0.25,
-          dy: 0.08 + Math.random() * 0.35,
-          alpha: 0.15 + Math.random() * 0.35,
-        }));
+    let raf;
+    const draw = () => {
+      // paint pure white background each frame (device space)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width / DPR, canvas.height / DPR);
+      ctx.restore();
 
-        let raf;
-        const draw = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.save();
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, canvas.width / DPR, canvas.height / DPR);
-          ctx.restore();
+      stars.forEach((s) => {
+        s.x += s.dx;
+        s.y += s.dy;
+        if (s.y > window.innerHeight + 10) s.y = -10;
+        if (s.x > window.innerWidth + 10) s.x = -10;
+        if (s.x < -10) s.x = window.innerWidth + 10;
 
-          stars.forEach((s) => {
-            s.x += s.dx;
-            s.y += s.dy;
-            if (s.y > window.innerHeight + 10) s.y = -10;
-            if (s.x > window.innerWidth + 10) s.x = -10;
-            if (s.x < -10) s.x = window.innerWidth + 10;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(212,169,55,${s.alpha})`;
-            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            ctx.fill();
-          });
-
-          raf = requestAnimationFrame(draw);
-        };
-        draw();
-
-        window.addEventListener('resize', resize);
-        return () => {
-          cancelAnimationFrame(raf);
-          window.removeEventListener('resize', resize);
-        };
+      raf = requestAnimationFrame(draw);
     };
+    draw();
 
-    // Wait 1.2 seconds before starting the canvas animation
-    // This allows the hero text to render smoothly first
-    const timer = setTimeout(() => {
-        startCanvas();
-    }, 1200);
-
-    return () => clearTimeout(timer);
+    window.addEventListener('resize', resize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+    };
   }, []);
 
   const neonWord = 'NEXORACREW';
@@ -1379,7 +1393,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
           </MilestonesGrid>
         </MilestonesSection>
 
-        {/* PARTNERS */}
+        {/* PARTNERS - uses MarqueeTrack (NO INLINE ANIMATION) */}
         <PartnersSection>
           <PartnersHeader>TRUSTED PARTNERS & COLLABORATORS</PartnersHeader>
           {partners.length > 0 ? (
@@ -1396,7 +1410,7 @@ const HomePage = ({ onNavigate = () => {}, generalData = {} }) => {
                     <PartnerCard key={`p-${p._id || i}-${i}`}>
                       <div className="icon-box">
                         {p.logoUrl ? (
-                          <img src={p.logoUrl} alt={name} loading="lazy" decoding="async" />
+                          <img src={p.logoUrl} alt={name} />
                         ) : (
                           <FontAwesomeIcon icon={faHandshake} />
                         )}
