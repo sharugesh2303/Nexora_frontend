@@ -275,22 +275,15 @@ const SectionTitle = styled.h2`
 `;
 
 const MembersGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 30px;
-  width: 100%;
-
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  @media (max-width: 900px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
   @media (max-width: 600px) {
-    grid-template-columns: 1fr;
+    justify-content: center;
+    gap: 20px;
   }
 `;
-
 
 const MemberCard = styled.div`
   width: 260px;
@@ -643,33 +636,6 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
   const navItems = ['home', 'about', 'services', 'projects', 'team', 'progress', 'blog', 'certificate', 'contact'];
 
   const grouped = useMemo(() => groupByDbFields(teamData, fixedRoles), [teamData, fixedRoles]);
-  // ─────────────────────────────────────────
-// FORCE PRIORITY ORDER + MAKE ROWS OF 4
-// ─────────────────────────────────────────
-const priority = [
-  "FOUNDER & CEO",
-  "CO CEO",
-  "HR",
-  "CTO",
-  "LEAD DEVELOPER",
-  "LEAD DESIGNER",
-  "LEAD R&D",
-  "LEAD AI AUTOMATION",
-  "SOCIAL MEDIA HANDLING",
-  "SEO",
-];
-
-const sortedTeam = [...teamData].sort((a, b) => {
-  const aIndex = priority.indexOf((a.role || "").toUpperCase());
-  const bIndex = priority.indexOf((b.role || "").toUpperCase());
-  return aIndex - bIndex;
-});
-
-const rows = [];
-for (let i = 0; i < sortedTeam.length; i += 4) {
-  rows.push(sortedTeam.slice(i, i + 4));
-}
-
 
   /* STAR CANVAS logic */
   useEffect(() => {
@@ -802,36 +768,52 @@ for (let i = 0; i < sortedTeam.length; i += 4) {
             <HeroParagraph style={{ textAlign: "center", marginTop: "50px" }}>No team members found.</HeroParagraph>
           )}
 
-          {rows.map((row, rIndex) => (
-  <MembersGrid key={rIndex}>
-    {row.map((m, i) => (
-      <MemberCard key={i}>
-  <p style={{
-    margin: "0 0 14px",
-    fontSize: "1.1rem",
-    fontWeight: 800,
-    color: "#123165",
-    textAlign: "center",
-    textTransform: "uppercase",
-    letterSpacing: "0.6px"
-  }}>
-    {m.role}
-  </p>
+          {grouped.map((group) => (
+            <div key={`group-${group.id}`}>
+              <SectionHeaderRow>
+                <SectionBar />
+                <SectionTitle>{group.label}</SectionTitle>
+              </SectionHeaderRow>
 
-  <ImageWrapper>
-    <img
-      src={m.img || "https://via.placeholder.com/300"}
-      alt={m.name}
-    />
-  </ImageWrapper>
+              {group.mainMembers && group.mainMembers.length > 0 && (
+                <MembersGrid>
+                  {group.mainMembers.map((m, i) => (
+                    <MemberCard key={`${m._id}-m${i}`} className="animate-in" style={{ animationDelay: `${0.1 * i}s` }}>
+                      <ImageWrapper>
+                        <img
+                          src={m.img || "https://via.placeholder.com/320x320/ffffff/e6eef8?text=Member"}
+                          alt={m.name}
+                          style={{ transform: `scale(${m.imgScale || 1}) translate(${m.imgOffsetX || 0}%, ${m.imgOffsetY || 0}%)` }}
+                        />
+                      </ImageWrapper>
+                      <MemberName>{m.name}</MemberName>
+                    </MemberCard>
+                  ))}
+                </MembersGrid>
+              )}
 
-  <MemberName>{m.name}</MemberName>
-</MemberCard>
-
-    ))}
-  </MembersGrid>
-))}
-
+              {group.subgroups &&
+                group.subgroups.map((sub) => (
+                  <SubgroupBlock key={`g${group.id}-s${sub.id}`}>
+                    <SubgroupHeader>{sub.label}</SubgroupHeader>
+                    <MembersGrid>
+                      {sub.members.map((m, i) => (
+                        <MemberCard key={`${m._id}-s${sub.id}-m${i}`} className="animate-in" style={{ animationDelay: `${0.1 * i}s` }}>
+                          <ImageWrapper>
+                            <img
+                              src={m.img || "https://via.placeholder.com/320x320/ffffff/e6eef8?text=Member"}
+                              alt={m.name}
+                              style={{ transform: `scale(${m.imgScale || 1}) translate(${m.imgOffsetX || 0}%, ${m.imgOffsetY || 0}%)` }}
+                            />
+                          </ImageWrapper>
+                          <MemberName>{m.name}</MemberName>
+                        </MemberCard>
+                      ))}
+                    </MembersGrid>
+                  </SubgroupBlock>
+                ))}
+            </div>
+          ))}
         </TeamContainer>
 
         <div style={{ background: "rgba(255,255,255,0.7)", padding: "60px 20px", textAlign: "center", marginTop: "40px", borderTop: `1px solid ${BORDER_LIGHT}` }}>
