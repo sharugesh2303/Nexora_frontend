@@ -1,4 +1,4 @@
-// src/components/TeamPage.jsx/
+// src/components/TeamPage.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled, { createGlobalStyle, keyframes } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
