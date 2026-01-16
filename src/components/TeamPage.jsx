@@ -758,7 +758,7 @@ const TeamPage = ({ onNavigate = () => {}, teamData = [], fixedRoles = [], gener
               Meet Our <span>Team</span>
             </HeroTitle>
             <HeroParagraph className="animate-in" style={{ animationDelay: "0.2s" }}>
-              The brilliant minds and creative souls behind Nexora. We are a diverse group of developers, designers, and innovators.
+              The brilliant minds and creative souls behind Nexoracrew. We are a diverse group of developers, designers, and innovators.
             </HeroParagraph>
           </div>
         </HeroTeam>
